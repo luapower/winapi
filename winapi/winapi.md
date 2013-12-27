@@ -52,5 +52,4 @@ which should give you more context.
 [tech doc]:     winapi_design.html
 [dev doc]:      winapi_binding.html
 [history]:      winapi_history.html
-[windesigner]:  windesigner.html
 
