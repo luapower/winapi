@@ -1,6 +1,7 @@
 ---
-project: winapi
-tagline: ffi bindings to the Windows API
+project:  winapi
+tagline:  ffi bindings to the Windows API
+category: Windows
 ---
 
 0.1a | [tech doc] | [dev doc] | [history] | LuaJIT 2
