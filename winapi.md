@@ -4,7 +4,7 @@ tagline:  ffi bindings to the Windows API
 category: Windows
 ---
 
-0.1a | [tech doc] | [dev doc] | [history] | LuaJIT 2
+[tech doc] | [dev doc] | [history]
 
 ## Scope
 
