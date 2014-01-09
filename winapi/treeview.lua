@@ -3,6 +3,8 @@ setfenv(1, require'winapi')
 require'winapi.window'
 require'winapi.comctl'
 
+do return end -- TODO: make this work again with the new struct spec
+
 InitCommonControlsEx(ICC_TREEVIEW_CLASSES)
 
 --creation

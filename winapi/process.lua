@@ -2,26 +2,6 @@
 setfenv(1, require'winapi')
 
 ffi.cdef[[
-CreateProcessW(
-	LPCWSTR lpApplicationName,
-	LPWSTR lpCommandLine,
-	LPSECURITY_ATTRIBUTES lpProcessAttributes,
-	LPSECURITY_ATTRIBUTES lpThreadAttributes,
-	BOOL bInheritHandles,
-	DWORD dwCreationFlags,
-	LPVOID lpEnvironment,
-	LPCWSTR lpCurrentDirectory,
-	LPSTARTUPINFOW lpStartupInfo,
-	LPPROCESS_INFORMATION lpProcessInformation
-);
-]]
-
-function CreateProcess(...)
-
-	return C.CreateProcessW(...)
-end
-
-ffi.cdef[[
 typedef struct _STARTUPINFOW {
     DWORD   cb;
     LPWSTR  lpReserved;
@@ -64,6 +44,38 @@ function GetStartupInfo(si)
 	si = types.STARTUPINFOW(si)
 	C.GetStartupInfoW(si)
 	return si
+end
+
+ffi.cdef[[
+typedef struct _PROCESS_INFORMATION {
+  HANDLE hProcess;
+  HANDLE hThread;
+  DWORD  dwProcessId;
+  DWORD  dwThreadId;
+} PROCESS_INFORMATION, *LPPROCESS_INFORMATION;
+
+typedef struct _SECURITY_ATTRIBUTES {
+  DWORD  nLength;
+  LPVOID lpSecurityDescriptor;
+  BOOL   bInheritHandle;
+} SECURITY_ATTRIBUTES, *PSECURITY_ATTRIBUTES, *LPSECURITY_ATTRIBUTES;
+
+BOOL CreateProcessW(
+	LPCWSTR lpApplicationName,
+	LPWSTR lpCommandLine,
+	LPSECURITY_ATTRIBUTES lpProcessAttributes,
+	LPSECURITY_ATTRIBUTES lpThreadAttributes,
+	BOOL bInheritHandles,
+	DWORD dwCreationFlags,
+	LPVOID lpEnvironment,
+	LPCWSTR lpCurrentDirectory,
+	LPSTARTUPINFOW lpStartupInfo,
+	LPPROCESS_INFORMATION lpProcessInformation
+);
+]]
+
+function CreateProcess(...)
+	return C.CreateProcessW(...)
 end
 
 

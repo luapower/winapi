@@ -23,13 +23,6 @@ with a fair degree of feature coverage and some cherry on top.
 I also started working on a [designer][windesigner] app that would serve as feature showcase, live testing environment,
 and ultimately as a GUI designer.
 
-## Installation
-
-Downloading `lua-files` will get you the winapi modules, the designer, and the luajit binary so you can start coding right away.<br>
-Just add `lua-files` to your `LUA_PATH` or `package.path` and run a few demos to make sure everything is properly found.
-
-The winapi modules are all in the `winapi` folder, you don't need any other modules outside of it except `glue.lua`.
-
 ## Example
 
 ~~~{.lua}
