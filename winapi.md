@@ -2,6 +2,7 @@
 project:  winapi
 tagline:  ffi bindings to the Windows API
 category: Windows
+platforms: mingw32
 ---
 
 [tech doc] | [dev doc] | [history]
