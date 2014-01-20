@@ -4,8 +4,6 @@ tagline:  ffi bindings to the Windows API
 platforms: mingw32
 ---
 
-[tech doc] | [dev doc] | [history]
-
 ## Scope
 
 Windows, common controls, auxiliary objects, dialogs, message loop.
