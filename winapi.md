@@ -1,6 +1,6 @@
 ---
-project:  winapi
-tagline:  ffi bindings to the Windows API
+project: winapi
+tagline: windows & widgets
 platforms: mingw32
 ---
 
