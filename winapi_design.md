@@ -3,8 +3,6 @@ project: winapi
 tagline: technical documentation
 ---
 
-[back](winapi.html)
-
 ## Structure
 
 The library publishes a procedural API that mimics the windows API and an object API for creating windows and controls.

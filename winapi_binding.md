@@ -3,8 +3,6 @@ project: winapi
 tagline: developer documentation
 ---
 
-[back](winapi.html)
-
 ## How to use the ffi layer
 
 Wrap winapi calls in `callnz`, `callh` and friends according to what constitutes
