@@ -1,0 +1,9 @@
+*
+!/bin/
+!/csrc/
+!/bin/mingw32/
+!/bin/linux32/
+!/media/
+
+!winapi*
+!winapi/*
