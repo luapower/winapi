@@ -65,20 +65,19 @@ function SetClipboardData(format, hmem)
 	return checkh(ffi.C.SetClipboardData(flags(format), hmem))
 end
 
---hi-level API
+--hi-level API: get/set utf8 text from/to clipboard
 
 function GetClipboardText()
-	if not IsClipboardFormatAvailable(CF_TEXT) then
+	if not IsClipboardFormatAvailable(CF_UNICODETEXT) then
 		return
 	end
 	require'winapi.memory'
 	OpenClipboard()
 	return glue.fcall(function()
-		local h = GetClipboardData(CF_TEXT)
+		local h = GetClipboardData(CF_UNICODETEXT)
 		local buf = GlobalLock(h)
 		return glue.fcall(function()
-			local sz = GlobalSize(h)
-			return ffi.string(buf, sz - 1)
+			return mbs(ffi.cast('WCHAR*', buf))
 		end, function() GlobalUnlock(h) end)
 	end, CloseClipboard)
 end
@@ -88,17 +87,19 @@ function SetClipboardText(s)
 	OpenClipboard()
 	glue.fcall(function()
 		EmptyClipboard()
-		local h = GlobalAlloc(GMEM_MOVEABLE, #s + 1) --windows frees this
+		local wbuf, wsz = wcs_sz(s)
+		local sz = wsz * 2
+		local h = GlobalAlloc(GMEM_MOVEABLE, sz) --windows frees this
 		local buf = GlobalLock(h)
-		ffi.copy(buf, s)
+		ffi.copy(buf, wbuf, sz)
 		GlobalUnlock(h)
-		SetClipboardData(CF_TEXT, h)
+		SetClipboardData(CF_UNICODETEXT, h)
 	end, CloseClipboard)
 end
 
 
 if not ... then
-	SetClipboardText('hello from the clipboard!')
-	print(GetClipboardText())
+	local s = 'hello from the clipboard!'
+	SetClipboardText(s)
+	assert(GetClipboardText() == s)
 end
-
