@@ -150,4 +150,11 @@ typedef struct _FILETIME {
     DWORD dwLowDateTime;
     DWORD dwHighDateTime;
 } FILETIME, *PFILETIME, *LPFILETIME;
+
+typedef HANDLE *SPHANDLE;
+typedef HANDLE *LPHANDLE;
+typedef HANDLE HGLOBAL;
+typedef HANDLE HLOCAL;
+typedef HANDLE GLOBALHANDLE;
+typedef HANDLE LOCALHANDLE;
 ]]
