@@ -23,7 +23,7 @@ Windows, common controls and dialogs, message loop, support APIs, OpenGL and cai
 ## Modules
 
 --------------------------- --------------------------------------
-__binding infrastructore__
+__binding infrastructure__
 [winapi.init]               load the namespace + ffi tools + wintypes
 [winapi.namespace]          the namespace table for the entire API
 [winapi.ffi]                load the ffi and bit libs and check the platform
