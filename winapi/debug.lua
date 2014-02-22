@@ -1,6 +1,5 @@
 --core/debug: strict mode and some debug tools. entirely optional module.
 setfenv(1, require'winapi.namespace')
-require'glue'
 
 --disable stdout buffering so we can print-debug stuff
 io.stdout:setvbuf'no'

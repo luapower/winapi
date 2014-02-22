@@ -4,13 +4,9 @@ require'winapi.ffi'
 require'winapi.wintypes'
 
 glue = require'glue'
-
---TODO: don't do this
 local string = string
 import(glue)
-_M.string = string --put string module back
-update(string, glue.string)
-
+_M.string = string --put string module back (glue has glue.string)
 
 ffi.cdef[[
 DWORD GetLastError(void);
@@ -120,7 +116,8 @@ function ptr(p) --just to discard NULL pointers; p must be a cdata or you get an
 end
 
 function constants(t) --import a table as module globals and return the reverse lookup table of it
-	import(t); return index(t)
+	import(t)
+	return index(t)
 end
 
 local band, bor, bnot, rshift = bit.band, bit.bor, bit.bnot, bit.rshift --cache
@@ -130,7 +127,7 @@ function flags(s) --accept and compute a 'FLAG1 | FLAG2' string; also nil turns 
 	if type(s) ~= 'string' then return s end
 	local x = 0
 	for flag in (s..'|'):gmatch'([^|]+)|' do
-		x = bor(x, _M[flag:trim()])
+		x = bor(x, _M[trim(flag)])
 	end
 	return x
 end
