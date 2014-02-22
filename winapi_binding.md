@@ -63,8 +63,8 @@ the virtual fields instead of the typedef'ed fields allows for some magic:
 
 All in all this is a real time saver and results in self-documenting code.
 
-Btw, use lowercase with underscores for virtual field names. Use names like caption, x, y, w, h, pos, parent, etc.
-consistently throughout.
+Btw, use the lowercase-with-underscores naming convention for virtual field names.
+Use names like caption, x, y, w, h, pos, parent, etc. consistently throughout.
 
 ## How to use the OO system
 
@@ -72,4 +72,3 @@ The easiest way to bind a new control is to use the code of an existing control 
 Basically, you subclass from `Control` (or a specific control, if your control is a refinement
 of a standard control) after you define the style bitmasks, default values, and event name mappings, if any.
 You override the constructor and/or any methods and define any new properties by way of getters and setters.
-

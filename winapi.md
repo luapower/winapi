@@ -6,19 +6,19 @@ platforms: mingw32
 
 ## Scope
 
-Windows, common controls, auxiliary objects, dialogs, message loop, OpenGL and cairo integration.
+Windows, common controls and dialogs, message loop, support APIs, OpenGL and cairo integration.
 
 ## Features
 
   * accepts (and returns) utf-8 encoded Lua strings throughout (accepts wide char buffers too)
-  * all calls are error-checked so you don't have to
+  * winapi calls are error-checked so you don't have to
+  * objects are automatically tied to the garbage collector when not owned by other winapi objects
+  * flags can be passed as `'FLAG1 | FLAG2'`
+  * counting from 1 everywhere
   * object system with virtual properties (eg. `window.w = 500` changes a window's width)
+  * Delphi-style anchor-based layout model for all controls
+  * [binding infrastructure][winapi_binding] tailored to winapi conventions, facilitating the binding of more APIs
   * cairo, opengl and openvg panel widgets
-  * binding infrastructure tailored to winapi, facilitating the binding of more APIs
-
-## Status
-
-Not active.
 
 ## Modules
 
@@ -153,7 +153,7 @@ local main = winapi.Window{
 os.exit(winapi.MessageLoop())
 ~~~
 
-> __NOTE:__ The oo modules can also be run as standalone scripts, showcasing the module's functionality.
+> __NOTE:__ The oo modules can also be run as standalone scripts, for showcasing the module's functionality.
 
 ## Documentation
 

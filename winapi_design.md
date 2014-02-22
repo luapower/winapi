@@ -25,14 +25,14 @@ Note: comctl 6 is Unicode only, another reason not to bind the ANSI API.
 
 ## The code
 
-The code is a 4-layer cake that looks like this (from top to bottom):
+The code is a 4-layer pie that looks like this (from bottom to top):
 
-  * object API - actual classes for windows and controls (all files named `*class.lua`)
-  * OO system - mechanism for inheritance, instantiation and virtual properties
-  * procedural API - actual winapi wrappers
-  * ffi layer - helper functions to aid wrapping
+  * [ffi layer][winapi_binding] - helper functions that comprise the binding vocabulary
+  * winapi modules - low-level procedural winapi wrappers
+  * oo system - provides a mechanism for inheritance, instantiation and virtual properties
+  * winapi classes - actual classes for windows and controls (all files named `*class.lua`)
 
-The first line in each file is a comment describing it and giving its place in the cake.
+> Each module starts with a comment which describes what the module does and its place in the pie.
 
 ## Object API
 
