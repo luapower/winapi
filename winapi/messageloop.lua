@@ -1,4 +1,4 @@
---class/messageloop: the thread message loop function.
+--oo/messageloop: thread's message loop
 setfenv(1, require'winapi')
 require'winapi.window'
 require'winapi.accelerator'

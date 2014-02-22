@@ -1,12 +1,10 @@
---ffi/struct: struct ctype wrapper.
+--ffi/struct: struct ctype wrapper
 setfenv(1, require'winapi.namespace')
 require'winapi.ffi'
 require'winapi.util'
 
 local Struct = {}
-local Struct_meta = {
-	__index = Struct,
-}
+local Struct_meta = {__index = Struct}
 
 local setbit = setbit --cache
 function Struct:set(cdata, field, value) --hot code

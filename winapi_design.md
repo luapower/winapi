@@ -5,13 +5,13 @@ tagline: technical documentation
 
 ## Structure
 
-The library publishes a procedural API that mimics the windows API and an object API for creating windows and controls.
+The library publishes a procedural API that mimics the windows API, and an object API for creating windows and controls.
 Both APIs share the same namespace, which is the table returned by `require'winapi'`.
 
-Interactivity (windows message processing) is handled in the object layer since it requires keeping state.
+Interactivity (windows message processing) is handled in the object layer because it needs to keep state.
 Dispatching of messages to child controls is implemented in the object layer.
-The object layer also provides additional features like anchor-based layouting, so there's little reason
-to use the procedural API directly except for say, implementing a different object API.
+The object layer also provides additional features like anchor-based layouting. There's generally little reason
+to use the procedural API directly for managing windows and controls except for say, implementing a different object API.
 
 ## Scope
 

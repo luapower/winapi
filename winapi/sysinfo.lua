@@ -1,4 +1,4 @@
---core/sysinfo: system info API
+--proc/sysinfo: system info API
 setfenv(1, require'winapi')
 
 ffi.cdef[[

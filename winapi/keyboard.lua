@@ -1,4 +1,4 @@
---proc/keyboard: keyboard input handling and keyboard layouts.
+--proc/keyboard: keyboard input handling and keyboard layouts
 setfenv(1, require'winapi')
 require'winapi.winusertypes'
 

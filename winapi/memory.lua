@@ -1,4 +1,4 @@
---memory management API
+--proc/memory: memory management
 setfenv(1, require'winapi')
 
 -- Global Memory Flags

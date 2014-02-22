@@ -1,6 +1,6 @@
 --proc/guid: UUID API from rpcdce.h
 setfenv(1, require'winapi')
-require'winapi.rpc_types'
+require'winapi.rpc'
 
 ffi.cdef[[
 RPC_STATUS UuidCreate (UUID* Uuid);

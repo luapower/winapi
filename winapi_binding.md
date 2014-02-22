@@ -3,7 +3,7 @@ project: winapi
 tagline: developer documentation
 ---
 
-## How to use the ffi layer
+## How to use the binding infrastructure
 
 Wrap winapi calls in `callnz`, `callh` and friends according to what constitutes
 an error in the result: you get automatic error handling and clear code.

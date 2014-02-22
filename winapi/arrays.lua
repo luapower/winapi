@@ -1,4 +1,4 @@
---ffi/array: variable length array (VLA) wrapper/memoizer.
+--ffi/array: variable length array (VLA) wrapper/memoizer
 setfenv(1, require'winapi.namespace')
 require'winapi.ffi'
 require'winapi.types'
@@ -25,4 +25,4 @@ arrays = setmetatable({}, {
 	end
 })
 
-if not ... then require'array_test' end
+if not ... then require'arrays_test' end

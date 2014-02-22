@@ -1,4 +1,4 @@
---class/window/waitemlist: accelerator item list.
+--oo/window/waitemlist: accelerator item list.
 setfenv(1, require'winapi')
 require'winapi.itemlist'
 require'winapi.accelerator'

@@ -1,4 +1,4 @@
---oo/object: object class providing
+--oo/object: base object class
 setfenv(1, require'winapi')
 require'winapi.class'
 

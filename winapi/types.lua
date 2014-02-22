@@ -1,4 +1,4 @@
---ffi/types: ctype wrapper/memoizer.
+--ffi/types: ctype wrapper/memoizer
 setfenv(1, require'winapi.namespace')
 require'winapi.ffi'
 require'winapi.util'

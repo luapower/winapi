@@ -6,5 +6,4 @@ ffi = require'ffi'
 bit = require'bit'
 C = ffi.C
 
-assert(ffi.abi'32bit', 'only known to work on 32bit platforms')
 assert(ffi.abi'win', 'platform not Windows')

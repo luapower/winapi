@@ -1,5 +1,4 @@
---proc/window/class: window classes in the winapi sense.
---this is unrelated to the oo API for windows (see msdn for what a window class means).
+--proc/window/class: window classes in the winapi sense (see msdn for what a window class means)
 setfenv(1, require'winapi')
 require'winapi.winuser'
 
