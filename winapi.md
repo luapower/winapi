@@ -158,7 +158,8 @@ os.exit(winapi.MessageLoop())
 ## Documentation
 
 There's no method-by-method documentation, but there's a [tech doc], [dev doc], and a [narrative][history]
-which should give you more context.
+which should give you more context. Also, oo modules have a small runnable demo at the bottom of the file
+which showcases the module's functionality. Run the module as a standalone script to check it out.
 
 [tech doc]:     winapi_design.html
 [dev doc]:      winapi_binding.html
