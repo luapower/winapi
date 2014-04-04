@@ -98,7 +98,7 @@ function mbs(ws) --accept and convert a wcs or pwcs buffer to a Lua string
 	if ffi.istype(WCS_ctype, ws) or ffi.istype(PWCS_ctype, ws) then
 		local sz = checknz(WC2MB(CP_UTF8, WC, ws, -1, nil, 0, nil, nil))
 		local buf = MBS_ctype(sz)
-		checknz(WC2MB(CP_UTF8, WC, ws, sz, buf, sz, nil, nil))
+		checknz(WC2MB(CP_UTF8, WC, ws, -1, buf, sz, nil, nil))
 		return ffi.string(buf, sz-1) --sz includes null terminator
 	else
 		return ws
