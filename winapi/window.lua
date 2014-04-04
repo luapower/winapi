@@ -212,6 +212,7 @@ HWND SetFocus(HWND hWnd);
 HWND GetWindow(HWND hWnd, UINT uCmd);
 HWND GetTopWindow(HWND hWnd);
 BOOL IsWindowUnicode(HWND hWnd);
+HWND GetDesktopWindow();
 ]]
 
 function MoveWindow(hwnd, x, y, w, h, repaint)
@@ -291,7 +292,7 @@ function GetPrevSibling(hwnd)  return callh2(GetWindow, hwnd, GW_HWNDPREV) end -
 
 local function nextchild(parent, sibling)
 	if not sibling then return GetFirstChild(parent) end
-	return GetNextSibling(hwnd)
+	return GetNextSibling(sibling)
 end
 function GetChildWindows(hwnd) --returns a stateless iterator iterating from top to bottom of the z-order
 	return nextchild, hwnd
@@ -302,6 +303,8 @@ GetTopWindow = C.GetTopWindow --same semantics as GetFirstChild ?
 function IsWindowUnicode(hwnd) --for outside windows; ours are always unicode
 	return C.IsWindowUnicode(hwnd) ~= 0
 end
+
+GetDesktopWindow = C.GetDesktopWindow
 
 ffi.cdef[[
 typedef __stdcall BOOL (* WNDENUMPROC)(HWND, LPARAM);
