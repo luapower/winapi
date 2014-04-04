@@ -205,6 +205,6 @@ SPI_GETFONTSMOOTHINGORIENTATION      = 0x2012
 SPI_SETFONTSMOOTHINGORIENTATION      = 0x2013
 
 function SystemParametersInfo(action, param, pvparam, ini)
-	checknz(C.SystemParametersInfo(action, param, pvparam, ini))
+	checknz(C.SystemParametersInfoW(action, param, pvparam, ini))
 end
 
