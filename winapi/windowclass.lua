@@ -68,7 +68,6 @@ Window = subclass({
 	},
 	__wm_handler_names = index{
 		on_close = WM_CLOSE,
-		on_quit = WM_QUIT,
 		on_activate_app = WM_ACTIVATEAPP,
 		on_query_open = WM_QUERYOPEN,
 		--system changes
@@ -191,6 +190,9 @@ local window_state_names = { --GetWindowPlacement distills states to these 3
 	[SW_SHOWMINIMIZED] = 'minimized',
 }
 function Window:get_state()
+	if self.__show_state then
+		return self.__show_state
+	end
 	local wpl = GetWindowPlacement(self.hwnd)
 	return window_state_names[wpl.command]
 end
@@ -213,13 +215,14 @@ function Window:set_state(st)
 	end
 end
 
-function Window:show()
-	if self.__show_state then
-		set_state(self, self.__show_state)
-		self.__show_state = nil
+function Window:show(state)
+	local state = state or self.__show_state
+	if state then
+		set_state(self, state)
 	else
 		Window.__index.show(self)
 	end
+	self.__show_state = nil
 end
 
 function Window:set_maximized_pos()
@@ -264,10 +267,10 @@ end
 
 --events
 
-function Window:WM_ACTIVATE(WA, minimized, other_hwnd)
-	if WA == WA_ACTIVE or WA == WA_CLICKACTIVE then
+function Window:WM_ACTIVATE(flag, minimized, other_hwnd)
+	if flag == 'active' or flag == 'clickactive' then
 		if self.on_activate then self:on_activate(Windows:find(other_hwnd)) end
-	elseif WA == WA_INACTIVE then
+	elseif flag == 'inactive' then
 		if self.on_deactivate then self:on_deactivate(Windows:find(other_hwnd)) end
 	end
 end
@@ -309,16 +312,23 @@ c2.max_size = {w=300, h=300}
 ]]
 
 function c:WM_GETDLGCODE()
-	return DLGC_WANTALLKEYS
+	return 0
+	--return bit.bor(DLGC_WANTALLKEYS, DLGC_WANTCHARS, DLGC_WANTMESSAGE)
 end
 
 function c:on_key_down(vk, flags)
 	print('WM_KEYDOWN', vk, flags)
 end
 
+function c:on_key_down_char(char, flags)
+	print('WM_CHAR', char, flags)
+end
+
 function c:on_lbutton_double_click()
 	print'double clicked'
 end
+
+c.__wantallkeys = true
 
 MessageLoop()
 
