@@ -70,10 +70,6 @@ union{
       LONG    x2;
       LONG    y2;
   };
-  struct{
-      LONG    x;
-      LONG    y;
-  };
 };
 } RECT, *PRECT,  *NPRECT,  *LPRECT;
 typedef const RECT * LPCRECT;

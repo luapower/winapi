@@ -15,4 +15,3 @@ function types:__index(type_str)
 	end
 	return self[type_str]
 end
-
