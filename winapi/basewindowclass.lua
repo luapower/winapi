@@ -252,13 +252,18 @@ end
 --destroing
 
 function BaseWindow:free()
+	if not self.hwnd then return end
 	DestroyWindow(self.hwnd)
 end
 
 function BaseWindow:WM_NCDESTROY() --after children are destroyed
 	Windows:remove(self)
 	disown(self.hwnd) --prevent the __gc on hwnd calling DestroyWindow again
+	self.hwnd = nil
 end
+
+function BaseWindow:get_dead() return self.hwnd == nil end
+function BaseWindow:set_dead() self:free() end
 
 --class properties
 
@@ -457,7 +462,7 @@ function BaseWindow:get_client_h()
 	return GetClientRect(self.hwnd).y2
 end
 
-function BaseWindow:move(x,y,w,h) --use nil to assume current value
+function BaseWindow:move(x, y, w, h) --use nil to assume current value
 	if not (x or y or w or h) then return end
 	local missing_xy = (x or y) and not (x and y)
 	local missing_wh = (w or h) and not (w and h)
@@ -478,8 +483,8 @@ function BaseWindow:move(x,y,w,h) --use nil to assume current value
 	SetWindowPos(self.hwnd, nil, x or 0, y or 0, w or 0, h or 0, flags)
 end
 
-function BaseWindow:resize(w,h)
-	self:move(nil,nil,w,h)
+function BaseWindow:resize(w, h)
+	self:move(nil, nil, w, h)
 end
 
 function BaseWindow:get_x() return self.rect.x1 end
