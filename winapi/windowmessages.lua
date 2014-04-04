@@ -242,20 +242,14 @@ end
 
 -- window events
 
-WA_INACTIVE     = 0
-WA_ACTIVE       = 1
-WA_CLICKACTIVE  = 2
+local activate_flags = {[0] = 'inactive', 'active', 'clickactive'}
 
 function WM.WM_ACTIVATE(wParam, lParam)
 	local WA, minimized = splitlong(wParam)
-	return WA, minimized ~= 0, ptr(ffi.cast('HWND', lParam)) --WA_*, minimized, other_window
+	return activate_flags[WA], minimized ~= 0, ptr(ffi.cast('HWND', lParam)) --flag, minimized, other_window
 end
 
 -- window sizing
-
-function WM.WM_SIZING(wParam, lParam)
-	return ffi.cast('RECT*', lParam)
-end
 
 ffi.cdef[[
 typedef struct tagMINMAXINFO {
@@ -286,6 +280,26 @@ function WM.WM_WINDOWPOSCHANGING(wParam, lParam)
 end
 
 WM.WM_WINDOWPOSCHANGED = WM.WM_WINDOWPOSCHANGING
+
+function WM.WM_MOVING(wParam, lParam)
+	return ffi.cast('RECT*', lParam)
+end
+
+local sizing_flags = {'left', 'right', 'top', 'topleft', 'topright', 'bottom', 'bottomleft', 'bottomright'}
+
+function WM.WM_SIZING(wParam, lParam) --flag, RECT
+	return sizing_flags[wParam], ffi.cast('RECT*', lParam)
+end
+
+local size_flags = {[0] = 'restored', 'minimized', 'maximized', 'other_restored', 'other_maximized'}
+
+function WM.WM_SIZE(wParam, lParam) --flag, w, h
+	return size_flags[wParam], splitlong(lParam)
+end
+
+function WM.WM_MOVE(wParam, lParam) --x, y
+	return splitlong(lParam)
+end
 
 -- controls/wm_*command
 
@@ -588,7 +602,7 @@ WM.WM_SYSKEYDOWN = WM.WM_KEYDOWN
 WM.WM_SYSKEYUP = WM.WM_KEYDOWN
 
 function WM.WM_CHAR(wParam, lParam)
-	return mbs(ffi.new('WCHAR[1]', wParam)), key_flags(lParam)
+	return mbs(ffi.new('WCHAR[?]', 2, wParam, 0)), key_flags(lParam)
 end
 
 WM.WM_UNICHAR = WM.WM_CHAR --TODO: support characters outside the BMP
