@@ -11,6 +11,9 @@ Panel = subclass({
 		own_dc = CS_OWNDC, --for opengl and cairo panels
 		receive_double_clicks = CS_DBLCLKS, --receive double click messages
 	},
+	__style_bitmask = bitmask{
+		tabstop = WS_TABSTOP,
+	},
 	__style_ex_bitmask = bitmask{
 		transparent = WS_EX_TRANSPARENT,
 	},
