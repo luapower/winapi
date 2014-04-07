@@ -51,6 +51,7 @@ WNDCLASSEXW = struct{
 }
 
 function RegisterClass(info)
+	assert(info.proc ~= nil, 'proc is required') --or you'll get a crash
 	return checknz(C.RegisterClassExW(WNDCLASSEXW(info)))
 end
 

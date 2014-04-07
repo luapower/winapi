@@ -283,6 +283,7 @@ require'winapi.icon'
 require'winapi.font'
 
 local c = Window{title = 'Main',
+	border = false, titlebar = false,
 	help_button = true, maximize_button = false, minimize_button = false,
 	autoquit = true, w = 500, h = 300, visible = false}
 c:show()
