@@ -86,10 +86,12 @@ WS_EX_PALETTEWINDOW = bit.bor(WS_EX_WINDOWEDGE, WS_EX_TOOLWINDOW, WS_EX_TOPMOST)
 CW_USEDEFAULT = 0x80000000 --for x and y
 
 function CreateWindow(info)
+	local class = wcs(MAKEINTRESOURCE(info.class))
+	local text = wcs(info.text)
 	local hwnd = checkh(C.CreateWindowExW(
 								flags(info.style_ex),
-								ffi.cast('LPCWSTR', wcs(MAKEINTRESOURCE(info.class))),
-								wcs(info.text),
+								ffi.cast('LPCWSTR', class),
+								text,
 								flags(info.style),
 								info.x, info.y, info.w, info.h,
 								info.parent,
@@ -542,10 +544,6 @@ BOOL PostMessageW(
      WPARAM wParam,
      LPARAM lParam);
 
-HWND GetCapture(void);
-HWND SetCapture(HWND hWnd);
-BOOL ReleaseCapture(void);
-
 typedef void (* TIMERPROC)(HWND, UINT, UINT_PTR, DWORD);
 UINT_PTR SetTimer(
      HWND hWnd,
@@ -653,18 +651,6 @@ function PeekMessage(hwnd, WMmin, WMmax, PM, msg)
 	return C.PeekMessageW(msg, hwnd, flags(WMmin), flags(WMmax), flags(PM)) ~= 0, msg
 end
 
-function GetCapture()
-	return ptr(C.GetCapture())
-end
-
-function SetCapture(hwnd)
-	return ptr(C.SetCapture(hwnd))
-end
-
-function ReleaseCapture()
-	return checknz(C.ReleaseCapture())
-end
-
 function SetTimer(hwnd, id, timeout, callback)
 	return checknz(C.SetTimer(hwnd, id, timeout, callback))
 end
@@ -701,16 +687,6 @@ UISF_ACTIVE                     = 0x4
 
 function ChangeUIState(hwnd, UIS, UISF)
 	SNDMSG(hwnd, WM_CHANGEUISTATE, MAKEWPARAM(flags(UIS), flags(UISF)))
-end
-
---mouse input
-
-ffi.cdef[[
-BOOL DragDetect(HWND hwnd, POINT pt);
-]]
-
-function DragDetect(hwnd, point)
-	return C.DragDetect(hwnd, POINT(point)) ~= 0
 end
 
 --message crackers
