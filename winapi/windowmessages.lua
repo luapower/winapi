@@ -507,7 +507,6 @@ WM.WM_MBUTTONDBLCLK = WM.WM_LBUTTONDBLCLK
 WM.WM_MBUTTONDOWN = WM.WM_LBUTTONDBLCLK
 WM.WM_MBUTTONUP = WM.WM_LBUTTONDBLCLK
 WM.WM_MOUSEHOVER = WM.WM_LBUTTONDBLCLK
-WM.WM_MOUSEHWHEEL = WM.WM_LBUTTONDBLCLK
 WM.WM_MOUSEMOVE = WM.WM_LBUTTONDBLCLK
 WM.WM_RBUTTONDBLCLK = WM.WM_LBUTTONDBLCLK
 WM.WM_RBUTTONDOWN = WM.WM_LBUTTONDBLCLK
@@ -518,6 +517,8 @@ function WM.WM_MOUSEWHEEL(wParam, lParam)
 	local buttons, delta = splitsigned(wParam)
 	return x, y, buttons_bitmask:get(buttons), delta
 end
+
+WM.WM_MOUSEHWHEEL = WM.WM_MOUSEWHEEL
 
 XBUTTON1 = 0x0001
 XBUTTON2 = 0x0002
@@ -530,7 +531,7 @@ local xbuttons_bitmask = bitmask{
 function WM.WM_XBUTTONDBLCLK(wParam, lParam)
 	local x, y = splitsigned(lParam)
 	local MK, XBUTTON = splitlong(wParam)
-	return x, y, xbuttons_bitmask:get(XBUTTON), buttons_bitmask:get(MK)
+	return x, y, buttons_bitmask:get(MK), xbuttons_bitmask:get(XBUTTON)
 end
 
 WM.WM_XBUTTONDOWN = WM.WM_XBUTTONDBLCLK
@@ -572,8 +573,6 @@ function WM.WM_SETCURSOR(wParam, lParam)
 end
 
 --keyboard input
-
-require'winapi.vkcodes'
 
 local key_bitmask = bitmask{
 	extended_key = 2^24,
