@@ -5,7 +5,7 @@ require'winapi.handlelist'
 require'winapi.window'
 require'winapi.windowclasses'
 require'winapi.wingdi'
-
+require'winapi.mouse'
 
 Windows = class(HandleList) --track window objects by their hwnd
 
@@ -86,8 +86,8 @@ BaseWindow = {
 		on_set_cursor = WM_SETCURSOR,
 		--mouse events
 		on_mouse_move = WM_MOUSEMOVE,
-		on_mouse_over = WM_MOUSEHOVER,
-		on_mouse_leave = WM_MOUSELEAVE,
+		on_mouse_over = WM_MOUSEHOVER,  --call TrackMouseEvent to receive this (and call it after the first WM_MOUSEMOVE!)
+		on_mouse_leave = WM_MOUSELEAVE, --call TrackMouseEvent to receive this
 		on_lbutton_double_click = WM_LBUTTONDBLCLK,
 		on_lbutton_down = WM_LBUTTONDOWN,
 		on_lbutton_up = WM_LBUTTONUP,
@@ -210,11 +210,18 @@ function BaseWindow:__init(info)
 		local args = {}
 		self:__before_create(info, args)
 		self.hwnd = CreateWindow(args)
+
+		--some style bits are ignored on creation (eg. WS_BORDER) so we set them now
+		SetWindowStyle(self.hwnd, args.style)
+		SetWindowExStyle(self.hwnd, args.style_ex)
+		SetWindowPos(self.hwnd, nil, 0, 0, 0, 0, SWP_FRAMECHANGED_ONLY)
+
 		self.font = info.font or GetStockObject(DEFAULT_GUI_FONT)
 		self:__after_create(info, args)
 	else --we can also wrap an exisiting window given its handle
 		self.hwnd = info.hwnd
 	end
+
 	Windows:add(self) --register the window so we can find it by hwnd
 	if info.visible ~= self.visible then --WS_VISIBLE on the first created window is ignored in some cases
 		self.visible = info.visible
