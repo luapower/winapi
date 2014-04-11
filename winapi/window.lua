@@ -1,6 +1,7 @@
 --proc/window: common API for windows and standard controls.
 setfenv(1, require'winapi')
 require'winapi.winuser'
+require'winapi.wingdi'
 
 --creation
 
@@ -334,7 +335,7 @@ typedef struct tagWINDOWPLACEMENT {
     UINT  command;
     POINT minimized_pos;
     POINT maximized_pos;
-    RECT  normalpos;
+    RECT  normal_pos;
 } WINDOWPLACEMENT;
 typedef WINDOWPLACEMENT *PWINDOWPLACEMENT, *LPWINDOWPLACEMENT;
 
@@ -487,6 +488,31 @@ function AdjustWindowRect(cr, wstyle, wstylex, hasmenu, rect)
 	rect.y2 = cr.y2
 	checknz(C.AdjustWindowRectEx(rect))
 	return rect
+end
+
+-- layered windows
+
+ULW_COLORKEY            = 0x00000001
+ULW_ALPHA               = 0x00000002
+ULW_OPAQUE              = 0x00000004
+ULW_EX_NORESIZE         = 0x00000008
+
+ffi.cdef[[
+BOOL UpdateLayeredWindow(
+  HWND hwnd,
+  HDC hdcDst,
+  POINT *pptDst,
+  SIZE *psize,
+  HDC hdcSrc,
+  POINT *pptSrc,
+  COLORREF crKey,
+  BLENDFUNCTION *pblend,
+  DWORD dwFlags
+);
+]]
+
+function UpdateLayeredWindow(hwnd, dst_hdc, dst_ppt, psize, src_hdc, src_ppt, key, pblend, dwflags)
+	checknz(C.UpdateLayeredWindow(hwnd, dst_hdc, dst_ppt, psize, src_hdc, src_ppt, key, pblend, flags(dwflags)))
 end
 
 -- messages

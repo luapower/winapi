@@ -105,5 +105,14 @@ int GetSystemMetrics(int nIndex);
 ]]
 
 function GetSystemMetrics(index)
-	checknz(C.GetSystemMetrics(index))
+	return C.GetSystemMetrics(flags(index))
+end
+
+
+if not ... then
+	for k in pairs(getfenv(1)) do
+		if k:match'^SM_' then
+			print(string.format('%-30s %s', k, GetSystemMetrics(k)))
+		end
+	end
 end

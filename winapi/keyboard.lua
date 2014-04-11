@@ -280,11 +280,11 @@ UINT  MapVirtualKeyExW(UINT uCode, UINT uMapType, HKL dwhkl);
 ]]
 
 function GetKeyState(vk) --down, toggled
-	local state = C.GetKeyState(vk)
+	local state = C.GetKeyState(flags(vk))
 	return bit.band(state, 0x8000) ~= 0, bit.band(state, 1) ~= 0
 end
 
 function GetAsyncKeyState(vk) --down
-	return bit.band(C.GetAsyncKeyState(vk), 0x8000) ~= 0
+	return bit.band(C.GetAsyncKeyState(flags(vk)), 0x8000) ~= 0
 end
 

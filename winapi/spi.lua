@@ -204,7 +204,13 @@ SPI_SETFOCUSBORDERHEIGHT             = 0x2011
 SPI_GETFONTSMOOTHINGORIENTATION      = 0x2012
 SPI_SETFONTSMOOTHINGORIENTATION      = 0x2013
 
+--ini param
+SPIF_UPDATEINIFILE      = 0x0001
+SPIF_SENDWININICHANGE   = 0x0002
+SPIF_SENDCHANGE         = SPIF_SENDWININICHANGE
+
 function SystemParametersInfo(action, param, pvparam, ini)
-	checknz(C.SystemParametersInfoW(action, param, pvparam, ini))
+	ini = ini or SPIF_SENDCHANGE --broadcast changes by default
+	checknz(C.SystemParametersInfoW(flags(action), param, pvparam, flags(ini)))
 end
 

@@ -18,7 +18,6 @@ end
 
 ffi.cdef[[
 HGDIOBJ  GetStockObject(int i);
-BOOL  DeleteObject(HGDIOBJ ho);
 ]]
 
 WHITE_BRUSH          = 0
@@ -47,7 +46,6 @@ DC_PEN               = 19
 
 
 function GetStockObject(i) return checkh(C.GetStockObject(i)) end
-function DeleteObject(ho) checknz(C.DeleteObject(ho)) end
 
 --device contexts
 
@@ -67,6 +65,7 @@ BOOL EndPaint(HWND hWnd, const PAINTSTRUCT *lpPaint);
 BOOL InvalidateRect(HWND hWnd, const RECT *lpRect, BOOL bErase);
 BOOL RedrawWindow(HWND hWnd, const RECT *lprcUpdate, HRGN hrgnUpdate, UINT flags);
 HGDIOBJ  SelectObject(HDC hdc, HGDIOBJ h);
+BOOL     DeleteObject(HGDIOBJ ho);
 COLORREF SetDCBrushColor(HDC hdc, COLORREF color);
 COLORREF SetDCPenColor(HDC hdc, COLORREF color);
 int      SetBkMode(HDC hdc, int mode);
@@ -85,6 +84,10 @@ function ReleaseDC(hwnd, hdc)
 end
 
 SelectObject = C.SelectObject --TODO: checkh for non-regions, HGDI_ERROR (-1U) for regions
+
+function DeleteObject(ho)
+	checknz(C.DeleteObject(ho))
+end
 
 function BeginPaint(hwnd, paintstruct)
 	return checkh(C.BeginPaint(hwnd, paintstruct))
@@ -493,6 +496,21 @@ BOOL GdiFlush(void);
 ]]
 
 GdiFlush = C.GdiFlush
+
+--blending
+
+ffi.cdef[[
+typedef struct _BLENDFUNCTION {
+    BYTE   BlendOp;
+    BYTE   BlendFlags;
+    BYTE   SourceConstantAlpha;
+    BYTE   AlphaFormat;
+} BLENDFUNCTION, *PBLENDFUNCTION;
+]]
+
+AC_SRC_OVER  = 0x00
+AC_SRC_ALPHA = 0x01
+
 
 --showcase
 

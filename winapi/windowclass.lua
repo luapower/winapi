@@ -28,7 +28,8 @@ Window = subclass({
 	__style_ex_bitmask = bitmask{
 		help_button = WS_EX_CONTEXTHELP, --only shown if both minimize and maximize buttons are hidden
 		tool_window = WS_EX_TOOLWINDOW,
-		transparent = WS_EX_TRANSPARENT,
+		transparent = WS_EX_TRANSPARENT, --not really
+		layered = WS_EX_LAYERED,
 		double_border = WS_EX_DLGMODALFRAME,
 	},
 	__defaults = {
@@ -197,9 +198,10 @@ function Window:get_state()
 	return window_state_names[wpl.command]
 end
 
-function Window:minimize() ShowWindow(self.hwnd, SW_MINIMIZE) end
-function Window:maximize() ShowWindow(self.hwnd, SW_SHOWMAXIMIZED) end
-function Window:restore() ShowWindow(self.hwnd, SW_RESTORE) end
+function Window:minimize_stay_active() ShowWindow(self.hwnd, SW_SHOWMINIMIZED) end --minimize but don't deactivate
+function Window:minimize() ShowWindow(self.hwnd, SW_MINIMIZE) end --minimize and deactivate
+function Window:maximize() ShowWindow(self.hwnd, SW_SHOWMAXIMIZED) end --maximize and activate (SW_MAXIMIZE does the same)
+function Window:restore() ShowWindow(self.hwnd, SW_RESTORE) end --restore and activate
 
 local function set_state(self, st)
 	if st == 'maximized' then self:maximize() end
@@ -212,6 +214,24 @@ function Window:set_state(st)
 		self.__show_state = st --set a promise to set this state on the next show()
 	else
 		set_state(self, st)
+	end
+end
+
+function Window:get_normal_rect()
+	if self.state == 'normal' then
+		return self.rect
+	end
+	local wpl = GetWindowPlacement(self.hwnd)
+	return wpl.normal_pos
+end
+
+function Window:set_normal_rect(r)
+	if self.state == 'normal' then
+		self.rect = r
+	else
+		local wpl = GetWindowPlacement(self.hwnd)
+		wpl.normal_pos = RECT(r)
+		SetWindowPlacement(self.hwnd, wpl)
 	end
 end
 
@@ -283,7 +303,7 @@ require'winapi.icon'
 require'winapi.font'
 
 local c = Window{title = 'Main',
-	border = false, titlebar = false,
+	--border = false, dialog_frame = false, titlebar = false,
 	help_button = true, maximize_button = false, minimize_button = false,
 	autoquit = true, w = 500, h = 300, visible = false}
 c:show()

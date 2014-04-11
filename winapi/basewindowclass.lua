@@ -325,7 +325,7 @@ function BaseWindow:get_visible()
 end
 
 function BaseWindow:show()
-	ShowWindow(self.hwnd, SW_SHOW)
+	ShowWindow(self.hwnd, SW_SHOW) --show and activate the window
 	if not self.visible then --the first ever call to ShowWindow with SW_SHOWNORMAL is ignored in some cases
 		ShowWindow(self.hwnd, SW_SHOW)
 	end
