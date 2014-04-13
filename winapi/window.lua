@@ -1,7 +1,7 @@
 --proc/window: common API for windows and standard controls.
 setfenv(1, require'winapi')
 require'winapi.winuser'
-require'winapi.wingdi'
+require'winapi.gdi'
 
 --creation
 

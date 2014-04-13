@@ -1,7 +1,7 @@
 --proc/font: font resources.
 setfenv(1, require'winapi')
 require'winapi.winuser'
-require'winapi.wingdi'
+require'winapi.gdi'
 require'winapi.logfonttype'
 
 ffi.cdef[[

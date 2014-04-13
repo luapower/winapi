@@ -2,7 +2,7 @@
 setfenv(1, require'winapi')
 require'winapi.controlclass'
 require'winapi.edit'
-require'winapi.wingdi'
+require'winapi.gdi'
 
 Edit = subclass({
 	__style_bitmask = bitmask{
