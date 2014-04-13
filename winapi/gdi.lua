@@ -1,6 +1,7 @@
---proc/wingdi: windows GDI API.
+--proc/gdi: windows GDI API.
 setfenv(1, require'winapi')
 require'winapi.winuser'
+require'winapi.gdi_devcaps'
 
 --glue
 
@@ -45,7 +46,9 @@ DC_BRUSH             = 18
 DC_PEN               = 19
 
 
-function GetStockObject(i) return checkh(C.GetStockObject(i)) end
+function GetStockObject(i)
+	return checkh(C.GetStockObject(i))
+end
 
 --device contexts
 
@@ -83,7 +86,11 @@ function ReleaseDC(hwnd, hdc)
 	disown(hdc)
 end
 
-SelectObject = C.SelectObject --TODO: checkh for non-regions, HGDI_ERROR (-1U) for regions
+function SelectObject(hdc, hobj)
+	local ret = C.SelectObject(hdc, hobj)
+	--TODO: checkh for non-regions, HGDI_ERROR (-1U) for regions
+	return ret
+end
 
 function DeleteObject(ho)
 	checknz(C.DeleteObject(ho))
@@ -411,7 +418,7 @@ function CreateCompatibleBitmap(hdc, w, h)
 end
 
 function CreateDIBSection(hdc, bmi, usage, hSection, offset, bits)
-	local bits = bits or 'void*[1]'
+	local bits = bits or ffi.new'void*[1]'
 	local hbitmap = checkh(C.CreateDIBSection(hdc, bmi, usage, bits, hSection, offset or 0))
 	return hbitmap, bits[0]
 end
