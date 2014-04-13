@@ -4,7 +4,7 @@ require'winapi.vobject'
 require'winapi.handlelist'
 require'winapi.window'
 require'winapi.windowclasses'
-require'winapi.wingdi'
+require'winapi.gdi'
 require'winapi.mouse'
 
 Windows = class(HandleList) --track window objects by their hwnd
@@ -470,24 +470,18 @@ function BaseWindow:get_client_h()
 end
 
 function BaseWindow:move(x, y, w, h) --use nil to assume current value
-	if not (x or y or w or h) then return end
-	local missing_xy = (x or y) and not (x and y)
-	local missing_wh = (w or h) and not (w and h)
-	if missing_xy or missing_wh then
-		local r = self.rect
-		if missing_xy then
-			if not x then x = r.x1 end
-			if not y then y = r.y1 end
-		end
-		if missing_wh then
-			if not w then w = r.w end
-			if not h then h = r.h end
-		end
-	end
+	local r = self.rect
+	x = x or r.x
+	y = y or r.y
+	w = w or r.w
+	h = h or r.h
+	local move = x ~= r.x or y ~= r.y
+	local resize = w ~= r.w or h ~= r.h
+	if not move and not resize then return end
 	local flags = bit.bor(SWP_NOZORDER, SWP_NOOWNERZORDER, SWP_NOACTIVATE,
-								x and 0 or SWP_NOMOVE,
-								w and 0 or SWP_NOSIZE)
-	SetWindowPos(self.hwnd, nil, x or 0, y or 0, w or 0, h or 0, flags)
+								move and 0 or SWP_NOMOVE,
+								resize and 0 or SWP_NOSIZE)
+	SetWindowPos(self.hwnd, nil, x, y, w, h, flags)
 end
 
 function BaseWindow:resize(w, h)
