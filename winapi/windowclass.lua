@@ -203,7 +203,7 @@ function Window:minimize() ShowWindow(self.hwnd, SW_MINIMIZE) end --minimize and
 function Window:maximize() ShowWindow(self.hwnd, SW_SHOWMAXIMIZED) end --maximize and activate (SW_MAXIMIZE does the same)
 function Window:restore() ShowWindow(self.hwnd, SW_RESTORE) end --restore and activate
 
-local function set_state(self, st)
+local function show_as(self, st)
 	if st == 'maximized' then self:maximize() end
 	if st == 'minimized' then self:minimize() end
 	if st == 'normal' then self:restore() end
@@ -213,7 +213,7 @@ function Window:set_state(st)
 	if not self.visible then
 		self.__show_state = st --set a promise to set this state on the next show()
 	else
-		set_state(self, st)
+		show_as(self, st)
 	end
 end
 
@@ -222,15 +222,15 @@ function Window:get_normal_rect()
 		return self.rect
 	end
 	local wpl = GetWindowPlacement(self.hwnd)
-	return wpl.normal_pos
+	return wpl.normal_rect
 end
 
-function Window:set_normal_rect(r)
+function Window:set_normal_rect(...) --x1,y1,x2,y2 or rect
 	if self.state == 'normal' then
-		self.rect = r
+		self:set_rect(...)
 	else
 		local wpl = GetWindowPlacement(self.hwnd)
-		wpl.normal_pos = RECT(r)
+		wpl.normal_rect = RECT(...)
 		SetWindowPlacement(self.hwnd, wpl)
 	end
 end
@@ -238,7 +238,7 @@ end
 function Window:show(state)
 	local state = state or self.__show_state
 	if state then
-		set_state(self, state)
+		show_as(self, state)
 	else
 		Window.__index.show(self)
 	end

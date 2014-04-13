@@ -1,7 +1,7 @@
 --proc/gdi: windows GDI API.
 setfenv(1, require'winapi')
 require'winapi.winuser'
-require'winapi.gdi_devcaps'
+require'winapi.gdidevcaps'
 
 --glue
 

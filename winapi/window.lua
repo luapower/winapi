@@ -146,8 +146,10 @@ BOOL SetWindowTextW(
      LPCWSTR lpString);
 ]]
 
+GetWindowTextLength = C.GetWindowTextLengthW
+
 function GetWindowText(hwnd, buf)
-	local ws, sz = WCS(buf or checkpoz(C.GetWindowTextLengthW(hwnd)))
+	local ws, sz = WCS(buf or C.GetWindowTextLengthW(hwnd))
 	C.GetWindowTextW(hwnd, ws, sz+1)
 	return buf or mbs(ws)
 end
@@ -268,8 +270,13 @@ function BringWindowToTop(hwnd)
 	checknz(C.BringWindowToTop(hwnd))
 end
 
-IsMinimized = C.IsIconic
-IsMaximized = C.IsZoomed
+function IsIconic(hwnd)
+	return C.IsIconic(hwnd) ~= 0
+end
+
+function IsZoomed(hwnd)
+	return C.IsZoomed(hwnd) ~= 0
+end
 
 function GetFocus()
 	return ptr(C.GetFocus())
@@ -285,7 +292,7 @@ GW_OWNER            = 4
 GW_CHILD            = 5
 GW_ENABLEDPOPUP     = 6
 
-function GetWindow(hwnd, GW) return ptr(C.GetWindow(hwnd, flags(GW))) end
+function GetWindow(hwnd, GW)   return ptr(C.GetWindow(hwnd, flags(GW))) end
 function GetOwner(hwnd)        return callh2(GetWindow, hwnd, GW_OWNER) end
 function GetFirstChild(hwnd)   return callh2(GetWindow, hwnd, GW_CHILD) end
 function GetFirstSibling(hwnd) return callh2(GetWindow, hwnd, GW_HWNDFIRST) end
@@ -297,7 +304,9 @@ local function nextchild(parent, sibling)
 	if not sibling then return GetFirstChild(parent) end
 	return GetNextSibling(sibling)
 end
-function GetChildWindows(hwnd) --returns a stateless iterator iterating from top to bottom of the z-order
+--returns a stateless iterator iterating from top to bottom of the z-order.
+--NOTE: you can get infinite loops if the z-order of the windows involved changes while iterating.
+function GetChildWindows(hwnd)
 	return nextchild, hwnd
 end
 
@@ -317,7 +326,8 @@ BOOL EnumChildWindows(
      LPARAM lParam);
 ]]
 
-function EnumChildWindows(hwnd) --for a not null hwnd use GetChildWindows (no callback, no table)
+--NOTE: for a not null hwnd you can use GetChildWindows (no callback, no table).
+function EnumChildWindows(hwnd)
 	local t = {}
 	local cb = ffi.cast('WNDENUMPROC', function(hwnd, lparam)
 		t[#t+1] = hwnd
@@ -335,7 +345,7 @@ typedef struct tagWINDOWPLACEMENT {
     UINT  command;
     POINT minimized_pos;
     POINT maximized_pos;
-    RECT  normal_pos;
+    RECT  normal_rect;
 } WINDOWPLACEMENT;
 typedef WINDOWPLACEMENT *PWINDOWPLACEMENT, *LPWINDOWPLACEMENT;
 

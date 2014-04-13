@@ -6,6 +6,9 @@ require'winapi.window'
 require'winapi.windowclasses'
 require'winapi.gdi'
 require'winapi.mouse'
+require'winapi.monitor'
+
+--window tracker
 
 Windows = class(HandleList) --track window objects by their hwnd
 
@@ -32,6 +35,7 @@ end
 
 Windows = Windows'hwnd' --singleton
 
+--message router
 
 MessageRouter = class(Object)
 
@@ -52,6 +56,7 @@ end
 
 MessageRouter = MessageRouter() --singleton
 
+--base window class
 
 BaseWindow = {
 	__class_style_bitmask = bitmask{}, --reserved for windows who own their class
@@ -211,7 +216,7 @@ function BaseWindow:__init(info)
 		self:__before_create(info, args)
 		self.hwnd = CreateWindow(args)
 
-		--some style bits are ignored on creation (eg. WS_BORDER) so we set them now
+		--some style bits are ignored on creation, so we set them now
 		SetWindowStyle(self.hwnd, args.style)
 		SetWindowExStyle(self.hwnd, args.style_ex)
 		SetWindowPos(self.hwnd, nil, 0, 0, 0, 0, SWP_FRAMECHANGED_ONLY)
@@ -270,7 +275,6 @@ function BaseWindow:WM_NCDESTROY() --after children are destroyed
 end
 
 function BaseWindow:get_dead() return self.hwnd == nil end
-function BaseWindow:set_dead() self:free() end
 
 --class properties
 
@@ -547,6 +551,12 @@ function BaseWindow:send_to_back()
 	SetWindowPos(self.hwnd, HWND_BOTTOM, 0, 0, 0, 0, SWP_ZORDER_CHANGED_ONLY)
 end
 
+--monitor
+
+function BaseWindow:get_monitor()
+	return MonitorFromWindow(self.hwnd, MONITOR_DEFAULTTONEAREST)
+end
+
 --custom painting
 
 function BaseWindow:set_updating(updating)
@@ -554,13 +564,13 @@ function BaseWindow:set_updating(updating)
 	SetRedraw(self.hwnd, not updating)
 end
 
-function BaseWindow:batch_update(f,...) --can't change self.updating inside f
+function BaseWindow:batch_update(f, ...) --can't change self.updating inside f
 	if not self.visible or self.updating then
 		f(...)
 	end
 	self.updating = true
 	local ok,err = pcall(f,...)
-	self.updating = nil
+	self.updating = false
 	self:redraw()
 	assert(ok, err)
 end
