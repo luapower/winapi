@@ -9,7 +9,15 @@ function HandleList:__init(handle_property)
 	self.items = {} --{ptonumber(handler) = object}; object is also pinned (table is not weak)
 end
 
-function HandleList:add(obj) self.items[ptonumber(obj[self.handle_property])] = obj end
-function HandleList:remove(obj) self.items[ptonumber(obj[self.handle_property])] = nil end
-function HandleList:find(handle) return self.items[ptonumber(handle)] end
+function HandleList:add(obj)
+	self.items[ptonumber(obj[self.handle_property])] = obj
+end
+
+function HandleList:remove(obj)
+	self.items[ptonumber(obj[self.handle_property])] = nil
+end
+
+function HandleList:find(handle)
+	return self.items[ptonumber(handle)]
+end
 

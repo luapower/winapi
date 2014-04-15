@@ -1,7 +1,6 @@
 --test/showcase: showcase window for the showcase part of modules.
 setfenv(1, require'winapi')
 require'winapi.windowclass'
-require'winapi.messageloop'
 require'winapi.comctl'
 require'winapi.imagelistclass'
 

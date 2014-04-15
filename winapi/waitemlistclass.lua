@@ -3,7 +3,6 @@ setfenv(1, require'winapi')
 require'winapi.itemlist'
 require'winapi.accelerator'
 
-
 local modifier_masks = {
 	shift = FSHIFT,
 	control = FCONTROL,

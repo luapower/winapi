@@ -1,6 +1,5 @@
 local winapi = require'winapi'
 require'winapi.windowclass'
-require'winapi.messageloop'
 require'winapi.wglpanel'
 local gl = require'winapi.gl11'
 

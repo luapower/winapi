@@ -1,6 +1,8 @@
 --proc/window: common API for windows and standard controls.
 setfenv(1, require'winapi')
 require'winapi.winuser'
+require'winapi.windowclasses'
+require'winapi.windowmessages'
 require'winapi.gdi'
 
 --creation
@@ -23,66 +25,66 @@ HWND CreateWindowExW(
 BOOL DestroyWindow(HWND hWnd);
 ]]
 
-WS_OVERLAPPED = 0x00000000
-WS_POPUP = 0x80000000
-WS_CHILD = 0x40000000
-WS_MINIMIZE = 0x20000000
-WS_VISIBLE = 0x10000000
-WS_DISABLED = 0x08000000
-WS_CLIPSIBLINGS = 0x04000000
-WS_CLIPCHILDREN = 0x02000000
-WS_MAXIMIZE = 0x01000000
-WS_CAPTION = 0x00C00000
-WS_BORDER = 0x00800000
-WS_DLGFRAME = 0x00400000
-WS_VSCROLL = 0x00200000
-WS_HSCROLL = 0x00100000
-WS_SYSMENU = 0x00080000
-WS_THICKFRAME = 0x00040000
-WS_GROUP = 0x00020000
-WS_TABSTOP = 0x00010000
-WS_MINIMIZEBOX = 0x00020000
-WS_MAXIMIZEBOX = 0x00010000
-WS_TILED = WS_OVERLAPPED
-WS_ICONIC = WS_MINIMIZE
-WS_SIZEBOX = WS_THICKFRAME
+WS_OVERLAPPED    = 0x00000000 --no bits!
+WS_POPUP         = 0x80000000
+WS_CHILD         = 0x40000000
+WS_MINIMIZE      = 0x20000000
+WS_VISIBLE       = 0x10000000
+WS_DISABLED      = 0x08000000
+WS_CLIPSIBLINGS  = 0x04000000
+WS_CLIPCHILDREN  = 0x02000000
+WS_MAXIMIZE      = 0x01000000
+WS_CAPTION       = 0x00C00000 --WS_BORDER + WS_DLGFRAME (always set on creation)
+WS_BORDER        = 0x00800000
+WS_DLGFRAME      = 0x00400000
+WS_VSCROLL       = 0x00200000
+WS_HSCROLL       = 0x00100000
+WS_SYSMENU       = 0x00080000
+WS_THICKFRAME    = 0x00040000
+WS_GROUP         = 0x00020000
+WS_TABSTOP       = 0x00010000 --same value as WS_MAXIMIZEBOX
+WS_MINIMIZEBOX   = 0x00020000
+WS_MAXIMIZEBOX   = 0x00010000
+WS_TILED         = WS_OVERLAPPED
+WS_ICONIC        = WS_MINIMIZE
+WS_SIZEBOX       = WS_THICKFRAME
 WS_OVERLAPPEDWINDOW = bit.bor(WS_OVERLAPPED,
 									  WS_CAPTION,
 									  WS_SYSMENU,
 									  WS_THICKFRAME,
 									  WS_MINIMIZEBOX,
 									  WS_MAXIMIZEBOX)
-WS_TILEDWINDOW = WS_OVERLAPPEDWINDOW
-WS_CHILDWINDOW = WS_CHILD
+WS_TILEDWINDOW   = WS_OVERLAPPEDWINDOW
+WS_CHILDWINDOW   = WS_CHILD
 
-WS_EX_DLGMODALFRAME = 0x00000001
-WS_EX_NOPARENTNOTIFY = 0x00000004
-WS_EX_TOPMOST = 0x00000008
-WS_EX_ACCEPTFILES = 0x00000010
-WS_EX_TRANSPARENT = 0x00000020
-WS_EX_MDICHILD = 0x00000040
-WS_EX_TOOLWINDOW = 0x00000080
-WS_EX_WINDOWEDGE = 0x00000100
-WS_EX_CLIENTEDGE = 0x00000200
-WS_EX_CONTEXTHELP = 0x00000400
-WS_EX_RIGHT = 0x00001000
-WS_EX_LEFT = 0x00000000
-WS_EX_RTLREADING = 0x00002000
-WS_EX_LTRREADING = 0x00000000
-WS_EX_LEFTSCROLLBAR = 0x00004000
-WS_EX_RIGHTSCROLLBAR = 0x00000000
-WS_EX_CONTROLPARENT = 0x00010000
-WS_EX_STATICEDGE = 0x00020000
-WS_EX_APPWINDOW = 0x00040000
-WS_EX_LAYERED = 0x00080000
+WS_EX_DLGMODALFRAME   = 0x00000001
+WS_EX_NOPARENTNOTIFY  = 0x00000004
+WS_EX_TOPMOST         = 0x00000008
+WS_EX_ACCEPTFILES     = 0x00000010
+WS_EX_TRANSPARENT     = 0x00000020
+WS_EX_MDICHILD        = 0x00000040
+WS_EX_TOOLWINDOW      = 0x00000080
+WS_EX_WINDOWEDGE      = 0x00000100 --always set on creation
+WS_EX_CLIENTEDGE      = 0x00000200
+WS_EX_CONTEXTHELP     = 0x00000400
+WS_EX_RIGHT           = 0x00001000
+WS_EX_LEFT            = 0x00000000 --no bits!
+WS_EX_RTLREADING      = 0x00002000
+WS_EX_LTRREADING      = 0x00000000 --no bits!
+WS_EX_LEFTSCROLLBAR   = 0x00004000
+WS_EX_RIGHTSCROLLBAR  = 0x00000000 --no bits!
+WS_EX_CONTROLPARENT   = 0x00010000
+WS_EX_STATICEDGE      = 0x00020000
+WS_EX_APPWINDOW       = 0x00040000
+WS_EX_LAYERED         = 0x00080000
 WS_EX_NOINHERITLAYOUT = 0x00100000
-WS_EX_LAYOUTRTL = 0x00400000
-WS_EX_COMPOSITED = 0x02000000
-WS_EX_NOACTIVATE = 0x08000000
+WS_EX_LAYOUTRTL       = 0x00400000
+WS_EX_COMPOSITED      = 0x02000000
+WS_EX_NOACTIVATE      = 0x08000000
 
-WS_POPUPWINDOW = bit.bor(WS_POPUP, WS_BORDER, WS_SYSMENU)
+WS_POPUPWINDOW         = bit.bor(WS_POPUP, WS_BORDER, WS_SYSMENU)
 WS_EX_OVERLAPPEDWINDOW = bit.bor(WS_EX_WINDOWEDGE, WS_EX_CLIENTEDGE)
-WS_EX_PALETTEWINDOW = bit.bor(WS_EX_WINDOWEDGE, WS_EX_TOOLWINDOW, WS_EX_TOPMOST)
+WS_EX_PALETTEWINDOW    = bit.bor(WS_EX_WINDOWEDGE, WS_EX_TOOLWINDOW, WS_EX_TOPMOST)
 
 CW_USEDEFAULT = 0x80000000 --for x and y
 
@@ -113,21 +115,18 @@ ffi.cdef[[
 BOOL ShowWindow(HWND hWnd, int nCmdShow);
 ]]
 
-SW_HIDE              = 0
-SW_SHOWNORMAL        = 1
-SW_NORMAL            = 1
-SW_SHOWMINIMIZED     = 2
-SW_SHOWMAXIMIZED     = 3
-SW_MAXIMIZE          = 3
-SW_SHOWNOACTIVATE    = 4
-SW_SHOW              = 5
-SW_MINIMIZE          = 6
-SW_SHOWMINNOACTIVE   = 7
-SW_SHOWNA            = 8
-SW_RESTORE           = 9
-SW_SHOWDEFAULT       = 10
-SW_FORCEMINIMIZE     = 11
-SW_MAX               = 11
+SW_HIDE              =  0
+SW_SHOWNORMAL        =  1 --revert to normal state and activate
+SW_SHOWMINIMIZED     =  2 --minimize but do not deactivate
+SW_SHOWMAXIMIZED     =  3 --maximize and activate
+SW_SHOWNOACTIVATE    =  4 --show in normal state but do not activate
+SW_SHOW              =  5 --show in current state and activate
+SW_MINIMIZE          =  6 --minimize and deactivate; same as SW_SHOWMINNOACTIVE
+SW_SHOWMINNOACTIVE   =  7 --minimize and deactivate; same as SW_MINIMIZE
+SW_SHOWNA            =  8 --show in current state but do not activate
+SW_RESTORE           =  9 --restore to last state (normal or maximized) and activate
+SW_SHOWDEFAULT       = 10 --show per STARTUPINFO
+SW_FORCEMINIMIZE     = 11 --minimize from a different thread
 
 function ShowWindow(hwnd, SW)
 	return C.ShowWindow(hwnd, flags(SW)) ~= 0
@@ -428,6 +427,8 @@ function GetWindowLong(hwnd, GWL)
 	return GetWindowLongW(hwnd, flags(GWL))
 end
 
+--Get/SetWindowLong wrappers (don't look them up in the docs)
+
 function GetWindowStyle(hwnd) return GetWindowLong(hwnd, GWL_STYLE) end
 function SetWindowStyle(hwnd, style) SetWindowLong(hwnd, GWL_STYLE, flags(style)) end
 
@@ -713,19 +714,15 @@ function SetRedraw(hwnd, allow) --adds WS_VISIBLE to the window!
 	SNDMSG(hwnd, WM_SETREDRAW, allow)
 end
 
-UIS_SET                         = 1
-UIS_CLEAR                       = 2
-UIS_INITIALIZE                  = 3
+UIS_SET         = 1
+UIS_CLEAR       = 2
+UIS_INITIALIZE  = 3
 
-UISF_HIDEFOCUS                  = 0x1
-UISF_HIDEACCEL                  = 0x2
-UISF_ACTIVE                     = 0x4
+UISF_HIDEFOCUS  = 0x1
+UISF_HIDEACCEL  = 0x2
+UISF_ACTIVE     = 0x4
 
 function ChangeUIState(hwnd, UIS, UISF)
 	SNDMSG(hwnd, WM_CHANGEUISTATE, MAKEWPARAM(flags(UIS), flags(UISF)))
 end
-
---message crackers
-
-require'winapi.windowmessages'
 

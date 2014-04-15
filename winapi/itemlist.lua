@@ -39,12 +39,3 @@ end
 function ItemList:clear() --default impl. in case there's no API for it
 	self.window:batch_update(remove_all, self)
 end
-
-function ItemList:get_info()
-	local t = {}
-	for i=1,self.count do
-		t[i] = self:get(i)
-	end
-	return t
-end
-

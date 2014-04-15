@@ -2,7 +2,6 @@
 setfenv(1, require'winapi')
 require'winapi.basewindowclass'
 require'winapi.menuclass'
-require'winapi.windowclasses'
 require'winapi.color'
 require'winapi.cursor'
 require'winapi.waitemlistclass'
@@ -15,22 +14,27 @@ Window = subclass({
 		receive_double_clicks = CS_DBLCLKS, --receive double click messages
 	},
 	__style_bitmask = bitmask{ --only static, frame styles here
-		border = WS_BORDER,
-		titlebar = WS_CAPTION,
+		border = WS_BORDER, 		--a frameless window is one without WS_BORDER, WS_DLGFRAME, WS_SIZEBOX and WS_EX_WINDOWEDGE
+		frame = WS_DLGFRAME,    --for the titlebar to appear you need both WS_BORDER and WS_DLGFRAME
 		minimize_button = WS_MINIMIZEBOX,
 		maximize_button = WS_MAXIMIZEBOX,
-		sizeable = WS_SIZEBOX,
-		sysmenu = WS_SYSMENU, --not setting this hides all buttons
+		sizeable = WS_SIZEBOX,  --needs WS_DLGFRAME
+		sysmenu = WS_SYSMENU,   --not setting this hides all buttons
 		vscroll = WS_VSCROLL,
 		hscroll = WS_HSCROLL,
-		dialog_frame = WS_DLGFRAME,
+		clip_children = WS_CLIPCHILDREN,
+		clip_siblings = WS_CLIPSIBLINGS,
 	},
 	__style_ex_bitmask = bitmask{
+		window_edge = WS_EX_WINDOWEDGE,  --needs to be the same as WS_DLGFRAME
+		double_border = WS_EX_DLGMODALFRAME,
 		help_button = WS_EX_CONTEXTHELP, --only shown if both minimize and maximize buttons are hidden
 		tool_window = WS_EX_TOOLWINDOW,
-		transparent = WS_EX_TRANSPARENT, --not really
-		layered = WS_EX_LAYERED,
-		double_border = WS_EX_DLGMODALFRAME,
+		transparent = WS_EX_TRANSPARENT, --not really, better use layered and UpdateLayeredWindow()
+		layered = WS_EX_LAYERED, --setting this makes a completely frameless window regardless of other styles
+		control_parent = WS_EX_CONTROLPARENT, --recurse when looking for the next control with WS_TABSTOP
+		activatable = negate(WS_EX_NOACTIVATE), --don't activate and don't show on taskbar (weird semantics)
+		taskbar_button = WS_EX_APPWINDOW, --force showing a button on taskbar for this window
 	},
 	__defaults = {
 		--class style bits
@@ -39,18 +43,25 @@ Window = subclass({
 		receive_double_clicks = true,
 		--window style bits
 		border = true,
-		titlebar = true,
+		frame = true,
 		minimize_button = true,
 		maximize_button = true,
 		sizeable = true,
 		sysmenu = true,
 		vscroll = false,
 		hscroll = false,
-		dialog_frame = false,
+		clip_children = true,
+		clip_siblings = true,
 		--window ex style bits
+		window_edge = true,
+		double_border = true,
 		help_button = false,
 		tool_window = false,
 		transparent = false,
+		layered = false,
+		control_parent = true,
+		activatable = true,
+		taskbar_button = false,
 		--class properties
 		background = COLOR_WINDOW,
 		cursor = LoadCursor(IDC_ARROW),
@@ -61,11 +72,11 @@ Window = subclass({
 		w = CW_USEDEFAULT,
 		h = CW_USEDEFAULT,
 		autoquit = false,
-		state = nil,
 		menu = nil,
 	},
 	__init_properties = {
-		'state', 'menu',
+		'menu',
+		'autoquit', --quit the app when the window closes
 	},
 	__wm_handler_names = index{
 		on_close = WM_CLOSE,
@@ -97,45 +108,45 @@ local function name_generator(format)
 end
 local gen_classname = name_generator'Window%d'
 
-function Window:__before_create_class(info, args)
-	args.name = gen_classname()
-	args.style = self.__class_style_bitmask:set(args.style or 0, info)
-	args.proc = MessageRouter.proc
-	args.icon = info.icon
-	args.small_icon = info.small_icon
-	args.cursor = info.cursor
-	args.background = info.background
-end
-
 function Window:__before_create(info, args)
 	Window.__index.__before_create(self, info, args)
 
 	local class_args = {}
-	self:__before_create_class(info, class_args)
-	self.__winclass = RegisterClass(class_args)
-	args.class = self.__winclass
+	class_args.name = gen_classname()
+	class_args.style = self.__class_style_bitmask:set(class_args.style or 0, info)
+	class_args.proc = MessageRouter.proc
+	class_args.icon = info.icon
+	class_args.small_icon = info.small_icon
+	class_args.cursor = info.cursor
+	class_args.background = info.background
+	args.class = RegisterClass(class_args)
 
 	args.parent = info.owner and info.owner.hwnd
 	args.text = info.title
+	args.style = bit.bor(args.style,
+								info.state == 'minimized' and WS_MINIMIZE or 0,
+								info.state == 'maximized' and WS_MAXIMIZE or 0)
 
-	args.style = bit.bor(args.style, WS_OVERLAPPED, WS_CLIPCHILDREN, WS_CLIPSIBLINGS)
-	args.style_ex = bit.bor(args.style_ex, WS_EX_CONTROLPARENT, --recurse when looking for the next control with WS_TABSTOP
-									info.topmost and WS_EX_TOPMOST or 0)
+	args.style_ex = bit.bor(args.style_ex, info.topmost and WS_EX_TOPMOST or 0)
 
 	self.__state.maximized_pos = info.maximized_pos
 	self.__state.maximized_size = info.maximized_size
-	self.autoquit = info.autoquit --quit the app when the window closes
 
-	if info.state then --we can't allow WS_VISIBLE, that will show the window in its normal state
-		args.style = setbit(args.style, WS_VISIBLE, false)
-		self.__show_state = info.state
-	end
+	self.__winclass = args.class --for unregistering
+	self.__winclass_style = class_args.style --for checking
+end
+
+function BaseWindow:__check_class_style(wanted)
+	self:__check_bitmask('class style', self.__class_style_bitmask, wanted, GetClassStyle(self.hwnd))
 end
 
 function Window:__init(info)
 	Window.__index.__init(self, info)
+
+	self:__check_class_style(self.__winclass_style)
+	self.__winclass_style = nil --we're done with this
+
 	self.accelerators = WAItemList(self)
-	if self.__show_state and info.visible then self:show() end
 end
 
 --destroying
@@ -153,31 +164,7 @@ function Window:WM_NCDESTROY()
 	end
 end
 
-function Window:WM_CTLCOLORSTATIC(wParam, lParam)
-	 --TODO: fix group box
-	 do return end
-	 local hBackground = CreateSolidBrush(RGB(0, 0, 0))
-	 local hdc = ffi.cast('HDC', wParam)
-    SetBkMode(hdc, OPAQUE)
-    SetTextColor(hdc, RGB(100, 100, 0))
-	 return tonumber(hBackground)
-end
-
---onwership
-
-function Window:get_owner() --note there's no set_owner: owner can't be changed
-	return Windows:find(GetOwner(self.hwnd))
-end
-
---positioning
-
-function Window:WM_GETMINMAXINFO(info)
-	if self.maximized_pos then info.maximized_pos = self.maximized_pos end
-	if self.maximized_size then info.maximized_size = self.maximized_size end
-	return 0
-end
-
---window properties
+--properties
 
 Window.get_title = BaseWindow.get_text
 Window.set_title = BaseWindow.set_text
@@ -185,70 +172,9 @@ Window.set_title = BaseWindow.set_text
 function Window:get_active() return GetActiveWindow() == self.hwnd end
 function Window:activate() SetActiveWindow(self.hwnd) end
 
-local window_state_names = { --GetWindowPlacement distills states to these 3
-	[SW_SHOWNORMAL] = 'normal',
-	[SW_SHOWMAXIMIZED] = 'maximized',
-	[SW_SHOWMINIMIZED] = 'minimized',
-}
-function Window:get_state()
-	if self.__show_state then
-		return self.__show_state
-	end
-	local wpl = GetWindowPlacement(self.hwnd)
-	return window_state_names[wpl.command]
+function Window:get_owner() --note there's no set_owner: owner can't be changed
+	return Windows:find(GetOwner(self.hwnd))
 end
-
-function Window:minimize_stay_active() ShowWindow(self.hwnd, SW_SHOWMINIMIZED) end --minimize but don't deactivate
-function Window:minimize() ShowWindow(self.hwnd, SW_MINIMIZE) end --minimize and deactivate
-function Window:maximize() ShowWindow(self.hwnd, SW_SHOWMAXIMIZED) end --maximize and activate (SW_MAXIMIZE does the same)
-function Window:restore() ShowWindow(self.hwnd, SW_RESTORE) end --restore and activate
-
-local function show_as(self, st)
-	if st == 'maximized' then self:maximize() end
-	if st == 'minimized' then self:minimize() end
-	if st == 'normal' then self:restore() end
-end
-
-function Window:set_state(st)
-	if not self.visible then
-		self.__show_state = st --set a promise to set this state on the next show()
-	else
-		show_as(self, st)
-	end
-end
-
-function Window:get_normal_rect()
-	if self.state == 'normal' then
-		return self.rect
-	end
-	local wpl = GetWindowPlacement(self.hwnd)
-	return wpl.normal_rect
-end
-
-function Window:set_normal_rect(...) --x1,y1,x2,y2 or rect
-	if self.state == 'normal' then
-		self:set_rect(...)
-	else
-		local wpl = GetWindowPlacement(self.hwnd)
-		wpl.normal_rect = RECT(...)
-		SetWindowPlacement(self.hwnd, wpl)
-	end
-end
-
-function Window:show(state)
-	local state = state or self.__show_state
-	if state then
-		show_as(self, state)
-	else
-		Window.__index.show(self)
-	end
-	self.__show_state = nil
-end
-
-function Window:set_maximized_pos()
-	self.rect = self.rect --trigger a resize
-end
-Window.set_maximized_size = Window.set_maximized_pos
 
 function Window:get_topmost()
 	return bit.band(GetWindowExStyle(self.hwnd), WS_EX_TOPMOST) == WS_EX_TOPMOST
@@ -257,6 +183,77 @@ end
 function Window:set_topmost(topmost)
 	SetWindowPos(self.hwnd, topmost and HWND_TOPMOST or HWND_NOTOPMOST,
 						0, 0, 0, 0, bit.bor(SWP_NOSIZE, SWP_NOMOVE, SWP_NOACTIVATE))
+end
+
+--maximize size/position constraints
+
+function Window:WM_GETMINMAXINFO(info)
+	if self.maximized_pos then info.maximized_pos = self.maximized_pos end
+	if self.maximized_size then info.maximized_size = self.maximized_size end
+	return 0
+end
+
+function Window:set_maximized_pos()
+	self:__force_resize()
+end
+Window.set_maximized_size = Window.set_maximized_pos
+
+--window state
+
+local window_state_names = { --GetWindowPlacement distills states to these 3
+	[SW_SHOWNORMAL]    = 'normal',
+	[SW_SHOWMAXIMIZED] = 'maximized',
+	[SW_SHOWMINIMIZED] = 'minimized',
+}
+
+function Window:get_state()
+	local wpl = GetWindowPlacement(self.hwnd)
+	return window_state_names[wpl.command]
+end
+
+function Window:set_state(state)
+	if state == 'normal' then
+		self:shownormal()
+	elseif state == 'maximized' then
+		self:maximize()
+	elseif state == 'minimized' then
+		self:minimize()
+	end
+end
+
+function Window:maximize() --can't maximize without activating (WM_COMMAND SC_MAXIMIZE also activates)
+	self:show(SW_SHOWMAXIMIZED)
+end
+
+function Window:shownormal(activate)
+	self:show(activate == false and SW_SHOWNOACTIVATE or SW_SHOWNORMAL)
+end
+
+function Window:minimize(deactivate)
+	self:show(deactivate == false and SW_SHOWMINIMIZED or SW_MINIMIZE)
+end
+
+--restore to last state (either maximized or normal)
+function Window:restore(activate)
+	self:show(activate == false and SW_SHOWNA or SW_RESTORE)
+end
+
+function Window:get_minimized() return IsIconic(self.hwnd) end
+function Window:set_minimized(min) if min then self:minimize() else self:restore() end end
+
+function Window:get_maximized() return IsZoomed(self.hwnd) end
+function Window:set_maximized(max) if max then self:maximize() else self:shownormal() end end
+
+--rect of the 'normal' state, regardless of current state
+
+function Window:get_normal_rect()
+	return GetWindowPlacement(self.hwnd).normal_rect
+end
+
+function Window:set_normal_rect(...) --x1,y1,x2,y2 or rect
+	local wpl = GetWindowPlacement(self.hwnd)
+	wpl.normal_rect = RECT(...)
+	SetWindowPlacement(self.hwnd, wpl)
 end
 
 --menus
@@ -276,6 +273,18 @@ function Window:WM_MENUCOMMAND(menu, i)
 	if menu.WM_MENUCOMMAND then menu:WM_MENUCOMMAND(i) end
 end
 
+--rendering
+
+function Window:WM_CTLCOLORSTATIC(wParam, lParam)
+	 --TODO: fix group box
+	 do return end
+	 local hBackground = CreateSolidBrush(RGB(0, 0, 0))
+	 local hdc = ffi.cast('HDC', wParam)
+    SetBkMode(hdc, OPAQUE)
+    SetTextColor(hdc, RGB(100, 100, 0))
+	 return tonumber(hBackground)
+end
+
 --accelerators
 
 function Window:WM_COMMAND(kind, id, ...)
@@ -285,52 +294,63 @@ function Window:WM_COMMAND(kind, id, ...)
 	Window.__index.WM_COMMAND(self, kind, id, ...)
 end
 
---events
+--events: on_activate() and on_deactivate() events from WM_ACTIVATE
 
 function Window:WM_ACTIVATE(flag, minimized, other_hwnd)
 	if flag == 'active' or flag == 'clickactive' then
-		if self.on_activate then self:on_activate(Windows:find(other_hwnd)) end
+		if self.on_activate then
+			self:on_activate(Windows:find(other_hwnd))
+		end
 	elseif flag == 'inactive' then
-		if self.on_deactivate then self:on_deactivate(Windows:find(other_hwnd)) end
+		if self.on_deactivate then
+			self:on_deactivate(Windows:find(other_hwnd))
+		end
 	end
 end
 
 --showcase
 
 if not ... then
-require'winapi.messageloop'
 require'winapi.icon'
 require'winapi.font'
 
 local c = Window{title = 'Main',
-	--border = false, dialog_frame = false, titlebar = false,
-	help_button = true, maximize_button = false, minimize_button = false,
+	border = true, frame = true, window_edge = true, sizeable = true, control_parent = true,
+	help_button = true, maximize_button = false, minimize_button = false, state = 'maximized',
 	autoquit = true, w = 500, h = 300, visible = false}
 c:show()
 
---c:restore()
---c:maximize()
 c.cursor = LoadCursor(IDC_HAND)
 c.icon = LoadIconFromInstance(IDI_INFORMATION)
---[[
-print(c.visible, c.state)
+
+print('shown     ', c.visible, c.state)
 c:maximize()
-print(c.visible, c.state)
+print('maximized ', c.visible, c.state)
 c:minimize()
-print(c.visible, c.state)
+print('minimized ', c.visible, c.state)
 c:show()
-print(c.visible, c.state)
+print('shown     ', c.visible, c.state)
 c:restore()
-print(c.visible, c.state)
-]]
+print('restored  ', c.visible, c.state)
+c:shownormal()
+print('shownormal', c.visible, c.state)
 
---[[
-c3 = Window{topmost = true, title='Topmost', h=200,w=200}
+local c3 = Window{topmost = true, title='Topmost', h = 300, w = 300, sizeable = false}
 
-local c2 = Window{title = 'Owned by Main', dialog_frame = true, w = 500, h = 300, visible = true, owner = c}
---c2.min_size = {h=100, h=100}
-c2.max_size = {w=300, h=300}
-]]
+local c2 = Window{title = 'Owned by Main', frame = true, w = 500, h = 100, visible = true, owner = c,
+							--taskbar_button = true --force a button on taskbar even when owned
+							}
+c2.min_w=200; c2.min_h=200
+c2.max_w=300; c2.max_h=300
+
+local c4 = Window{x = 400, y = 400, w = 400, h = 200,
+						border = true,
+						frame = false,
+						window_edge = false,
+						double_border = false,
+						sizeable = false,
+						owner = c,
+						}
 
 function c:WM_GETDLGCODE()
 	return 0
@@ -350,6 +370,10 @@ function c:on_lbutton_double_click()
 end
 
 c.__wantallkeys = true
+
+c3:minimize()
+c3:activate()
+c3:minimize()
 
 MessageLoop()
 

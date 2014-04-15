@@ -1,7 +1,6 @@
---proc/window/class: window classes in the winapi sense (see msdn for what a window class means)
+--proc/window/class: window classes (see msdn for what a window class means)
 setfenv(1, require'winapi')
 require'winapi.winuser'
-
 --register/unregister
 
 ffi.cdef[[
@@ -96,6 +95,8 @@ end
 
 function GetClassLong(hwnd, GCL) return GetClassLongW(hwnd, flags(GCL)) end
 
+-- Get/SetClassLong wrappers (don't look them up in the docs)
+
 function GetClassStyle(hwnd) return GetClassLong(hwnd, GCL_STYLE) end
 function SetClassStyle(hwnd, style) SetClassLong(hwnd, GCL_STYLE, flags(style)) end
 
@@ -114,6 +115,7 @@ function SetClassBackground(hwnd, bg) SetClassLong(hwnd, GCL_HBRBACKGROUND, bg) 
 --showcase
 
 if not ... then
+package.loaded['winapi.windowclasses'] = true --prevent double-loading by winapi.window
 require'winapi.color'
 require'winapi.cursor'
 require'winapi.window' --for DefWindowProc

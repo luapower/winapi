@@ -28,12 +28,6 @@ function Control:__init(info)
 	self.__prev_proc = SetWindowLong(self.hwnd, GWL_WNDPROC, MessageRouter.proc)
 end
 
-function Control:get_info() --recreate the info table to serve for duplication of the window
-	return update(Control.__index.get_info(self), {
-		parent = self.parent,
-	})
-end
-
 function Control:__default_proc(WM, wParam, lParam)
 	return CallWindowProc(self.__prev_proc, self.hwnd, WM, wParam, lParam)
 end

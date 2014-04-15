@@ -1,6 +1,5 @@
 local winapi = require'winapi'
 require'winapi.windowclass'
-require'winapi.messageloop'
 require'winapi.amanithvgpanel'
 local gl = require'winapi.gl11'
 local vg = require'amanithvg'

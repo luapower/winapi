@@ -41,7 +41,6 @@ __types__
 [winapi.logfonttype]        LOGFONTW type
 __windows__
 [winapi.window]             common API for windows and standard controls
-[winapi.windowclasses]      window classes in the winapi sense (not to be confused with [winapi.windowclass])
 __standard controls__
 [winapi.comctl]             common controls API
 [winapi.messagebox]         standard message box dialog
@@ -74,10 +73,12 @@ __resources__
 [winapi.imagelist]          image list resources
 __support APIs__
 [winapi.memory]             memory management
+[winapi.mouse]              mouse API
 [winapi.process]            process API
 [winapi.registry]           registry API
 [winapi.sysinfo]            system info API
 [winapi.shellapi]           shell API
+[winapi.systemmetrics]      system metrics API
 [winapi.spi]                system parameters info API
 [winapi.winbase]            winbase.h. incomplete :)
 [winapi.winnt]              don't know the scope of this yet
@@ -87,9 +88,7 @@ __support APIs__
 [winapi.uuid]               UUID API from rpcdce.h
 [winapi.module]             winuser submodule that deals with dlls
 [winapi.keyboard]           keyboard input handling and keyboard layouts
-[winapi.vkcodes]            keyboard virtual codes
-[winapi.wingdi]             windows GDI API
-[winapi.windowmessages]     WM names and decoders
+[winapi.gdi]                windows GDI API
 __opengl__
 [winapi.gl]                 opengl dynamic namespace based on `PFN*PROC` cdefs and wglGetProcAddress
 [winapi.gl11]               opengl 1.1 API
@@ -218,6 +217,7 @@ which showcases the module's functionality. Run the module as a standalone scrip
 [winapi.messagebox]: https://github.com/luapower/winapi/blob/master/winapi/messagebox.lua
 [winapi.messageloop]: https://github.com/luapower/winapi/blob/master/winapi/messageloop.lua
 [winapi.module]: https://github.com/luapower/winapi/blob/master/winapi/module.lua
+[winapi.mouse]: https://github.com/luapower/winapi/blob/master/winapi/mouse.lua
 [winapi.multimon]: https://github.com/luapower/winapi/blob/master/winapi/multimon.lua
 [winapi.namespace]: https://github.com/luapower/winapi/blob/master/winapi/namespace.lua
 [winapi.object]: https://github.com/luapower/winapi/blob/master/winapi/object.lua
@@ -230,6 +230,7 @@ which showcases the module's functionality. Run the module as a standalone scrip
 [winapi.rpc]: https://github.com/luapower/winapi/blob/master/winapi/rpc.lua
 [winapi.shellapi]: https://github.com/luapower/winapi/blob/master/winapi/shellapi.lua
 [winapi.showcase]: https://github.com/luapower/winapi/blob/master/winapi/showcase.lua
+[winapi.systemmetrics]: https://github.com/luapower/winapi/blob/master/winapi/systemmetrics.lua
 [winapi.spi]: https://github.com/luapower/winapi/blob/master/winapi/spi.lua
 [winapi.static]: https://github.com/luapower/winapi/blob/master/winapi/static.lua
 [winapi.struct]: https://github.com/luapower/winapi/blob/master/winapi/struct.lua
@@ -243,7 +244,6 @@ which showcases the module's functionality. Run the module as a standalone scrip
 [winapi.types]: https://github.com/luapower/winapi/blob/master/winapi/types.lua
 [winapi.util]: https://github.com/luapower/winapi/blob/master/winapi/util.lua
 [winapi.uuid]: https://github.com/luapower/winapi/blob/master/winapi/uuid.lua
-[winapi.vkcodes]: https://github.com/luapower/winapi/blob/master/winapi/vkcodes.lua
 [winapi.vobject]: https://github.com/luapower/winapi/blob/master/winapi/vobject.lua
 [winapi.waitemlistclass]: https://github.com/luapower/winapi/blob/master/winapi/waitemlistclass.lua
 [winapi.wcs]: https://github.com/luapower/winapi/blob/master/winapi/wcs.lua
@@ -254,9 +254,7 @@ which showcases the module's functionality. Run the module as a standalone scrip
 [winapi.winbase]: https://github.com/luapower/winapi/blob/master/winapi/winbase.lua
 [winapi.window]: https://github.com/luapower/winapi/blob/master/winapi/window.lua
 [winapi.windowclass]: https://github.com/luapower/winapi/blob/master/winapi/windowclass.lua
-[winapi.windowclasses]: https://github.com/luapower/winapi/blob/master/winapi/windowclasses.lua
-[winapi.windowmessages]: https://github.com/luapower/winapi/blob/master/winapi/windowmessages.lua
-[winapi.wingdi]: https://github.com/luapower/winapi/blob/master/winapi/wingdi.lua
+[winapi.gdi]: https://github.com/luapower/winapi/blob/master/winapi/gdi.lua
 [winapi.winnt]: https://github.com/luapower/winapi/blob/master/winapi/winnt.lua
 [winapi.wintypes]: https://github.com/luapower/winapi/blob/master/winapi/wintypes.lua
 [winapi.winuser]: https://github.com/luapower/winapi/blob/master/winapi/winuser.lua
