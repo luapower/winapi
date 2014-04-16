@@ -487,7 +487,7 @@ end
 
 function BaseWindow:set_rect(...) --x1,y1,x2,y2 or rect
 	local r = RECT(...)
-	self:move(r.x1, r.y1, r.w, r.h)
+	self:move(r.x, r.y, r.w, r.h)
 end
 
 function BaseWindow:get_screen_rect()

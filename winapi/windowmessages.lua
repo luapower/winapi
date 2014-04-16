@@ -254,10 +254,10 @@ end
 ffi.cdef[[
 typedef struct tagMINMAXINFO {
     POINT ptReserved;
-    SIZE  maximized_size;
-	 POINT maximized_pos;
-	 SIZE  min_size;
-	 SIZE  max_size;
+    SIZE  ptMaxSize;
+	 POINT ptMaxPosition;
+	 SIZE  ptMinTrackSize;
+	 SIZE  ptMaxTrackSize;
 } MINMAXINFO, *PMINMAXINFO, *LPMINMAXINFO;
 
 typedef struct tagWINDOWPOS {

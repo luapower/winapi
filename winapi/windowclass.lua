@@ -54,7 +54,7 @@ Window = subclass({
 		clip_siblings = true,
 		--window ex style bits
 		window_edge = true,
-		double_border = true,
+		double_border = false,
 		help_button = false,
 		tool_window = false,
 		transparent = false,
@@ -66,7 +66,7 @@ Window = subclass({
 		background = COLOR_WINDOW,
 		cursor = LoadCursor(IDC_ARROW),
 		--window properties
-		title = 'Untitled',
+		title = '',
 		x = CW_USEDEFAULT,
 		y = CW_USEDEFAULT,
 		w = CW_USEDEFAULT,
@@ -81,7 +81,7 @@ Window = subclass({
 	__wm_handler_names = index{
 		on_close = WM_CLOSE,
 		on_activate_app = WM_ACTIVATEAPP,
-		on_query_open = WM_QUERYOPEN,
+		on_restoring = WM_QUERYOPEN, --return false to prevent restoring from minimize state
 		--system changes
 		on_query_end_session = WM_QUERYENDSESSION,
 		on_end_session = WM_ENDSESSION,
@@ -188,8 +188,8 @@ end
 --maximize size/position constraints
 
 function Window:WM_GETMINMAXINFO(info)
-	if self.maximized_pos then info.maximized_pos = self.maximized_pos end
-	if self.maximized_size then info.maximized_size = self.maximized_size end
+	if self.maximized_pos then info.ptMaxPosition = self.maximized_pos end
+	if self.maximized_size then info.ptMaxSize = self.maximized_size end
 	return 0
 end
 
@@ -207,8 +207,8 @@ local window_state_names = { --GetWindowPlacement distills states to these 3
 }
 
 function Window:get_state()
-	local wpl = GetWindowPlacement(self.hwnd)
-	return window_state_names[wpl.command]
+	local wp = GetWindowPlacement(self.hwnd)
+	return window_state_names[wp.showCmd]
 end
 
 function Window:set_state(state)
@@ -221,39 +221,86 @@ function Window:set_state(state)
 	end
 end
 
-function Window:maximize() --can't maximize without activating (WM_COMMAND SC_MAXIMIZE also activates)
+--maximize and activate (can't maximize without activating; WM_COMMAND SC_MAXIMIZE also activates)
+function Window:maximize()
 	self:show(SW_SHOWMAXIMIZED)
 end
 
+--show in normal state and activate or not
 function Window:shownormal(activate)
 	self:show(activate == false and SW_SHOWNOACTIVATE or SW_SHOWNORMAL)
 end
 
+--show in minimized state and deactivate or not
 function Window:minimize(deactivate)
 	self:show(deactivate == false and SW_SHOWMINIMIZED or SW_MINIMIZE)
 end
 
---restore to last state (either maximized or normal)
-function Window:restore(activate)
-	self:show(activate == false and SW_SHOWNA or SW_RESTORE)
+--restore to last state (minimized -> normal or maximized; maximized -> normal) and activate
+function Window:restore()
+	self:show(SW_RESTORE)
 end
 
-function Window:get_minimized() return IsIconic(self.hwnd) end
-function Window:set_minimized(min) if min then self:minimize() else self:restore() end end
+--special case: show in current state (minimized, normal or maximized) but don't activate
+function Window:show_no_activate()
+	self:show(SW_SHOWNA)
+end
 
-function Window:get_maximized() return IsZoomed(self.hwnd) end
-function Window:set_maximized(max) if max then self:maximize() else self:shownormal() end end
+function Window:get_minimized()
+	return IsIconic(self.hwnd)
+end
+
+--self.minimized = false goes to last state (either maximized or restored)
+function Window:set_minimized(min)
+	if min then
+		self:minimize()
+	elseif self.minimized then
+		self:restore()
+	end
+end
+
+function Window:get_maximized()
+	return IsZoomed(self.hwnd)
+end
+
+--self.maximized = false always goes to normal state, even from minimized state
+--we can't change the restore state while the window is minimized
+function Window:set_maximized(max)
+	if max then
+		self:maximize()
+	else
+		self:shownormal()
+	end
+end
 
 --rect of the 'normal' state, regardless of current state
 
 function Window:get_normal_rect()
-	return GetWindowPlacement(self.hwnd).normal_rect
+	return GetWindowPlacement(self.hwnd).rcNormalPosition
 end
 
 function Window:set_normal_rect(...) --x1,y1,x2,y2 or rect
-	local wpl = GetWindowPlacement(self.hwnd)
-	wpl.normal_rect = RECT(...)
-	SetWindowPlacement(self.hwnd, wpl)
+	local wp = GetWindowPlacement(self.hwnd)
+	wp.rcNormalPosition = RECT(...)
+	SetWindowPlacement(self.hwnd, wp)
+end
+
+--get/set the behavior of the next call to restore() (only works when the window is in minimized state)
+
+function Window:get_restore_to_maximized()
+	local wp = GetWindowPlacement(self.hwnd)
+	if wp.showCmd == SW_SHOWMINIMIZED then
+		return  bit.band(wp.flags, WPF_RESTORETOMAXIMIZED) ~= 0
+	end
+end
+
+function Window:set_restore_to_maximized(yes)
+	local wp = GetWindowPlacement(self.hwnd)
+	if wp.showCmd ~= SW_SHOWMINIMIZED then return end
+	wp.flags = yes and
+		bit.bor(wp.flags, WPF_RESTORETOMAXIMIZED) or
+		bit.band(wp.flags, bit.bnot(WPF_RESTORETOMAXIMIZED))
+	SetWindowPlacement(self.hwnd, wp)
 end
 
 --menus

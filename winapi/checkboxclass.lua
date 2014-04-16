@@ -61,4 +61,3 @@ function cb3:on_double_click() print 'b3 dbl-clicked' end
 MessageLoop()
 end
 
-

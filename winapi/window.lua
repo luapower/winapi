@@ -115,18 +115,18 @@ ffi.cdef[[
 BOOL ShowWindow(HWND hWnd, int nCmdShow);
 ]]
 
-SW_HIDE              =  0
-SW_SHOWNORMAL        =  1 --revert to normal state and activate
-SW_SHOWMINIMIZED     =  2 --minimize but do not deactivate
-SW_SHOWMAXIMIZED     =  3 --maximize and activate
-SW_SHOWNOACTIVATE    =  4 --show in normal state but do not activate
-SW_SHOW              =  5 --show in current state and activate
-SW_MINIMIZE          =  6 --minimize and deactivate; same as SW_SHOWMINNOACTIVE
-SW_SHOWMINNOACTIVE   =  7 --minimize and deactivate; same as SW_MINIMIZE
-SW_SHOWNA            =  8 --show in current state but do not activate
-SW_RESTORE           =  9 --restore to last state (normal or maximized) and activate
-SW_SHOWDEFAULT       = 10 --show per STARTUPINFO
-SW_FORCEMINIMIZE     = 11 --minimize from a different thread
+SW_HIDE             =  0 --hide and remember the show state
+SW_SHOWNORMAL       =  1 --revert to normal state and activate (do nothing if already in normal state)
+SW_SHOWMINIMIZED    =  2 --minimize but do not deactivate (do nothing if already minimized)
+SW_SHOWMAXIMIZED    =  3 --maximize and activate (do nothing if already maximized)
+SW_SHOWNOACTIVATE   =  4 --revert to normal state but do not activate (do nothing if alread in normal state)
+SW_SHOW             =  5 --show in current state and activate (activate even if minimized; do nothing if already visible)
+SW_MINIMIZE         =  6 --minimize and deactivate (do nothing if already minimized); same as SW_SHOWMINNOACTIVE
+SW_SHOWMINNOACTIVE  =  7 --minimize and deactivate; same as SW_MINIMIZE
+SW_SHOWNA           =  8 --show in current state but do not activate
+SW_RESTORE          =  9 --restore to last state (minimized -> normal or maximized; maximized -> normal) and activate
+SW_SHOWDEFAULT      = 10 --show per STARTUPINFO
+SW_FORCEMINIMIZE    = 11 --minimize from a different thread
 
 function ShowWindow(hwnd, SW)
 	return C.ShowWindow(hwnd, flags(SW)) ~= 0
@@ -337,14 +337,18 @@ function EnumChildWindows(hwnd)
 	return t
 end
 
+WPF_ASYNCWINDOWPLACEMENT = 0x0004
+WPF_RESTORETOMAXIMIZED   = 0x0002
+WPF_SETMINPOSITION       = 0x0001
+
 ffi.cdef[[
 typedef struct tagWINDOWPLACEMENT {
     UINT  length;
     UINT  _flags;
-    UINT  command;
-    POINT minimized_pos;
-    POINT maximized_pos;
-    RECT  normal_rect;
+    UINT  showCmd;
+    POINT ptMinPosition;
+    POINT ptMaxPosition;
+    RECT  rcNormalPosition;
 } WINDOWPLACEMENT;
 typedef WINDOWPLACEMENT *PWINDOWPLACEMENT, *LPWINDOWPLACEMENT;
 
@@ -360,7 +364,7 @@ BOOL SetWindowPlacement(
 WINDOWPLACEMENT = struct{
 	ctype = 'WINDOWPLACEMENT', size = 'length',
 	fields = sfields{
-		'flags', '_flags', flags, pass,
+		'flags', '_flags', flags, pass, --WPF_*
 	},
 }
 
