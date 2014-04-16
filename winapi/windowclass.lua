@@ -236,7 +236,9 @@ function Window:minimize(deactivate)
 	self:show(deactivate == false and SW_SHOWMINIMIZED or SW_MINIMIZE)
 end
 
---restore to last state (minimized -> normal or maximized; maximized -> normal) and activate
+--restore to last state and activate:
+-- 1) if minimized, go to normal or maximized state, based on the value of self.restore_to_maximized
+-- 2) if maximized, go to normal state
 function Window:restore()
 	self:show(SW_RESTORE)
 end
@@ -250,7 +252,7 @@ function Window:get_minimized()
 	return IsIconic(self.hwnd)
 end
 
---self.minimized = false goes to last state (either maximized or restored)
+--self.minimized = false goes to last state (either maximized or restored, per self.restore_to_maximized)
 function Window:set_minimized(min)
 	if min then
 		self:minimize()
@@ -263,11 +265,12 @@ function Window:get_maximized()
 	return IsZoomed(self.hwnd)
 end
 
---self.maximized = false always goes to normal state, even from minimized state
---we can't change the restore state while the window is minimized
+--self.maximized = false goes to normal state if maximized, or changes the restore_to_maximized flag if minimized.
 function Window:set_maximized(max)
 	if max then
 		self:maximize()
+	elseif self.minimized then
+		self.restore_to_maximized = false
 	else
 		self:shownormal()
 	end
