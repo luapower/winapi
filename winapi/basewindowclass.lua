@@ -39,6 +39,7 @@ Windows = Windows'hwnd' --singleton
 --by assigning your window's WNDPROC to MessageRouter.proc (either via SetWindowLong(GWL_WNDPROC) or
 --via RegisterClass(), and adding your window object to the window tracker via Windows:add(window),
 --your window's __handle_message() method will be called for each message destined to your window.
+--This way only one ffi callback object is wasted for all windows.
 
 MessageRouter = class(Object)
 
@@ -99,11 +100,14 @@ function MessageLoop(after_process) --you can do os.exit(MessageLoop())
 	return msg.signed_wParam --WM_QUIT returns 0 and an int exit code in wParam
 end
 
-function ProcessMessages()
+function ProcessMessages(after_process)
 	while true do
 		local ok, msg = PeekMessage(nil, 0, 0, PM_REMOVE)
 		if not ok then return end
 		ProcessMessage(msg)
+		if after_process then
+			after_process(msg)
+		end
 	end
 end
 
@@ -428,12 +432,16 @@ end
 
 --restrict size by min/max constraints and resize children
 function BaseWindow:WM_WINDOWPOSCHANGING(wp)
-	if bit.band(wp.flags, SWP_NOSIZE) == SWP_NOSIZE then return end
-	self:__adjust_wh(wp)
-	for child in self:children() do
-		child:__parent_resizing(wp) --children can resize the parent by modifying wp
+	if bit.band(wp.flags, SWP_NOSIZE) ~= SWP_NOSIZE then
+		self:__adjust_wh(wp)
+		for child in self:children() do
+			child:__parent_resizing(wp) --children can resize the parent by modifying wp
+		end
+		if self.on_pos_changing then
+			self:on_pos_changing(wp)
+		end
+		return 0
 	end
-	return 0
 end
 
 function BaseWindow:__force_resize() --force move + resize events
@@ -522,6 +530,7 @@ function BaseWindow:__handle_message(WM, wParam, lParam)
 		if ret ~= nil then return ret end
 	end
 	--look for a hi-level handler self:on_*()
+	--print(WM_NAMES[WM], self.__wm_handler_names[WM])
 	handler = self[self.__wm_handler_names[WM]]
 	if handler then
 		local ret = handler(self, DecodeMessage(WM, wParam, lParam))

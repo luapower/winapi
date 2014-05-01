@@ -27,7 +27,7 @@ Window = subclass({
 	},
 	__style_ex_bitmask = bitmask{
 		window_edge = WS_EX_WINDOWEDGE,  --needs to be the same as WS_DLGFRAME
-		double_border = WS_EX_DLGMODALFRAME,
+		dialog_frame = WS_EX_DLGMODALFRAME, --double border and no system menu icon!
 		help_button = WS_EX_CONTEXTHELP, --only shown if both minimize and maximize buttons are hidden
 		tool_window = WS_EX_TOOLWINDOW,
 		transparent = WS_EX_TRANSPARENT, --not really, better use layered and UpdateLayeredWindow()
@@ -54,7 +54,7 @@ Window = subclass({
 		clip_siblings = true,
 		--window ex style bits
 		window_edge = true,
-		double_border = false,
+		dialog_frame = false,
 		help_button = false,
 		tool_window = false,
 		transparent = false,
@@ -80,7 +80,6 @@ Window = subclass({
 	},
 	__wm_handler_names = index{
 		on_close = WM_CLOSE,
-		on_activate_app = WM_ACTIVATEAPP,
 		on_restoring = WM_QUERYOPEN, --return false to prevent restoring from minimize state
 		--system changes
 		on_query_end_session = WM_QUERYENDSESSION,
@@ -172,8 +171,12 @@ Window.set_title = BaseWindow.set_text
 function Window:get_active() return GetActiveWindow() == self.hwnd end
 function Window:activate() SetActiveWindow(self.hwnd) end
 
-function Window:get_owner() --note there's no set_owner: owner can't be changed
-	return Windows:find(GetOwner(self.hwnd))
+function Window:get_owner()
+	return Windows:find(GetWindowOwner(self.hwnd))
+end
+
+function Window:set_owner(owner)
+	SetWindowOwner(self.hwnd, owner and owner.hwnd)
 end
 
 function Window:get_topmost()
@@ -344,7 +347,7 @@ function Window:WM_COMMAND(kind, id, ...)
 	Window.__index.WM_COMMAND(self, kind, id, ...)
 end
 
---events: on_activate() and on_deactivate() events from WM_ACTIVATE
+--events: on_activate*() and on_deactivate*() events from WM_ACTIVATE and WM_ACTIVATEAPP
 
 function Window:WM_ACTIVATE(flag, minimized, other_hwnd)
 	if flag == 'active' or flag == 'clickactive' then
@@ -354,6 +357,18 @@ function Window:WM_ACTIVATE(flag, minimized, other_hwnd)
 	elseif flag == 'inactive' then
 		if self.on_deactivate then
 			self:on_deactivate(Windows:find(other_hwnd))
+		end
+	end
+end
+
+function Window:WM_ACTIVATEAPP(flag, other_thread_id)
+	if flag == 'active' then
+		if self.on_activate_app then
+			self:on_activate_app(other_thread_id)
+		end
+	elseif flag == 'inactive' then
+		if self.on_deactivate_app then
+			self:on_deactivate_app(other_thread_id)
 		end
 	end
 end
@@ -397,7 +412,7 @@ local c4 = Window{x = 400, y = 400, w = 400, h = 200,
 						border = true,
 						frame = false,
 						window_edge = false,
-						double_border = false,
+						--dialog_frame = false,
 						sizeable = false,
 						owner = c,
 						}

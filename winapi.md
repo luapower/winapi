@@ -102,7 +102,6 @@ __oo system__
 __oo core classes__
 [winapi.handlelist]         track objects by their corresponding 32bit pointer handle
 [winapi.imagelistclass]     image list class
-[winapi.messageloop]        thread's message loop
 __oo windows__
 [winapi.basewindowclass]    base class for both overlapping windows and controls
 [winapi.windowclass]        overlapping (aka top-level) windows
@@ -141,7 +140,6 @@ I have no plans to continue working on that though.
 ~~~{.lua}
 winapi = require'winapi'
 require'winapi.windowclass'
-require'winapi.messageloop'
 
 local main = winapi.Window{
    title = 'Demo',
@@ -215,7 +213,6 @@ which showcases the module's functionality. Run the module as a standalone scrip
 [winapi.menu]: https://github.com/luapower/winapi/blob/master/winapi/menu.lua
 [winapi.menuclass]: https://github.com/luapower/winapi/blob/master/winapi/menuclass.lua
 [winapi.messagebox]: https://github.com/luapower/winapi/blob/master/winapi/messagebox.lua
-[winapi.messageloop]: https://github.com/luapower/winapi/blob/master/winapi/messageloop.lua
 [winapi.module]: https://github.com/luapower/winapi/blob/master/winapi/module.lua
 [winapi.mouse]: https://github.com/luapower/winapi/blob/master/winapi/mouse.lua
 [winapi.multimon]: https://github.com/luapower/winapi/blob/master/winapi/multimon.lua

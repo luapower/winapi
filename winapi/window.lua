@@ -2,7 +2,6 @@
 setfenv(1, require'winapi')
 require'winapi.winuser'
 require'winapi.windowclasses'
-require'winapi.windowmessages'
 require'winapi.gdi'
 
 --creation
@@ -94,7 +93,7 @@ function CreateWindow(info)
 	local hwnd = checkh(C.CreateWindowExW(
 								flags(info.style_ex),
 								ffi.cast('LPCWSTR', class),
-								text,
+								wcs(info.text),
 								flags(info.style),
 								info.x, info.y, info.w, info.h,
 								info.parent,
@@ -178,16 +177,17 @@ SWP_NOMOVE           = 0x0002
 SWP_NOZORDER         = 0x0004
 SWP_NOREDRAW         = 0x0008
 SWP_NOACTIVATE       = 0x0010
-SWP_FRAMECHANGED     = 0x0020  --The frame changed: send WM_NCCALCSIZE
+SWP_FRAMECHANGED     = 0x0020  --the frame changed: send WM_NCCALCSIZE
 SWP_SHOWWINDOW       = 0x0040
 SWP_HIDEWINDOW       = 0x0080
 SWP_NOCOPYBITS       = 0x0100
-SWP_NOOWNERZORDER    = 0x0200  --Don't do owner Z ordering
-SWP_NOSENDCHANGING   = 0x0400  --Don't send WM_WINDOWPOSCHANGING
+SWP_NOOWNERZORDER    = 0x0200  --don't do owner Z ordering
+SWP_NOSENDCHANGING   = 0x0400  --don't send WM_WINDOWPOSCHANGING
 SWP_DRAWFRAME        = SWP_FRAMECHANGED
 SWP_NOREPOSITION     = SWP_NOOWNERZORDER
 SWP_DEFERERASE       = 0x2000
 SWP_ASYNCWINDOWPOS   = 0x4000
+SWP_STATECHANGED     = 0x8000  --undocumented
 SWP_FRAMECHANGED_ONLY = bit.bor(SWP_NOZORDER, SWP_NOOWNERZORDER, SWP_NOACTIVATE,
 											SWP_NOSIZE, SWP_NOMOVE, SWP_FRAMECHANGED)
 SWP_ZORDER_CHANGED_ONLY = bit.bor(SWP_NOMOVE, SWP_NOSIZE, SWP_NOACTIVATE)
@@ -401,7 +401,7 @@ CallWindowProc = C.CallWindowProcW
 
 GWL_WNDPROC        = -4
 GWL_HINSTANCE      = -6
-GWL_HWNDPARENT     = -8
+GWL_HWNDPARENT     = -8 --this gets/sets the owner, not the parent!
 GWL_STYLE          = -16
 GWL_EXSTYLE        = -20
 GWL_USERDATA       = -21
@@ -444,6 +444,9 @@ function SetWindowInstance(hwnd, hinst) SetWindowLong(hwnd, GWL_HINSTANCE, hinst
 
 function IsRestored(hwnd) return bit.band(GetWindowStyle(hwnd), WS_MINIMIZE + WS_MAXIMIZE) == 0 end
 function IsVisible(hwnd) return bit.band(GetWindowStyle(hwnd), WS_VISIBLE) == WS_VISIBLE end
+
+function GetWindowOwner(hwnd) return ffi.cast('HWND', GetWindowLong(hwnd, GWL_HWNDPARENT)) end --GetOwner() is another way
+function SetWindowOwner(hwnd, owner_hwnd) SetWindowLong(hwnd, GWL_HWNDPARENT, owner_hwnd) end
 
 --window geometry
 
@@ -530,6 +533,29 @@ function UpdateLayeredWindow(hwnd, dst_hdc, dst_ppt, psize, src_hdc, src_ppt, ke
 	checknz(C.UpdateLayeredWindow(hwnd, dst_hdc, dst_ppt, psize, src_hdc, src_ppt, key, pblend, flags(dwflags)))
 end
 
+-- timers
+
+ffi.cdef[[
+typedef void (* TIMERPROC)(HWND, UINT, UINT_PTR, DWORD);
+UINT_PTR SetTimer(
+     HWND hWnd,
+     UINT_PTR nIDEvent,
+     UINT uElapse,
+     TIMERPROC lpTimerFunc);
+
+BOOL KillTimer(
+     HWND hWnd,
+     UINT_PTR uIDEvent);
+]]
+
+function SetTimer(hwnd, id, timeout, callback)
+	return checknz(C.SetTimer(hwnd, id, timeout, callback))
+end
+
+function KillTimer(hwnd, id)
+	checknz(C.KillTimer(hwnd, id))
+end
+
 -- messages
 
 ffi.cdef[[
@@ -584,17 +610,6 @@ BOOL PostMessageW(
      UINT Msg,
      WPARAM wParam,
      LPARAM lParam);
-
-typedef void (* TIMERPROC)(HWND, UINT, UINT_PTR, DWORD);
-UINT_PTR SetTimer(
-     HWND hWnd,
-     UINT_PTR nIDEvent,
-     UINT uElapse,
-     TIMERPROC lpTimerFunc);
-
-BOOL KillTimer(
-     HWND hWnd,
-     UINT_PTR uIDEvent);
 ]]
 
 function GetMessage(hwnd, WMmin, WMmax, msg)
@@ -692,14 +707,6 @@ function PeekMessage(hwnd, WMmin, WMmax, PM, msg)
 	return C.PeekMessageW(msg, hwnd, flags(WMmin), flags(WMmax), flags(PM)) ~= 0, msg
 end
 
-function SetTimer(hwnd, id, timeout, callback)
-	return checknz(C.SetTimer(hwnd, id, timeout, callback))
-end
-
-function KillTimer(hwnd, id)
-	checknz(C.KillTimer(hwnd, id))
-end
-
 --message-based commands
 
 function SetWindowFont(hwnd, font)
@@ -730,3 +737,6 @@ function ChangeUIState(hwnd, UIS, UISF)
 	SNDMSG(hwnd, WM_CHANGEUISTATE, MAKEWPARAM(flags(UIS), flags(UISF)))
 end
 
+--window messages
+
+require'winapi.windowmessages'

@@ -20,7 +20,7 @@ WM_PENWINLAST                    = 0x038F
 WM_APP                           = 0x8000
 WM_USER                          = 0x0400
 
-WM_NAMES = constants{ --mark but keep obsolete messages so you don't see unknown messages when debugging
+WM_NAMES = constants{ --mark obsolete messages but keep them so that you don't see unknown messages when debugging
 	WM_NULL                          = 0x0000,
 	WM_CREATE                        = 0x0001,
 	WM_DESTROY                       = 0x0002,
@@ -151,7 +151,7 @@ WM_NAMES = constants{ --mark but keep obsolete messages so you don't see unknown
 	WM_CTLCOLORDLG                   = 0x0136,
 	WM_CTLCOLORSCROLLBAR             = 0x0137,
 	WM_CTLCOLORSTATIC                = 0x0138,
-	MN_GETHMENU                      = 0x01E1,
+	MN_GETHMENU                      = 0x01E1, --MN_ not a typo
 	WM_MOUSEMOVE                     = 0x0200,
 	WM_LBUTTONDOWN                   = 0x0201,
 	WM_LBUTTONUP                     = 0x0202,
@@ -249,6 +249,10 @@ function WM.WM_ACTIVATE(wParam, lParam)
 	return activate_flags[WA], minimized ~= 0, ptr(ffi.cast('HWND', lParam)) --flag, minimized, other_window
 end
 
+function WM.WM_ACTIVATEAPP(wParam, lParam)
+	return activate_flags[wParam], lParam --flag, other_thread_id
+end
+
 -- window sizing
 
 ffi.cdef[[
@@ -270,6 +274,31 @@ typedef struct tagWINDOWPOS {
     UINT    flags;
 } WINDOWPOS, *LPWINDOWPOS, *PWINDOWPOS;
 ]]
+
+do
+	local wp_fields = {}
+	for k,v in pairs(_M) do
+		if k:match'^SWP_' then
+			wp_fields[k] = v
+		end
+	end
+	local wp_flags = bitmask(wp_fields)
+	local function wp_flags_get(flags)
+		local t = {}
+		wp_flags:get(flags, t)
+		return t
+	end
+	local function wp_flags_set(flags, value)
+		wp_flags:set(flags, t)
+	end
+
+	WINDOWPOS = struct{
+		ctype = 'WINDOWPOS',
+		fields = sfields{
+			'flagbits', 'flags', wp_flags_set, wp_flags_get, --SWP_*
+		}
+	}
+end
 
 function WM.WM_GETMINMAXINFO(wParam, lParam)
 	return ffi.cast('MINMAXINFO*', lParam)
@@ -299,6 +328,11 @@ end
 
 function WM.WM_MOVE(wParam, lParam) --x, y
 	return splitlong(lParam)
+end
+
+function WM.WM_DISPLAYCHANGE(wParam, lParam) --w, h, bpp
+	local w, h = splitlong(lParam)
+	return w, h, bpp
 end
 
 -- controls/wm_*command
