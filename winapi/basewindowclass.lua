@@ -251,8 +251,8 @@ function BaseWindow:__check_bitmask(name, mask, wanted, actual)
 	if wanted == actual then return end
 	local pp = require'pp'
 	error(string.format('inconsistent %s bits\nwanted: 0x%08x %s\nactual: 0x%08x %s', name,
-		wanted, pp.pformat(mask:get(wanted), '   '),
-		actual, pp.pformat(mask:get(actual), '   ')))
+		wanted, pp.format(mask:get(wanted), '   '),
+		actual, pp.format(mask:get(actual), '   ')))
 end
 
 function BaseWindow:__check_style(wanted)
