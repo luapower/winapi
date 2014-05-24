@@ -135,10 +135,6 @@ function Window:__before_create(info, args)
 	self.__winclass_style = class_args.style --for checking
 end
 
-function BaseWindow:__check_class_style(wanted)
-	self:__check_bitmask('class style', self.__class_style_bitmask, wanted, GetClassStyle(self.hwnd))
-end
-
 function Window:__init(info)
 	Window.__index.__init(self, info)
 
@@ -288,6 +284,7 @@ end
 function Window:set_normal_rect(...) --x1,y1,x2,y2 or rect
 	local wp = GetWindowPlacement(self.hwnd)
 	wp.rcNormalPosition = RECT(...)
+	if not self.visible then wp.showCmd = SW_HIDE end --it can be SW_SHOWNORMAL and we don't want that
 	SetWindowPlacement(self.hwnd, wp)
 end
 
@@ -296,7 +293,7 @@ end
 function Window:get_restore_to_maximized()
 	local wp = GetWindowPlacement(self.hwnd)
 	if wp.showCmd == SW_SHOWMINIMIZED then
-		return  bit.band(wp.flags, WPF_RESTORETOMAXIMIZED) ~= 0
+		return bit.band(wp.flags, WPF_RESTORETOMAXIMIZED) ~= 0
 	end
 end
 

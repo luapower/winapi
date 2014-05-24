@@ -255,6 +255,10 @@ function BaseWindow:__check_bitmask(name, mask, wanted, actual)
 		actual, pp.format(mask:get(actual), '   ')))
 end
 
+function BaseWindow:__check_class_style(wanted)
+	self:__check_bitmask('class style', self.__class_style_bitmask, wanted, GetClassStyle(self.hwnd))
+end
+
 function BaseWindow:__check_style(wanted)
 	self:__check_bitmask('style', self.__style_bitmask, wanted, GetWindowStyle(self.hwnd))
 end
@@ -305,7 +309,7 @@ function BaseWindow:__init(info)
 		SetWindowPos(self.hwnd, nil, 0, 0, 0, 0, SWP_FRAMECHANGED_ONLY) --events are not yet routed
 	end
 
-	--make sure the style obits are consistent (windows will switch the inconsistent ones)
+	--make sure the style bits are consistent (windows will switch the inconsistent ones)
 	self:__check_style(args.style)
 	self:__check_style_ex(args.style_ex)
 
@@ -323,7 +327,7 @@ function BaseWindow:__init(info)
 	--register the window so we can find it by hwnd and route messages back to it via MessageRouter
 	Windows:add(self)
 
-	--show the window
+	--show the window (it is created without WS_VISIBLE to allow us to set up event routing first)
 	if info.visible and not self.visible then
 		self.visible = true
 	end
@@ -412,7 +416,7 @@ function BaseWindow:get_visible()
 end
 
 function BaseWindow:set_visible(visible)
-	if visible then self:show(SW_SHOW) else self:hide() end
+	if visible then self:show() else self:hide() end
 end
 
 --size constraints & parent resizing event
