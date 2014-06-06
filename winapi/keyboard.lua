@@ -13,7 +13,7 @@ VK_XBUTTON2       = 0x06    -- NOT contiguous with L & RBUTTON
 VK_BACK           = 0x08
 VK_TAB            = 0x09
 
-VK_CLEAR          = 0x0C
+VK_CLEAR          = 0x0C    -- Numpad 5 with NumLock off
 VK_RETURN         = 0x0D
 
 VK_SHIFT          = 0x10
@@ -56,9 +56,9 @@ VK_HELP           = 0x2F
 --VK_0 - VK_9 are the same as ASCII '0' - '9' (0x30 - 0x39)
 --VK_A - VK_Z are the same as ASCII 'A' - 'Z' (0x41 - 0x5A)
 
-VK_LWIN           = 0x5B
+VK_LWIN           = 0x5B --"left windows key" is actually 0xff on my keyboard
 VK_RWIN           = 0x5C
-VK_APPS           = 0x5D --context menu key
+VK_APPS           = 0x5D --"context menu" key
 
 VK_SLEEP          = 0x5F
 
@@ -286,5 +286,14 @@ end
 
 function GetAsyncKeyState(vk) --down
 	return bit.band(C.GetAsyncKeyState(flags(vk)), 0x8000) ~= 0
+end
+
+MAPVK_VK_TO_VSC    = 0
+MAPVK_VSC_TO_VK    = 1
+MAPVK_VK_TO_CHAR   = 2
+MAPVK_VSC_TO_VK_EX = 3
+
+function MapVirtualKey(code, maptype)
+	return C.MapVirtualKeyW(code, flags(maptype))
 end
 

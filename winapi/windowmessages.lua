@@ -609,13 +609,13 @@ end
 --keyboard input
 
 local key_bitmask = bitmask{
-	extended_key = 2^24,
+	extended_key = 2^24, --distinguish between numpad keys and the rest
 	context_code = 2^29, --0 for WM_KEYDOWN
 	prev_key_state = 2^30,
 	transition_state = 2^31, --0 for WM_KEYDOWN
 }
 
-local function get_bitrange(from,b1,b2)
+local function get_bitrange(from, b1, b2)
 	return bit.band(bit.rshift(from, b1), 2^(b2-b1+1)-1)
 end
 
