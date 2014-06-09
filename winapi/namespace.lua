@@ -14,4 +14,10 @@ function import(globals)
 	return globals
 end
 
+--WM is a namespace for registering window message decoders
+WM = {} --{WM_name = function(wParam, lParam) return decoded values ... end}
+
+--NM is a namespace for registering WM_NOTIFY message decoders
+NM = {} --{NM_name = function(hdr, wParam) return decoded values ... end}
+
 return _M

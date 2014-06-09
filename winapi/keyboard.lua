@@ -297,3 +297,40 @@ function MapVirtualKey(code, maptype)
 	return C.MapVirtualKeyW(code, flags(maptype))
 end
 
+--messages
+
+local key_bitmask = bitmask{
+	extended_key = 2^24, --distinguish between numpad keys and the rest
+	context_code = 2^29, --0 for WM_KEYDOWN
+	prev_key_state = 2^30,
+	transition_state = 2^31, --0 for WM_KEYDOWN
+}
+
+local function get_bitrange(from, b1, b2)
+	return bit.band(bit.rshift(from, b1), 2^(b2-b1+1)-1)
+end
+
+local function key_flags(lParam)
+	local t = key_bitmask:get(lParam)
+	t.repeat_count = get_bitrange(lParam, 0, 15) --always 1
+	t.scan_code = get_bitrange(lParam, 16, 23)
+	return t
+end
+
+function WM.WM_KEYDOWN(wParam, lParam)
+	return wParam, key_flags(lParam) --VK_*, flags
+end
+
+WM.WM_KEYUP = WM.WM_KEYDOWN
+WM.WM_SYSKEYDOWN = WM.WM_KEYDOWN
+WM.WM_SYSKEYUP = WM.WM_KEYDOWN
+
+function WM.WM_CHAR(wParam, lParam)
+	return mbs(ffi.new('WCHAR[?]', 2, wParam, 0)), key_flags(lParam)
+end
+
+WM.WM_UNICHAR = WM.WM_CHAR --TODO: support characters outside the BMP
+WM.WM_SYSCHAR = WM.WM_CHAR
+WM.WM_DEADCHAR = WM.WM_CHAR
+WM.WM_SYSDEADCHAR = WM.WM_CHAR
+

@@ -386,12 +386,12 @@ typedef struct tagNMLISTVIEW
 } NMLISTVIEW, *LPNMLISTVIEW;
 ]]
 
-function WM_NOTIFY_DECODERS.LVN_ITEMCHANGING(hdr) --return item, subitem, new_LVIS, old_LVIS, changed_LVIF
+function NM.LVN_ITEMCHANGING(hdr) --return item, subitem, new_LVIS, old_LVIS, changed_LVIF
 	local t = ffi.cast('NMLISTVIEW*', hdr)
 	return countfrom1(t.iItem), t.iSubItem, t.uNewState, t.uOldState, t.uChanged
 end
 
-WM_NOTIFY_DECODERS.LVN_ITEMCHANGED = WM_NOTIFY_DECODERS.LVN_ITEMCHANGING
+NM.LVN_ITEMCHANGED = NM.LVN_ITEMCHANGING
 
 ffi.cdef[[
 typedef struct tagNMLVODSTATECHANGE
@@ -404,7 +404,7 @@ typedef struct tagNMLVODSTATECHANGE
 } NMLVODSTATECHANGE, *LPNMLVODSTATECHANGE;
 ]]
 
-function WM_NOTIFY_DECODERS.LVN_ODSTATECHANGED(hdr)
+function NM.LVN_ODSTATECHANGED(hdr)
 	return ffi.cast('NMLVODSTATECHANGE*', hdr)
 end
 

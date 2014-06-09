@@ -4,6 +4,7 @@ require'winapi.vobject'
 require'winapi.handlelist'
 require'winapi.window'
 require'winapi.gdi'
+require'winapi.keyboard'
 require'winapi.mouse'
 require'winapi.monitor'
 
@@ -173,6 +174,8 @@ BaseWindow = {
 		on_dead_syskey_down_char = WM_SYSDEADCHAR,
 		--system events
 		on_timer = WM_TIMER,
+		--raw input
+		on_input = WM_INPUT,
 	},
 	__wm_command_handler_names = {}, --subclasses add WM_COMMAND commands that are relevant to them
 	__wm_notify_handler_names = {}, --subclasses add WM_NOTIFY codes that are relevant to them
