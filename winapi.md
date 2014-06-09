@@ -72,8 +72,10 @@ __resources__
 [winapi.color]              standard color brushes
 [winapi.imagelist]          image list resources
 __support APIs__
-[winapi.memory]             memory management
 [winapi.mouse]              mouse API
+[winapi.keyboard]           keyboard input handling and keyboard layouts
+[winapi.rawinput]           raw input handling
+[winapi.memory]             memory management
 [winapi.process]            process API
 [winapi.registry]           registry API
 [winapi.sysinfo]            system info API
@@ -87,7 +89,6 @@ __support APIs__
 [winapi.rpc]                RPC runtime and types
 [winapi.uuid]               UUID API from rpcdce.h
 [winapi.module]             winuser submodule that deals with dlls
-[winapi.keyboard]           keyboard input handling and keyboard layouts
 [winapi.gdi]                windows GDI API
 __opengl__
 [winapi.gl]                 opengl dynamic namespace based on `PFN*PROC` cdefs and wglGetProcAddress
