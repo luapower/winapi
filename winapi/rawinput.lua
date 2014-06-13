@@ -138,9 +138,6 @@ LRESULT DefRawInputProc(
      UINT cbSizeHeader);
 ]]
 
-RIM_INPUT     = 0
-RIM_INPUTSINK = 1
-
 --type of raw input
 RIM_TYPEMOUSE       = 0
 RIM_TYPEKEYBOARD    = 1
@@ -222,18 +219,49 @@ function RIDEV_EXMODE(mode)
 	return bit.band(mode, RIDEV_EXMODEMASK)
 end
 
--- flags for the WM_INPUT_DEVICE_CHANGE message
-GIDC_ARRIVAL             = 1
-GIDC_REMOVAL             = 2
-
 --GET_DEVICE_CHANGE_WPARAM(wParam)  (LOWORD(wParam)) --Vista+
 --GET_DEVICE_CHANGE_LPARAM(lParam)  (LOWORD(lParam)) --XP
 
-GetRawInputData              = C.GetRawInputData
+function GetRawInputData(...)
+	return checkpoz(C.GetRawInputData(...))
+end
+
 GetRawInputDeviceInfo        = C.GetRawInputDeviceInfoW
 GetRawInputBuffer            = C.GetRawInputBuffer
-RegisterRawInputDevices      = C.RegisterRawInputDevices
+
+function RegisterRawInputDevices(...)
+	return checknz(C.RegisterRawInputDevices(...))
+end
+
 GetRegisteredRawInputDevices = C.GetRegisteredRawInputDevices
 GetRawInputDeviceList        = C.GetRawInputDeviceList
 DefRawInputProc              = C.DefRawInputProc
+
+--input message
+
+local hsz = ffi.sizeof'RAWINPUTHEADER'
+local sz  = ffi.new'UINT[1]'
+local buf, pbuf
+local bufsz = 0
+
+function WM.WM_INPUT(wParam, lParam) --NOTE: must not return a value, so that DefWindowProc can be called.
+	local hraw = ffi.cast('HRAWINPUT', lParam)
+	GetRawInputData(hraw, RID_INPUT, nil, sz, hsz) --get sz
+	if sz[0] > bufsz then --grow the buffer
+		bufsz = sz[0]
+		buf = ffi.new('BYTE[?]', bufsz)
+		pbuf = ffi.cast('PRAWINPUT', buf)
+	end
+	local szz = GetRawInputData(hraw, RID_INPUT, buf, sz, hsz)
+	assert(szz == sz[0], szz..'/'..sz[0])
+	return pbuf
+end
+
+-- device change message
+
+local op = {'add', 'remove'}
+
+function WM.WM_INPUT_DEVICE_CHANGE(wParam, lParam)
+	return op[wParam], ffi.cast('HRAWINPUT', lParam)
+end
 

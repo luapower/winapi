@@ -2,6 +2,8 @@
 setfenv(1, require'winapi')
 require'winapi.winuser'
 
+--NOTE: EnumDisplayMonitors() returns the monitors in random order, that can also change between reboots.
+
 ffi.cdef[[
 HMONITOR MonitorFromPoint(POINT pt, DWORD dwFlags);
 HMONITOR MonitorFromRect(LPCRECT lprc, DWORD dwFlags);

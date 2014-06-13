@@ -4,6 +4,8 @@ require'winapi.winuser'
 require'winapi.windowclasses'
 require'winapi.gdi'
 
+--NOTE: IsDialogMessage() is filtering out WM_CHAR messages.
+
 --creation
 
 ffi.cdef[[
@@ -852,7 +854,8 @@ WM_NAMES = constants{ --mark obsolete messages but keep them so that you don't s
 	WM_NCXBUTTONDOWN                 = 0x00AB,
 	WM_NCXBUTTONUP                   = 0x00AC,
 	WM_NCXBUTTONDBLCLK               = 0x00AD,
-   WM_INPUT                         = 0x00FF,
+   WM_INPUT_DEVICE_CHANGE           = 0x00FE,
+	WM_INPUT                         = 0x00FF,
 	WM_KEYDOWN                       = 0x0100,
 	WM_KEYUP                         = 0x0101,
 	WM_CHAR                          = 0x0102,

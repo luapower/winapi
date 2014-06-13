@@ -175,7 +175,8 @@ BaseWindow = {
 		--system events
 		on_timer = WM_TIMER,
 		--raw input
-		on_input = WM_INPUT,
+		on_raw_input = WM_INPUT,
+		on_device_change = WM_INPUT_DEVICE_CHANGE,
 	},
 	__wm_command_handler_names = {}, --subclasses add WM_COMMAND commands that are relevant to them
 	__wm_notify_handler_names = {}, --subclasses add WM_NOTIFY codes that are relevant to them
