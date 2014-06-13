@@ -50,10 +50,18 @@ function GetCursorPos(p)
 	return p
 end
 
+--messages
+
+function WM.WM_SETCURSOR(wParam, lParam)
+	local HT, id = splitlong(lParam)
+	return ffi.cast('HWND', wParam), HT, id --HT codes are in winapi.mouse
+end
+
+--demo
 
 if not ... then
-print(LoadCursor(IDC_ARROW))
-assert(LoadCursor(IDC_ARROW) == LoadCursor(IDC_ARROW)) --same handle every time, no worry about freeing these
-print(LoadCursor(IDC_HELP))
+	print(LoadCursor(IDC_ARROW))
+	assert(LoadCursor(IDC_ARROW) == LoadCursor(IDC_ARROW)) --same handle every time, no worry about freeing these
+	print(LoadCursor(IDC_HELP))
 end
 
