@@ -328,7 +328,7 @@ BOOL EnumChildWindows(
 ]]
 
 --NOTE: for a not null hwnd you can use GetChildWindows (no callback, no table).
-function EnumChildWindows(hwnd)
+function EnumChildWindows(hwnd) --note: fron-to-back order
 	local t = {}
 	local cb = ffi.cast('WNDENUMPROC', function(hwnd, lparam)
 		t[#t+1] = hwnd

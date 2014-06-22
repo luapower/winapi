@@ -221,6 +221,7 @@ which showcases the module's functionality. Run the module as a standalone scrip
 [winapi.object]: https://github.com/luapower/winapi/blob/master/winapi/object.lua
 [winapi.panelclass]: https://github.com/luapower/winapi/blob/master/winapi/panelclass.lua
 [winapi.process]: https://github.com/luapower/winapi/blob/master/winapi/process.lua
+[winapi.rawinput]: https://github.com/luapower/winapi/blob/master/winapi/rawinput.lua
 [winapi.radiobuttonclass]: https://github.com/luapower/winapi/blob/master/winapi/radiobuttonclass.lua
 [winapi.registry]: https://github.com/luapower/winapi/blob/master/winapi/registry.lua
 [winapi.resource]: https://github.com/luapower/winapi/blob/master/winapi/resource.lua
