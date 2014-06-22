@@ -27,6 +27,9 @@ LPVOID GlobalLock(HGLOBAL hMem);
 BOOL  GlobalUnlock(HGLOBAL hMem);
 SIZE_T GlobalSize(HGLOBAL hMem);
 HGLOBAL GlobalAlloc(UINT uFlags, SIZE_T dwBytes);
+LPVOID VirtualAlloc(LPVOID lpAddress, SIZE_T dwSize, DWORD flAllocationType, DWORD flProtect);
+BOOL VirtualProtect(LPVOID lpAddress, SIZE_T dwSize, DWORD flNewProtect, PDWORD lpflOldProtect);
+BOOL VirtualFree(LPVOID lpAddress, SIZE_T dwSize, DWORD dwFreeType);
 ]]
 
 GlobalLock = ffi.C.GlobalLock
@@ -41,4 +44,61 @@ end
 
 function GlobalAlloc(fl, sz)
 	return checkh(ffi.C.GlobalAlloc(flags(fl), sz))
+end
+
+PAGE_NOACCESS           = 0x01
+PAGE_READONLY           = 0x02
+PAGE_READWRITE          = 0x04
+PAGE_WRITECOPY          = 0x08
+PAGE_EXECUTE            = 0x10
+PAGE_EXECUTE_READ       = 0x20
+PAGE_EXECUTE_READWRITE  = 0x40
+PAGE_EXECUTE_WRITECOPY  = 0x80
+PAGE_GUARD             = 0x100
+PAGE_NOCACHE           = 0x200
+PAGE_WRITECOMBINE      = 0x400
+
+MEM_COMMIT            = 0x1000
+MEM_RESERVE           = 0x2000
+MEM_DECOMMIT          = 0x4000
+MEM_RELEASE           = 0x8000
+MEM_FREE             = 0x10000
+MEM_PRIVATE          = 0x20000
+MEM_MAPPED           = 0x40000
+MEM_RESET            = 0x80000
+MEM_TOP_DOWN        = 0x100000
+MEM_WRITE_WATCH     = 0x200000
+MEM_PHYSICAL        = 0x400000
+MEM_ROTATE          = 0x800000
+MEM_LARGE_PAGES   = 0x20000000
+MEM_4MB_PAGES     = 0x80000000
+
+SEC_FILE            = 0x800000
+SEC_IMAGE          = 0x1000000
+SEC_PROTECTED_IMAGE= 0x2000000
+SEC_RESERVE        = 0x4000000
+SEC_COMMIT         = 0x8000000
+SEC_NOCACHE       = 0x10000000
+SEC_WRITECOMBINE  = 0x40000000
+SEC_LARGE_PAGES   = 0x80000000
+
+MEM_IMAGE          = SEC_IMAGE
+
+WRITE_WATCH_FLAG_RESET  = 0x01
+
+function VirtualAlloc(addr, size, MEM, PAGE)
+	return checkh(C.VirtualAlloc(addr, size, flags(MEM), flags(PAGE)))
+end
+
+function VirtualProtect(addr, size, newprotect, oldprotect)
+	oldprotect = oldprotect or ffi.new'DWORD[1]'
+	checknz(C.VirtualProtect(addr, size, flags(newprotect), oldprotect))
+	return oldprotect
+end
+
+MEM_DECOMMIT = 0x4000
+MEM_RELEASE  = 0x8000 --size must be 0 with this flag
+
+function VirtualFree(addr, size, freetype)
+	checknz(C.VirtualFree(addr, size or 0, flags(freetype or MEM_RELEASE)))
 end
