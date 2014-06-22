@@ -30,10 +30,16 @@ SetLastError = C.SetLastError
 FORMAT_MESSAGE_FROM_SYSTEM     = 0x00001000
 
 local function get_error_message(id)
+	if id == 8 then
+		error'out of memory' --we might not be able to allocate further memory so let's drop it here
+	end
 	local bufsize = 2048
 	local buf = ffi.new('char[?]', bufsize)
 	local sz = C.FormatMessageA(FORMAT_MESSAGE_FROM_SYSTEM, nil, id, 0, buf, bufsize, nil)
-	assert(sz ~= 0, 'error getting error message: %d', GetLastError())
+	if sz == 0 and GetLastError() == 8 then
+		error('out of memory getting error message for %d', id)
+	end
+	assert(sz ~= 0, 'error getting error message for %d: %d', id, GetLastError())
 	return ffi.string(buf, sz)
 end
 
