@@ -3,18 +3,25 @@ setfenv(1, require'winapi')
 require'winapi.winuser'
 
 ffi.cdef[[
-HCURSOR LoadCursorW(
-     HINSTANCE hInstance,
-     LPCWSTR lpCursorName);
+typedef struct {
+  DWORD   cbSize;
+  DWORD   flags;
+  HCURSOR hCursor;
+  POINT   ptScreenPos;
+} CURSORINFO, *PCURSORINFO, *LPCURSORINFO;
+
+HCURSOR LoadCursorW(HINSTANCE hInstance, LPCWSTR lpCursorName);
 int ShowCursor(BOOL bShow);
 BOOL SetCursorPos(int X, int Y);
 BOOL SetPhysicalCursorPos(int X, int Y);
 HCURSOR SetCursor(HCURSOR hCursor);
 BOOL GetCursorPos(LPPOINT lpPoint);
 BOOL GetPhysicalCursorPos(LPPOINT lpPoint);
+DWORD GetMessagePos(void);
 BOOL ClipCursor(const RECT *lpRect);
 BOOL GetClipCursor(LPRECT lpRect);
 HCURSOR GetCursor(void);
+BOOL GetCursorInfo(PCURSORINFO pci);
 ]]
 
 IDC_ARROW       = 32512
@@ -44,10 +51,23 @@ function SetCursor(cursor)
 	return ptr(C.SetCursor(cursor))
 end
 
-function GetCursorPos(p)
+function GetCursorPos(p) --NOTE: use GetCursorInfo() instead due to a bug in WinXP x64 with this function
 	p = POINT(p)
 	checknz(C.GetCursorPos(p))
 	return p
+end
+
+function GetMessagePos()
+	return splitsigned(C.GetMessagePos())
+end
+
+CURSOR_SHOWING     = 1
+CURSOR_SUPPRESSED  = 2 --Win8+
+
+function GetCursorInfo(pci)
+	pci = types.CURSORINFO(pci)
+	checknz(C.GetCursorInfo(pci))
+	return pci
 end
 
 --messages
