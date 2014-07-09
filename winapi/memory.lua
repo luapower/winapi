@@ -27,9 +27,18 @@ LPVOID GlobalLock(HGLOBAL hMem);
 BOOL  GlobalUnlock(HGLOBAL hMem);
 SIZE_T GlobalSize(HGLOBAL hMem);
 HGLOBAL GlobalAlloc(UINT uFlags, SIZE_T dwBytes);
+
 LPVOID VirtualAlloc(LPVOID lpAddress, SIZE_T dwSize, DWORD flAllocationType, DWORD flProtect);
 BOOL VirtualProtect(LPVOID lpAddress, SIZE_T dwSize, DWORD flNewProtect, PDWORD lpflOldProtect);
 BOOL VirtualFree(LPVOID lpAddress, SIZE_T dwSize, DWORD dwFreeType);
+
+HANDLE GetProcessHeap(void);
+HANDLE HeapCreate(DWORD flOptions, SIZE_T dwInitialSize, SIZE_T dwMaximumSize);
+BOOL HeapDestroy(HANDLE hHeap);
+LPVOID HeapAlloc(HANDLE hHeap, DWORD dwFlags, SIZE_T dwBytes);
+LPVOID HeapReAlloc(HANDLE hHeap, DWORD dwFlags, LPVOID lpMem, SIZE_T dwBytes);
+BOOL HeapFree(HANDLE hHeap, DWORD dwFlags, LPVOID lpMem);
+BOOL HeapValidate(HANDLE hHeap, DWORD dwFlags, LPCVOID lpMem);
 ]]
 
 GlobalLock = ffi.C.GlobalLock
@@ -102,3 +111,36 @@ MEM_RELEASE  = 0x8000 --size must be 0 with this flag
 function VirtualFree(addr, size, freetype)
 	checknz(C.VirtualFree(addr, size or 0, flags(freetype or MEM_RELEASE)))
 end
+
+HEAP_NO_SERIALIZE          = 0x00000001
+HEAP_GENERATE_EXCEPTIONS   = 0x00000004
+HEAP_ZERO_MEMORY           = 0x00000008
+HEAP_REALLOC_IN_PLACE_ONLY = 0x00000010
+HEAP_CREATE_ENABLE_EXECUTE = 0x00040000
+
+GetProcessHeap = C.GetProcessHeap
+
+function HeapCreate(HEAP, initsz, maxsz)
+	return checkh(C.HeapCreate(flags(HEAP), initsz or 0, maxsz or 0))
+end
+
+function HeapDestroy(heap)
+	checknz(C.HeapDestroy(heap))
+end
+
+function HeapAlloc(heap, HEAP, bytes)
+	return checkh(C.HeapAlloc(heap, flags(HEAP), bytes))
+end
+
+function HeapReAlloc(heap, HEAP, mem, bytes)
+	return checkh(C.HeapReAlloc(heap, flags(HEAP), mem, bytes))
+end
+
+function HeapFree(heap, HEAP, mem)
+	return checknz(C.HeapFree(heap, flags(HEAP), mem))
+end
+
+function HeapValidate(heap, HEAP, mem)
+	return checknz(C.HeapValidate(heap, flags(HEAP), mem))
+end
+
