@@ -219,6 +219,9 @@ HWND GetWindow(HWND hWnd, UINT uCmd);
 HWND GetTopWindow(HWND hWnd);
 BOOL IsWindowUnicode(HWND hWnd);
 HWND GetDesktopWindow();
+HWND GetForegroundWindow();
+BOOL SetForegroundWindow(HWND hWnd);
+BOOL LockSetForegroundWindow(UINT uLockCode);
 ]]
 
 function MoveWindow(hwnd, x, y, w, h, repaint)
@@ -318,6 +321,24 @@ function IsWindowUnicode(hwnd) --for outside windows; ours are always unicode
 end
 
 GetDesktopWindow = C.GetDesktopWindow
+
+function GetForegroundWindow()
+	return ptr(C.GetForegroundWindow())
+end
+
+function SetForegroundWindow(hwnd)
+	return C.SetForegroundWindow(hwnd) ~= 0
+end
+jit.off(SetForegroundWindow) --important!
+
+LSFW_LOCK   = 1
+LSFW_UNLOCK = 2
+
+function LockSetForegroundWindow(hwnd, LSFW)
+	checknz(C.LockSetForegroundWindow(hwnd, flags(LSFW)))
+end
+
+--enum windows
 
 ffi.cdef[[
 typedef __stdcall BOOL (* WNDENUMPROC)(HWND, LPARAM);

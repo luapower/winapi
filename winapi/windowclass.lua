@@ -167,6 +167,12 @@ Window.set_title = BaseWindow.set_text
 function Window:get_active() return GetActiveWindow() == self.hwnd end
 function Window:activate() SetActiveWindow(self.hwnd) end
 
+--this is different than activate() in that the window flashes in the taskbar
+--if its thread is not currently the active thread.
+function Window:setforeground()
+	SetForegroundWindow(self.hwnd)
+end
+
 function Window:get_owner()
 	return Windows:find(GetWindowOwner(self.hwnd))
 end

@@ -12,8 +12,18 @@ require'winapi.monitor'
 
 Windows = class(HandleList) --track window objects by their hwnd
 
+--the active window goes nil when the app is deactivated, but if
+--SetActiveWindow() is called while the app is not active, the active
+--window will be set nevertheless.
 function Windows:get_active_window()
 	return self:find(GetActiveWindow())
+end
+
+--the difference between active window and foreground window is that
+--the foreground window is always nil when the app is not active,
+--even if SetActiveWindow() is called.
+function Windows:get_foreground_window()
+	return self:find(GetForegroundWindow())
 end
 
 function Windows:window_at(p)
