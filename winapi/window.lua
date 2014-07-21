@@ -4,7 +4,12 @@ require'winapi.winuser'
 require'winapi.windowclasses'
 require'winapi.gdi'
 
---NOTE: IsDialogMessage() is filtering out WM_CHAR messages.
+--WINAPI NOTES
+--------------
+--IsDialogMessage() is filtering out WM_CHAR messages.
+--SetActiveWindow() wrongly triggers WM_ACTIVATEAPP when the app is inactive.
+--An app doesn't activate with SetActiveWindow(), only with SetForegroundWindow(),
+--and even then it only blinks in the taskbar (but the events are sent).
 
 --creation
 
