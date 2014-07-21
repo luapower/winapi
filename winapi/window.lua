@@ -1018,6 +1018,10 @@ function WM.WM_ACTIVATEAPP(wParam, lParam)
 	return activate_flags[wParam], lParam --flag, other_thread_id
 end
 
+function WM.WM_NCACTIVATE(wParam, lParam)
+	return activate_flags[wParam], lParam --flag, update_hrgn
+end
+
 -- window sizing
 
 ffi.cdef[[

@@ -550,7 +550,7 @@ function BaseWindow:__handle_message(WM, wParam, lParam)
 		if ret ~= nil then return ret end
 	end
 	--look for a hi-level handler self:on_*()
-	--print(WM_NAMES[WM], self.__wm_handler_names[WM])
+	--print(WM_NAMES[WM], self.__wm_handler_names[WM] or '')
 	handler = self[self.__wm_handler_names[WM]]
 	if handler then
 		local ret = handler(self, DecodeMessage(WM, wParam, lParam))

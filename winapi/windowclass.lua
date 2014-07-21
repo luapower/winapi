@@ -376,6 +376,18 @@ function Window:WM_ACTIVATEAPP(flag, other_thread_id)
 	end
 end
 
+function Window:WM_NCACTIVATE(flag, update_hrgn)
+	if flag == 'active' then
+		if self.on_nc_activate then
+			self:on_nc_activate(update_hrgn)
+		end
+	elseif flag == 'inactive' then
+		if self.on_nc_deactivate then
+			self:on_nc_deactivate(update_hrgn)
+		end
+	end
+end
+
 --showcase
 
 if not ... then
