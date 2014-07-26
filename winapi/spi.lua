@@ -1,14 +1,6 @@
 --proc/spi: system parameters info API.
 setfenv(1, require'winapi')
 
-ffi.cdef[[
-BOOL SystemParametersInfoW(
-     UINT uiAction,
-     UINT uiParam,
-     PVOID pvParam,
-     UINT fWinIni);
-]]
-
 SPI_GETBEEP                  = 0x0001
 SPI_SETBEEP                  = 0x0002
 SPI_GETMOUSE                 = 0x0003
@@ -208,6 +200,14 @@ SPI_SETFONTSMOOTHINGORIENTATION      = 0x2013
 SPIF_UPDATEINIFILE      = 0x0001
 SPIF_SENDWININICHANGE   = 0x0002
 SPIF_SENDCHANGE         = SPIF_SENDWININICHANGE
+
+ffi.cdef[[
+BOOL SystemParametersInfoW(
+     UINT uiAction,
+     UINT uiParam,
+     PVOID pvParam,
+     UINT fWinIni);
+]]
 
 function SystemParametersInfo(action, param, pvparam, ini)
 	ini = ini or SPIF_SENDCHANGE --broadcast changes by default

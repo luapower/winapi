@@ -71,7 +71,7 @@ typedef struct tagOFNW {
    LPARAM       lCustData;
    LPOFNHOOKPROC lpfnHook;
    LPCWSTR      lpTemplateName;
-   void *        pvReserved;
+   void*        pvReserved;
    DWORD        dwReserved;
    DWORD        FlagsEx;
 } OPENFILENAMEW, *LPOPENFILENAMEW;
@@ -79,14 +79,6 @@ typedef struct tagOFNW {
 BOOL GetSaveFileNameW(LPOPENFILENAMEW);
 BOOL GetOpenFileNameW(LPOPENFILENAMEW);
 ]]
-
-local function wcsmax(maxfield)
-	return function(s, cdata)
-		local s, sz = wcs_sz(s)
-		cdata[maxfield] = sz
-		return s
-	end
-end
 
 local function set_filter(s)
 	if type(s) == 'table' then s = table.concat(s,'\0') end

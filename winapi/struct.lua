@@ -188,7 +188,9 @@ function struct(s)
 	return s
 end
 
-function sfields(t) --sugar constructor for defining non-masked struct fields
+--sugar constructor for defining non-masked struct fields.
+--t is a table of form {aliasname1, structname1, setter, getter, fieldname2, ...}.
+function sfields(t)
 	local dt = {}
 	for i=1,#t,4 do
 		assert(type(t[i]) == 'string', 'invalid sfields spec')
@@ -203,7 +205,9 @@ function sfields(t) --sugar constructor for defining non-masked struct fields
 	return dt
 end
 
-function mfields(t) --sugar constructor for defining masked struct fields
+--sugar constructor for defining masked struct fields.
+--t is a table of form {aliasname1, structname1, mask, setter, getter, aliasname2, ...}.
+function mfields(t)
 	local dt = {}
 	for i=1,#t,5 do
 		assert(type(t[i]) == 'string', 'invalid mfields spec')

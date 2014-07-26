@@ -22,7 +22,7 @@ typedef struct tagMENUITEMINFOW
     HBITMAP  hbmpChecked;
     HBITMAP  hbmpUnchecked;
     ULONG_PTR dwItemData;
-     LPWSTR   dwTypeData;
+    LPWSTR   dwTypeData;
     UINT     cch;
     HBITMAP  hbmpItem;
 }   MENUITEMINFOW,  *LPMENUITEMINFOW;
@@ -46,6 +46,24 @@ BOOL GetMenuItemInfoW(
      UINT item,
      BOOL fByPosition,
      LPMENUITEMINFOW lpmii);
+
+DWORD CheckMenuItem(
+      HMENU hmenu,
+      UINT uIDCheckItem,
+      UINT uCheck
+);
+
+UINT GetMenuState(
+     HMENU hMenu,
+     UINT uId,
+     UINT uFlags
+);
+
+BOOL EnableMenuItem(
+     HMENU hMenu,
+     UINT uIDEnableItem,
+     UINT uEnable
+);
 
 BOOL RemoveMenu(
      HMENU hMenu,
@@ -191,21 +209,18 @@ function InsertMenuItem(menu, i, info, byposition)
 	disown(info.submenu)
 end
 
-function SetMenuItem(menu, i, info, byposition)
+function SetMenuItemInfo(menu, i, info, byposition)
 	local oldsubmenu = GetSubMenu(menu, i)
 	checknz(C.SetMenuItemInfoW(menu, countfrom0(i), byposition, MENUITEMINFO(info)))
 	disown(info.submenu)
 	own(oldsubmenu, DestroyMenu)
 end
 
-function GetMenuItem(menu, i, byposition, info)
+function GetMenuItemInfo(menu, i, byposition, info)
 	info = MENUITEMINFO:setmask(info)
 	checknz(C.GetMenuItemInfoW(menu, countfrom0(i), byposition, info))
 	return info
 end
-
-MF_BYCOMMAND  = 0x00000000
-MF_BYPOSITION = 0x00000400
 
 function RemoveMenuItem(menu, i, byposition)
 	local oldsubmenu = GetSubMenu(menu, i)
@@ -300,5 +315,23 @@ end
 
 function SetMenuInfo(menu, info)
 	checknz(C.SetMenuInfo(menu, MENUINFO(info)))
+end
+
+function CheckMenuItem(menu, i, byposition, checked)
+	return checkpoz(C.CheckMenuItem(menu, countfrom0(i),
+		bit.bor(byposition and MF_BYPOSITION or MF_BYCOMMAND,
+					checked and MF_CHECKED or MF_UNCHECKED))) == MF_CHECKED
+end
+
+function GetMenuState(menu, i, byposition)
+	return checkpoz(C.GetMenuState(menu, countfrom0(i), byposition and MF_BYPOSITION or MF_BYCOMMAND))
+end
+
+function EnableMenuItem(menu, i, byposition, enabled)
+	return checkpoz(C.EnableMenuItem(menu, countfrom0(i),
+		bit.bor(byposition and MF_BYPOSITION or MF_BYCOMMAND,
+					enabled == true and MFS_ENABLED or
+					enabled == false and MFS_DISABLED or
+					flags(enabled))))
 end
 

@@ -17,13 +17,13 @@ function MenuItemList:__init(menu, items)
 end
 
 local types_bitmask = bitmask{
-	menu_bar_break = MFT_MENUBARBREAK,
-	menu_break = MFT_MENUBREAK,
+	menu_break_bar = MFT_MENUBARBREAK, --vertical break with a bar
+	menu_break = MFT_MENUBREAK,        --vertical break without a bar
 	separator = MFT_SEPARATOR,
 	owner_draw = MFT_OWNERDRAW,
 	radio_check = MFT_RADIOCHECK,
 	rtl = MFT_RIGHTORDER,
-	right_align = MFT_RIGHTJUSTIFY, --this and subsequent items (only for menu bar items)
+	right_align = MFT_RIGHTJUSTIFY,   --apply to this item and all subsequent items (only for menu bar items)
 }
 
 local states_bitmask = bitmask{
@@ -60,23 +60,45 @@ function MenuItemList:remove(i)
 end
 
 function MenuItemList:set(i, item)
-	SetMenuItem(self.hmenu, i, mkitem(item), true)
+	SetMenuItemInfo(self.hmenu, i, mkitem(item), true)
 	self.handlers[i] = item.on_click or false
 	self.menu:__redraw()
 end
 
 function MenuItemList:get(i)
-	local item = GetMenuItem(self.hmenu, i, true)
+	local item = GetMenuItemInfo(self.hmenu, i, true)
+	item.cch = item.cch + 1
+	local buf = ffi.new('WCHAR[?]', item.cch)
+	item.dwTypeData = buf
+	item = GetMenuItemInfo(self.hmenu, i, true, item)
 	return update({
 			text = item.text,
 			submenu = Menus:find(item.submenu),
 			bitmap = item.bitmap,
 			checked_bitmap = item.checked_bitmap,
 			unchecked_bitmap = item.unchecked_bitmap,
+			on_click = self.handlers[i],
 		},
 		types_bitmask:get(item.type),
 		states_bitmask:get(item.state)
 	)
+end
+
+function MenuItemList:setchecked(i, checked)
+	CheckMenuItem(self.hmenu, i, true, checked)
+end
+
+function MenuItemList:checked(i)
+	return bit.band(GetMenuState(self.hmenu, i, true), MF_CHECKED) ~= 0
+end
+
+function MenuItemList:setenabled(i, enabled)
+	EnableMenuItem(self.hmenu, i, true, enabled)
+end
+
+function MenuItemList:enabled(i)
+	local item = GetMenuItemInfo(self.hmenu, i, true)
+	return states_bitmask:getbit(item.state, 'enabled')
 end
 
 function MenuItemList:get_count()
@@ -95,10 +117,12 @@ local style_bitmask = bitmask{
 }
 
 function Menu:__create()
+	self.type = 'menu'
 	return CreateMenu()
 end
 
 function Menu:__init(info)
+	info = info or {}
 	self.hmenu = self:__create()
 	Menus:add(self)
 	self.items = MenuItemList(self, info.items)
@@ -169,6 +193,7 @@ end
 MenuBar = class(Menu)
 
 function MenuBar:__create()
+	self.type = 'menubar'
 	return CreateMenuBar()
 end
 

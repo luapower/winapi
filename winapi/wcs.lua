@@ -112,3 +112,13 @@ function wcsncpy(dest, src, count) --wcsncpy variant that null-terminates even o
 	dest[count-1] = 0
 end
 
+--TODO: not used because dest. must be WCHAR[N] not WCHAR[?] (see winapi.font)
+function wcsmax(maxsz)
+	return function(s, cdata)
+		if type(s) ~= 'string' then return s end
+		local ws, sz = wcs_sz(s)
+		assert(sz <= maxsz, 'string too long. max length is %d', maxsz)
+		return ws
+	end
+end
+
