@@ -18,8 +18,11 @@ end
 
 function WGLPanel:on_destroy()
 	if not self.hrc then return end
-	wglMakeCurrent(nil, nil)
 	wglDeleteContext(self.hrc)
+	if self.window_hdc then
+		wglMakeCurrent(self.window_hdc, nil)
+	end
+	self.hrc = nil
 end
 
 function WGLPanel:WM_ERASEBKGND()
@@ -37,6 +40,7 @@ function WGLPanel:set_viewport() end --stub
 function WGLPanel:__after_gl_context() end --stub
 
 function WGLPanel:on_paint(window_hdc)
+	self.window_hdc = window_hdc
 	if not self.hrc then
 		local pfd = PIXELFORMATDESCRIPTOR{
 			flags = 'PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER',
@@ -48,7 +52,6 @@ function WGLPanel:on_paint(window_hdc)
 		}
 		SetPixelFormat(window_hdc, ChoosePixelFormat(window_hdc, pfd), pfd)
 		self.hrc = gl.wglCreateContext(window_hdc)
-		wglMakeCurrent(window_hdc, self.hrc)
 
 		--[[
 		if wglChoosePixelFormatARB then
@@ -90,10 +93,14 @@ function WGLPanel:on_paint(window_hdc)
 			gl.wglSwapIntervalEXT(1)
 		end
 
+		wglMakeCurrent(window_hdc, self.hrc)
 		self:__after_gl_context()
 		--TODO: use wglChoosePixelFormatARB to enable FSAA
 		self:set_viewport()
+	else
+		wglMakeCurrent(window_hdc, self.hrc)
 	end
+
 	self:on_render()
 	SwapBuffers(window_hdc)
 end
