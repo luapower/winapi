@@ -47,10 +47,12 @@ end
 
 function MenuItemList:add(i, item)
 	if not item then i,item = nil,i end --i is optional
+	i = i or #self.handlers+1
 	item = item or {}
 	InsertMenuItem(self.hmenu, i, mkitem(item), true)
-	table.insert(self.handlers, i or #self.handlers+1, item.on_click or false)
+	table.insert(self.handlers, i, item.on_click or false)
 	self.menu:__redraw()
+	return i
 end
 
 function MenuItemList:remove(i)
