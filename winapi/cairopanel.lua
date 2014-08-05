@@ -6,7 +6,7 @@ require'winapi.panelclass'
 local cairo = require'cairo'
 require'cairo_win32'
 
-local CairoPanel = winapi.class(winapi.Panel)
+CairoPanel = winapi.class(winapi.Panel)
 
 function CairoPanel:__before_create(info, args)
 	info.own_dc = true --very important, because we reuse the hdc between WM_PAINTs
