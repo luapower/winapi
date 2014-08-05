@@ -39,10 +39,11 @@ end
 
 local r = 30
 local function cube(w)
-	r = r + .1
+	r = r + 1
 	gl.glPushMatrix()
+	gl.glTranslated(0,0,-3)
 	gl.glScaled(w, w, 1)
-	gl.glRotated(r,1,0,0)
+	gl.glRotated(r,1,r,r)
 	axes(2)
 	gl.glTranslated(0,0,2)
 	local function face(c)
@@ -85,6 +86,8 @@ function panel:set_viewport()
 end
 
 function panel:on_render()
+	gl.glClearColor(0, 0, 0, 1)
+	gl.glClear(bit.bor(gl.GL_COLOR_BUFFER_BIT, gl.GL_DEPTH_BUFFER_BIT))
 	gl.glEnable(gl.GL_BLEND)
 	gl.glBlendFunc(gl.GL_SRC_ALPHA, gl.GL_SRC_ALPHA)
 	gl.glDisable(gl.GL_DEPTH_TEST)
