@@ -6,10 +6,12 @@ require'winapi.winusertypes'
 --NOTE: pressing both shift keys and then depressing one of them doesn't trigger WM_KEYUP, but does trigger WM_INPUT.
 --NOTE: flags.prev_key_state is a single flag for both left and right ctrl/alt/shift, not for each physical key.
 --NOTE: AltGr is LCTRL followed by RALT with the same message timestamp (which we can use to distinguish from CTRL+ALT).
+--NOTE: To distinguish Ctrl+Break from Ctrl+ScrollLock, and Break from Ctrl+NumLock check RI_KEY_E1 and RI_KEY_E0 on WM_INPUT.
+--NOTE: Ctrl+NumLock doesn't change the NumLock state, unlike other keys + NumLock (same with Ctrl+ScrollLock).
 
 VK_LBUTTON        = 0x01
 VK_RBUTTON        = 0x02
-VK_CANCEL         = 0x03
+VK_CANCEL         = 0x03    -- Ctrl+Break or Ctrl+ScrollLock
 VK_MBUTTON        = 0x04    -- NOT contiguous with L & RBUTTON
 
 VK_XBUTTON1       = 0x05    -- NOT contiguous with L & RBUTTON
@@ -23,8 +25,8 @@ VK_RETURN         = 0x0D
 
 VK_SHIFT          = 0x10
 VK_CONTROL        = 0x11
-VK_MENU           = 0x12 --Alt
-VK_PAUSE          = 0x13
+VK_MENU           = 0x12    -- Alt
+VK_PAUSE          = 0x13    -- Break or Ctrl+NumLock
 VK_CAPITAL        = 0x14
 
 VK_KANA           = 0x15
