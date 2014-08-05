@@ -122,6 +122,8 @@ function Window:__before_create(info, args)
 
 	args.parent = info.owner and info.owner.hwnd
 	args.text = info.title
+
+	--WS_MINIMIZE and WS_MAXIMIZE flags don't work together, hence the 'state' property.
 	args.style = bit.bor(args.style,
 								info.state == 'minimized' and WS_MINIMIZE or 0,
 								info.state == 'maximized' and WS_MAXIMIZE or 0)
@@ -246,11 +248,6 @@ end
 -- 2) if maximized, go to normal state
 function Window:restore()
 	self:show(SW_RESTORE)
-end
-
---special case: show in current state (minimized, normal or maximized) but don't activate
-function Window:show_no_activate()
-	self:show(SW_SHOWNA)
 end
 
 function Window:get_minimized()

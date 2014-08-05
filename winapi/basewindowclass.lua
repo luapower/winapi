@@ -409,10 +409,13 @@ end
 
 --visibility
 
+--show(true|nil) = show in current state.
+--show(false) = show show in current state but don't activate.
 function BaseWindow:show(SW)
-	SW = flags(SW or SW_SHOW)
+	SW = flags((SW == nil or SW == true) and SW_SHOW or SW == false and SW_SHOWNA or SW)
 	ShowWindow(self.hwnd, SW)
-	if not self.visible then --first ShowWindow(SW_SHOW) is ignored on the first window (SW_RESTORE is not)
+	--first ShowWindow(SW_SHOW) is ignored on the first window (SW_RESTORE is not)
+	if SW ~= SW_HIDE and not self.visible then
 		ShowWindow(self.hwnd, SW)
 		assert(self.visible)
 	end
@@ -518,8 +521,8 @@ function BaseWindow:set_rect(...) --x1,y1,x2,y2 or rect
 	self:move(r.x, r.y, r.w, r.h)
 end
 
-function BaseWindow:get_screen_rect()
-	return GetWindowRect(self.hwnd)
+function BaseWindow:get_screen_rect(r)
+	return GetWindowRect(self.hwnd, r)
 end
 
 function BaseWindow:set_screen_rect(...) --x1,y1,x2,y2 or rect

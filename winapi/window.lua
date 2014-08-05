@@ -92,7 +92,7 @@ WS_POPUPWINDOW         = bit.bor(WS_POPUP, WS_BORDER, WS_SYSMENU)
 WS_EX_OVERLAPPEDWINDOW = bit.bor(WS_EX_WINDOWEDGE, WS_EX_CLIENTEDGE)
 WS_EX_PALETTEWINDOW    = bit.bor(WS_EX_WINDOWEDGE, WS_EX_TOOLWINDOW, WS_EX_TOPMOST)
 
-CW_USEDEFAULT = 0x80000000 --for x and y
+CW_USEDEFAULT = 0x80000000 --if used for x, then y must be a SW_* flag
 
 function CreateWindow(info)
 	local class = wcs(MAKEINTRESOURCE(info.class))
