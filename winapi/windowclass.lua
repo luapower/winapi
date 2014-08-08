@@ -80,7 +80,7 @@ Window = subclass({
 	},
 	__wm_handler_names = index{
 		on_close = WM_CLOSE,
-		on_restoring = WM_QUERYOPEN, --return false to prevent restoring from minimize state
+		on_restoring = WM_QUERYOPEN, --return false to prevent restoring from minimize state.
 		--system changes
 		on_query_end_session = WM_QUERYENDSESSION,
 		on_end_session = WM_ENDSESSION,
@@ -93,6 +93,11 @@ Window = subclass({
 		on_input_language_change = WM_INPUTLANGCHANGE,
 		on_user_change = WM_USERCHANGED,
 		on_display_change = WM_DISPLAYCHANGE,
+	},
+	__wm_syscommand_handler_names = index{
+		on_minimizing = SC_MINIMIZE, --before minimize; return false to prevent.
+		on_maximizing = SC_MAXIMIZE, --before maximize; return false  to prevent.
+		on_menu_key   = SC_KEYMENU,  --get the 'f' in Alt+F if there's a `&File` menu.
 	},
 }, BaseWindow)
 
@@ -124,6 +129,7 @@ function Window:__before_create(info, args)
 	args.text = info.title
 
 	--WS_MINIMIZE and WS_MAXIMIZE flags don't work together, hence the 'state' property.
+	--the combination WS_MINIMIZE + WS_MAXIMIZE makes ShowWindow(SW_RESTORE) have no effect.
 	args.style = bit.bor(args.style,
 								info.state == 'minimized' and WS_MINIMIZE or 0,
 								info.state == 'maximized' and WS_MAXIMIZE or 0)
@@ -183,15 +189,6 @@ function Window:set_owner(owner)
 	SetWindowOwner(self.hwnd, owner and owner.hwnd)
 end
 
-function Window:get_topmost()
-	return bit.band(GetWindowExStyle(self.hwnd), WS_EX_TOPMOST) == WS_EX_TOPMOST
-end
-
-function Window:set_topmost(topmost)
-	SetWindowPos(self.hwnd, topmost and HWND_TOPMOST or HWND_NOTOPMOST,
-						0, 0, 0, 0, bit.bor(SWP_NOSIZE, SWP_NOMOVE, SWP_NOACTIVATE))
-end
-
 --maximize size/position constraints
 
 function Window:WM_GETMINMAXINFO(info)
@@ -218,36 +215,36 @@ function Window:get_state()
 	return window_state_names[wp.showCmd]
 end
 
-function Window:set_state(state)
+function Window:set_state(state, async)
 	if state == 'normal' then
-		self:shownormal()
+		self:shownormal(nil, async)
 	elseif state == 'maximized' then
-		self:maximize()
+		self:maximize(nil, async)
 	elseif state == 'minimized' then
-		self:minimize()
+		self:minimize(nil, async)
 	end
 end
 
 --maximize and activate (can't maximize without activating; WM_COMMAND SC_MAXIMIZE also activates)
-function Window:maximize()
-	self:show(SW_SHOWMAXIMIZED)
+function Window:maximize(_, async)
+	self:show(SW_SHOWMAXIMIZED, async)
 end
 
 --show in normal state and activate or not
-function Window:shownormal(activate)
-	self:show(activate == false and SW_SHOWNOACTIVATE or SW_SHOWNORMAL)
+function Window:shownormal(activate, async)
+	self:show(activate == false and SW_SHOWNOACTIVATE or SW_SHOWNORMAL, async)
 end
 
 --show in minimized state and deactivate or not
-function Window:minimize(deactivate)
-	self:show(deactivate == false and SW_SHOWMINIMIZED or SW_MINIMIZE)
+function Window:minimize(deactivate, async)
+	self:show(deactivate == false and SW_SHOWMINIMIZED or SW_MINIMIZE, async)
 end
 
 --restore to last state and activate:
 -- 1) if minimized, go to normal or maximized state, based on the value of self.restore_to_maximized
 -- 2) if maximized, go to normal state
-function Window:restore()
-	self:show(SW_RESTORE)
+function Window:restore(_, async)
+	self:show(SW_RESTORE, async)
 end
 
 function Window:get_minimized()

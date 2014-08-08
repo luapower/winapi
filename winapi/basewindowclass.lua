@@ -190,6 +190,7 @@ BaseWindow = {
 		on_raw_input = WM_INPUT,
 		on_device_change = WM_INPUT_DEVICE_CHANGE,
 	},
+	__wm_syscommand_handler_names = {}, --subclasses add WM_SYSCOMMAND commands that are relevant to them
 	__wm_command_handler_names = {}, --subclasses add WM_COMMAND commands that are relevant to them
 	__wm_notify_handler_names = {}, --subclasses add WM_NOTIFY codes that are relevant to them
 }
@@ -249,6 +250,9 @@ function BaseWindow:__subclass(class)
 	end
 	if rawget(class, '__wm_handler_names') then
 		inherit(class.__wm_handler_names, self.__wm_handler_names)
+	end
+	if rawget(class, '__wm_syscommand_handler_names') then
+		inherit(class.__wm_syscommand_handler_names, self.__wm_syscommand_handler_names)
 	end
 	if rawget(class, '__wm_command_handler_names') then
 		inherit(class.__wm_command_handler_names, self.__wm_command_handler_names)
@@ -411,19 +415,21 @@ end
 
 --show(true|nil) = show in current state.
 --show(false) = show show in current state but don't activate.
-function BaseWindow:show(SW)
+function BaseWindow:show(SW, async)
 	SW = flags((SW == nil or SW == true) and SW_SHOW or SW == false and SW_SHOWNA or SW)
+	local ShowWindow = async and ShowWindowAsync or ShowWindow
 	ShowWindow(self.hwnd, SW)
-	--first ShowWindow(SW_SHOW) is ignored on the first window (SW_RESTORE is not)
-	if SW ~= SW_HIDE and not self.visible then
-		ShowWindow(self.hwnd, SW)
-		assert(self.visible)
+	if SW ~= SW_HIDE then
+		if not self.visible then
+			--first ShowWindow(SW_SHOW) is ignored on the first window (SW_RESTORE is not)
+			ShowWindow(self.hwnd, SW)
+			UpdateWindow(self.hwnd)
+		end
 	end
-	UpdateWindow(self.hwnd)
 end
 
-function BaseWindow:hide()
-	ShowWindow(self.hwnd, SW_HIDE)
+function BaseWindow:hide(async)
+	self:show(SW_HIDE, async)
 end
 
 function BaseWindow:get_is_visible() --visible and all parents are visible too
@@ -547,6 +553,7 @@ end
 
 function BaseWindow:__handle_message(WM, wParam, lParam)
 	--look for a procedural-level handler self:WM_*()
+	--print(WM_NAMES[WM], wParam, lParam)
 	local handler = self[WM_NAMES[WM]]
 	if handler then
 		local ret = handler(self, DecodeMessage(WM, wParam, lParam))
@@ -564,6 +571,13 @@ end
 
 function BaseWindow:__default_proc(WM, wParam, lParam) --controls override this and call CallWindowProc instead
 	return DefWindowProc(self.hwnd, WM, wParam, lParam)
+end
+
+--WM_SYSCOMMAND routing
+
+function BaseWindow:WM_SYSCOMMAND(SC, ...)
+	local handler = self[self.__wm_syscommand_handler_names[SC]]
+	if handler then return handler(self, ...) end
 end
 
 --WM_COMMAND routing
@@ -647,20 +661,27 @@ end
 
 --z-order
 
-function BaseWindow:bring_below(window)
-	SetWindowPos(self.hwnd, window.window, 0, 0, 0, 0, SWP_ZORDER_CHANGED_ONLY)
+function BaseWindow:get_topmost()
+	return bit.band(GetWindowExStyle(self.hwnd), WS_EX_TOPMOST) == WS_EX_TOPMOST
 end
 
-function BaseWindow:bring_above(window)
-	SetWindowPos(self.hwnd, GetPrevSibling(window.window) or HWND_TOP, 0, 0, 0, 0, SWP_ZORDER_CHANGED_ONLY)
+function BaseWindow:set_topmost(topmost)
+	SetWindowPos(self.hwnd, topmost and HWND_TOPMOST or HWND_NOTOPMOST,
+		0, 0, 0, 0, SWP_ZORDER_CHANGED_ONLY)
 end
 
-function BaseWindow:bring_to_front()
-	SetWindowPos(self.hwnd, HWND_TOP, 0, 0, 0, 0, SWP_ZORDER_CHANGED_ONLY)
+function BaseWindow:send_to_back(relto)
+	local topmost = self.topmost
+	local relto_hwnd = relto and relto.hwnd or (self.topmost and HWND_NOTOPMOST or HWND_BOTTOM)
+	SetWindowPos(self.hwnd, relto_hwnd, 0, 0, 0, 0, SWP_ZORDER_CHANGED_ONLY)
+	if topmost then
+		--self.topmost = true
+	end
 end
 
-function BaseWindow:send_to_back()
-	SetWindowPos(self.hwnd, HWND_BOTTOM, 0, 0, 0, 0, SWP_ZORDER_CHANGED_ONLY)
+function BaseWindow:bring_to_front(relto)
+	local relto_hwnd = relto and GetPrevSibling(relto.hwnd) or (self.topmost and HWND_TOPMOST or HWND_TOP)
+	SetWindowPos(self.hwnd, relto_hwnd, 0, 0, 0, 0, SWP_ZORDER_CHANGED_ONLY)
 end
 
 --monitor
