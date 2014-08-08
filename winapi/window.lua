@@ -4,13 +4,6 @@ require'winapi.winuser'
 require'winapi.windowclasses'
 require'winapi.gdi'
 
---WINAPI NOTES
---------------
---IsDialogMessage() is filtering out WM_CHAR messages.
---SetActiveWindow() wrongly triggers WM_ACTIVATEAPP when the app is inactive.
---An app doesn't activate with SetActiveWindow(), only with SetForegroundWindow(),
---and even then it only blinks in the taskbar (but the events are sent).
-
 --creation
 
 ffi.cdef[[
@@ -119,6 +112,7 @@ end
 
 ffi.cdef[[
 BOOL ShowWindow(HWND hWnd, int nCmdShow);
+BOOL ShowWindowAsync(HWND hWnd, int nCmdShow);
 ]]
 
 SW_HIDE             =  0 --hide and remember the show state
@@ -136,6 +130,10 @@ SW_FORCEMINIMIZE    = 11 --minimize from a different thread
 
 function ShowWindow(hwnd, SW)
 	return C.ShowWindow(hwnd, flags(SW)) ~= 0
+end
+
+function ShowWindowAsync(hwnd, SW)
+	return C.ShowWindowAsync(hwnd, flags(SW)) ~= 0
 end
 
 ffi.cdef[[
@@ -273,6 +271,12 @@ function GetActiveWindow()
 	return ptr(C.GetActiveWindow())
 end
 
+--NOTE: SetActiveWindow() triggers WM_ACTIVATEAPP even when the app doesn't activate!
+--An app (and thus one of its windows) doesn't activate with SetActiveWindow(),
+--but with SetForegroundWindow(), and even then it might not activate immediately,
+--but instead blink the window in the taskbar waiting for the user to activate it.
+--WM_ACTIVATE is sent immediately and in all cases, while WM_NCACTIVATE is sent
+--if and after the user clicks on the flashing taskbar button.
 SetActiveWindow = C.SetActiveWindow
 
 function BringWindowToTop(hwnd)
@@ -313,6 +317,7 @@ local function nextchild(parent, sibling)
 	if not sibling then return GetFirstChild(parent) end
 	return GetNextSibling(sibling)
 end
+
 --returns a stateless iterator iterating from top to bottom of the z-order.
 --NOTE: you can get infinite loops if the z-order of the windows involved changes while iterating.
 function GetChildWindows(hwnd)
@@ -658,24 +663,14 @@ function TranslateMessage(msg)
 	return C.TranslateMessage(msg)
 end
 
+--NOTE: IsDialogMessage() is filtering out WM_CHAR messages.
 function IsDialogMessage(hwnd, msg)
 	return C.IsDialogMessageW(hwnd, msg) ~= 0
 end
 
---[[
-Mike Sez:
-> The problem is that a FFI callback cannot safely be called from a
-> C function which is itself called via the FFI from JIT-compiled
-> code.
->
-> I've put in a lot of heuristics to detect this, and it usually
-> succeeds in disabling compilation for such a function. However in
-> your case the loop is compiled before the callback is ever called,
-> so the detection fails.
->
-> The straighforward solution is to put the message loop into an
-> extra Lua function and use jit.off(func).
-]]
+-- NOTE: a FFI callback cannot safely be called from a C function which is
+-- itself called via the FFI from JIT-compiled code. This means we must disable
+-- jitting for all functions that could trigger a FFI callback.
 jit.off(GetMessage)
 jit.off(DispatchMessage)
 jit.off(TranslateAccelerator)
@@ -788,7 +783,9 @@ WM_PENWINLAST                    = 0x038F
 WM_APP                           = 0x8000
 WM_USER                          = 0x0400
 
-WM_NAMES = constants{ --mark obsolete messages but keep them so that you don't see unknown messages when debugging
+--dev note: do comment on obsolete messages but keep them so that you don't see unknown messages when debugging.
+
+WM_NAMES = constants{
 	WM_NULL                          = 0x0000,
 	WM_CREATE                        = 0x0001,
 	WM_DESTROY                       = 0x0002,
@@ -1005,7 +1002,20 @@ function DecodeMessage(WM_, wParam, lParam) --returns decoded results...
 	return decoder(wParam, lParam)
 end
 
--- window events
+--window state
+
+SW_OTHERUNZOOM    = 4 --The window is being uncovered because a maximize window was restored or minimized.
+SW_OTHERZOOM      = 2 --The window is being covered by another window that has been maximized.
+SW_PARENTCLOSING  = 1 --The window's owner window is being minimized.
+SW_PARENTOPENING  = 3 --The window's owner window is being restored.
+
+local show_status = {'minimized', 'other_maximized', 'restored', 'other_restored'}
+
+function WM.WM_SHOWWINDOW(wParam, lParam) --shown/hidden, show_status
+	return wParam == 1, show_status[lParam]
+end
+
+-- window activation
 
 local activate_flags = {[0] = 'inactive', 'active', 'clickactive'}
 
