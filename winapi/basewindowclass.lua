@@ -7,6 +7,7 @@ require'winapi.gdi'
 require'winapi.keyboard'
 require'winapi.mouse'
 require'winapi.monitor'
+require'winapi.wmapp'
 
 --window tracker
 
@@ -74,7 +75,7 @@ MessageRouter = MessageRouter() --singleton
 --message loop
 
 --message sent to the thread (thus the message loop) to unregister a window class after a window is destroyed.
-WM_UNREGISTER_CLASS = WM_APP + 1
+WM_UNREGISTER_CLASS = acquire_message_code()
 
 function ProcessMessage(msg)
 	local window = Windows.active_window
