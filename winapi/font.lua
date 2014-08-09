@@ -119,15 +119,6 @@ local function getfamily(v, cdata) --it's in the high 6 bits
 	return bit.band(cdata.lfPitchAndFamily, 0xff-3)
 end
 
-local function wcs32(s)
-	if type(s) ~= 'string' then return s end
-	local sz = checknz(C.MultiByteToWideChar(CP_UTF8, 0, s, #s + 1, nil, 0))
-	assert(sz <= 32, 'font facename must not exceed 31 characters')
-	local ws = ffi.new'WCHAR[32]'
-	checknz(C.MultiByteToWideChar(CP_UTF8, 0, s, #s + 1, ws, 32))
-	return ws
-end
-
 LOGFONT = struct{
 	ctype = 'LOGFONTW',
 	fields = sfields{
@@ -138,7 +129,7 @@ LOGFONT = struct{
 		'quality', 'lfQuality', flags, pass, --*_QUALITY
 		'pitch', 'lfPitchAndFamily', setpitch, getpitch, --*_PITCH
 		'family', 'lfPitchAndFamily', setfamily, getfamily, --FF_*
-		'facename', 'lfFaceName', wcs32, mbs,
+		'facename', '', wc_set'lfFaceName', wc_get'lfFaceName',
 	}
 }
 
@@ -147,8 +138,9 @@ function CreateFont(lf)
 end
 
 if not ... then
-local font = print(CreateFont{
-	facename = 'Arial'
-})
+local logfont = LOGFONT{facename = 'Arial'}
+assert(logfont.facename == 'Arial')
+
+print('CreateFont:', CreateFont(logfont))
 end
 
