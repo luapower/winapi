@@ -118,14 +118,14 @@ local style_bitmask = bitmask{
 	notify_by_pos = MNS_NOTIFYBYPOS,
 }
 
-function Menu:__create()
+function Menu:__create_hmenu()
 	self.type = 'menu'
 	return CreateMenu()
 end
 
 function Menu:__init(info)
 	info = info or {}
-	self.hmenu = self:__create()
+	self.hmenu = self:__create_hmenu()
 	Menus:add(self)
 	self.items = MenuItemList(self, info.items)
 
@@ -143,16 +143,16 @@ function Menu:free()
 	self.items.hmenu = nil
 end
 
-function Menu:__get_property(o,k)
+function Menu.__get_vproperty(class, self, k)
 	if MENUINFO.fields[k] then --publish info fields individually
 		return GetMenuInfo(self.hmenu)[k]
 	elseif style_bitmask.fields[k] then --publish style fields individually
 		return style_bitmask:get(GetMenuInfo(self.hmenu).style)
 	end
-	Menu.__index.__get_property(self,o,k)
+	return Menu.__index.__get_vproperty(class, self, k)
 end
 
-function Menu:__set_property(o,k,v)
+function Menu.__set_vproperty(class, self, k, v)
 	if MENUINFO.fields[k] then --publish info fields individually
 		info = MENUINFO()
 		info[k] = v
@@ -162,7 +162,7 @@ function Menu:__set_property(o,k,v)
 		info.style = style_bitmask:setbit(info.style, k, v)
 		SetMenuInfo(self.hmenu, info)
 	else
-		Menu.__index.__set_property(self,o,k,v)
+		Menu.__index.__set_vproperty(class, self, k, v)
 	end
 end
 
@@ -194,7 +194,7 @@ end
 
 MenuBar = class(Menu)
 
-function MenuBar:__create()
+function MenuBar:__create_hmenu()
 	self.type = 'menubar'
 	return CreateMenuBar()
 end
