@@ -55,23 +55,23 @@ end
 ffi.cdef[[
 typedef struct _NOTIFYICONDATAW {
     DWORD cbSize;
-    HWND hWnd;
-    UINT uID;
+    HWND hwnd;
+    UINT id;
     UINT uFlags;
     UINT uCallbackMessage;
     HICON hIcon;
-    WCHAR  szTip[128];  --Win2K+
+    WCHAR szTip[128];  // Win2K+
     DWORD dwState;
     DWORD dwStateMask;
-    WCHAR  szInfo[256];
+    WCHAR szInfo[256]; // Win2K+
     union {
-        UINT  uTimeout;
-        UINT  uVersion;  -- used with NIM_SETVERSION, values 0, 3 and 4
-    } DUMMYUNIONNAME;
-    WCHAR  szInfoTitle[64];
+        UINT uTimeout;
+        UINT uVersion; // used with NIM_SETVERSION, values 0, 3 and 4
+    };
+    WCHAR szInfoTitle[64];
     DWORD dwInfoFlags;
-    GUID guidItem;       --WinXP+
-    HICON hBalloonIcon;  --Vista+
+    GUID guidItem;       // WinXP+
+    HICON hBalloonIcon;  // Vista+
 } NOTIFYICONDATAW, *PNOTIFYICONDATAW;
 
 typedef struct _NOTIFYICONIDENTIFIER {
@@ -85,67 +85,70 @@ BOOL Shell_NotifyIconW(DWORD dwMessage, PNOTIFYICONDATAW lpData);
 void Shell_NotifyIconGetRect(const NOTIFYICONIDENTIFIER* identifier, RECT* iconLocation);
 ]]
 
-NIN_SELECT          = (WM_USER + 0)
-NINF_KEY            = 0x1
-NIN_KEYSELECT       = bit.bor(NIN_SELECT, NINF_KEY)
+--messages
+WM_USER                 = 0x0400
+NIN_SELECT              = (WM_USER + 0)
+NINF_KEY                = 0x1
+NIN_KEYSELECT           = bit.bor(NIN_SELECT, NINF_KEY)
+NIN_BALLOONSHOW         = (WM_USER + 2) --XP+
+NIN_BALLOONHIDE         = (WM_USER + 3) --XP+
+NIN_BALLOONTIMEOUT      = (WM_USER + 4) --XP+
+NIN_BALLOONUSERCLICK    = (WM_USER + 5) --XP+
+NIN_POPUPOPEN           = (WM_USER + 6) --Vista+
+NIN_POPUPCLOSE          = (WM_USER + 7) --Vista+
 
---XP+
-NIN_BALLOONSHOW         = (WM_USER + 2)
-NIN_BALLOONHIDE         = (WM_USER + 3)
-NIN_BALLOONTIMEOUT      = (WM_USER + 4)
-NIN_BALLOONUSERCLICK    = (WM_USER + 5)
-
---Vista+
-NIN_POPUPOPEN           = (WM_USER + 6)
-NIN_POPUPCLOSE          = (WM_USER + 7)
-
+--actions
 NIM_ADD         = 0x00000000
 NIM_MODIFY      = 0x00000001
 NIM_DELETE      = 0x00000002
 NIM_SETFOCUS    = 0x00000003
 NIM_SETVERSION  = 0x00000004
 
--- set NOTIFYICONDATA.uVersion with 0, 3 or 4
--- please read the documentation on the behavior difference that the different versions imply
-NOTIFYICON_VERSION      = 3
-NOTIFYICON_VERSION_4    = 4 --Vista+
-
+--bitmask/flags
 NIF_MESSAGE     = 0x00000001
 NIF_ICON        = 0x00000002
 NIF_TIP         = 0x00000004
 NIF_STATE       = 0x00000008
 NIF_INFO        = 0x00000010
---Vista+
-NIF_GUID        = 0x00000020
-NIF_REALTIME    = 0x00000040
-NIF_SHOWTIP     = 0x00000080
-NIS_HIDDEN      = 0x00000001
-NIS_SHAREDICON  = 0x00000002
+NIF_GUID        = 0x00000020 --Vista+
+NIF_REALTIME    = 0x00000040 --Vista+
+NIF_SHOWTIP     = 0x00000080 --Vista+
 
--- says this is the source of a shared icon
+--state flags
+NIS_HIDDEN      = 0x00000001 --Vista+
+NIS_SHAREDICON  = 0x00000002 --Vista+
 
--- Notify Icon Infotip flags
+--infotip flags (mutually exclusive)
 NIIF_NONE       = 0x00000000
--- icon flags are mutually exclusive
--- and take only the lowest 2 bits
 NIIF_INFO       = 0x00000001
 NIIF_WARNING    = 0x00000002
 NIIF_ERROR      = 0x00000003
---XP SP2+ / WS03 SP1+
-NIIF_USER       = 0x00000004
-NIIF_ICON_MASK  = 0x0000000F
-NIIF_NOSOUND    = 0x00000010
---Vista+
-NIIF_LARGE_ICON = 0x00000020
---Win7+
-NIIF_RESPECT_QUIET_TIME = 0x00000080
+NIIF_USER       = 0x00000004 --XP SP2+ / WS03 SP1+
+NIIF_ICON_MASK  = 0x0000000F --XP SP2+ / WS03 SP1+
+NIIF_NOSOUND    = 0x00000010 --XP SP2+ / WS03 SP1+
+NIIF_LARGE_ICON = 0x00000020 --Vista+
+NIIF_RESPECT_QUIET_TIME = 0x00000080 --Win7+
 
-PNOTIFYICONDATA = struct{
-	ctype = 'PNOTIFYICONDATA',
+NOTIFYICONDATA = struct{
+	ctype = 'NOTIFYICONDATAW', size = 'cbSize', mask = 'uFlags',
+	fields = mfields{
+		'message',      'uCallbackMessage', NIF_MESSAGE, pass, pass,
+		'icon',         'hIcon',            NIF_ICON, pass, pass,
+		'tip',          '',                 NIF_TIP, wc_set'szTip', wc_get'szTip',
+		'__state',      'dwState',          NIF_STATE, pass, pass,
+		'__stateMask',  'dwStateMask',      NIF_STATE, pass, pass,
+		'info',         '',                 NIF_INFO, wc_set'szInfo', wc_get'szInfo',
+		'info_title',   '',      				NIF_INFO, wc_set'szInfoTitle', wc_get'szInfoTitle',
+		'info_flags',   'dwInfoFlags',      NIF_INFO, flags, pass,
+		'info_timeout', 'uTimeout',         NIF_INFO, pass, pass,
+	},
+	bitfields = {
+		state = {'__state', '__stateMask', 'NIS'},
+	},
 }
 
 function Shell_NotifyIcon(msg, data)
-	data = PNOTIFYICONDATA(data)
-	checknz(shell32.Shell_NotifyIconW(msg, data)
+	data = NOTIFYICONDATA(data)
+	checknz(shell32.Shell_NotifyIconW(msg, data))
 end
 
