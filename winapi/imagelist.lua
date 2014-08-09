@@ -1,7 +1,6 @@
 --proc/imagelist: image list resources.
 setfenv(1, require'winapi')
 require'winapi.comctl'
-require'winapi.rpc'
 
 ffi.cdef[[
 HIMAGELIST  ImageList_Create(int cx, int cy, UINT flags, int cInitial, int cGrow);
