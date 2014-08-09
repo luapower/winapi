@@ -780,10 +780,11 @@ WM_AFXLAST                       = 0x037F
 WM_PENWINFIRST                   = 0x0380
 WM_PENWINLAST                    = 0x038F
 
-WM_APP                           = 0x8000
+WM_APP                           = 0x8000 --tip: use the wmapp module to manage those.
 WM_USER                          = 0x0400
 
---dev note: do comment on obsolete messages but keep them so that you don't see unknown messages when debugging.
+--dev note: make a comment on obsolete messages but keep them anyway,
+--so that you don't see unknown messages when debugging.
 
 WM_NAMES = constants{
 	WM_NULL                          = 0x0000,
