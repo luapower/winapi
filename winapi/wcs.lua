@@ -47,8 +47,8 @@ ERROR_INSUFFICIENT_BUFFER = 122
 local checknz = checknz
 local WCS_ctype = ffi.typeof'WCHAR[?]'
 local MB2WC = C.MultiByteToWideChar
-local CP = CP_UTF8
-local MB = 0
+local CP = CP_UTF8  --CP_* flags
+local MB = 0        --MB_* flags
 
 function wcs_sz(s) --accept and convert a utf8-encoded Lua string to a wcs cdata
 	if type(s) ~= 'string' then return s end
@@ -92,7 +92,7 @@ WC_NO_BEST_FIT_CHARS      = 0x00000400  -- do not use best fit chars
 local MBS_ctype = ffi.typeof'CHAR[?]'
 local PWCS_ctype = ffi.typeof'WCHAR*'
 local WC2MB = C.WideCharToMultiByte
-local WC = 0
+local WC = 0 --WC_* flags
 
 function mbs(ws) --accept and convert a wcs or pwcs buffer to a Lua string
 	if ffi.istype(WCS_ctype, ws) or ffi.istype(PWCS_ctype, ws) then
@@ -112,13 +112,14 @@ function wcsncpy(dest, src, count) --wcsncpy variant that null-terminates even o
 	dest[count-1] = 0
 end
 
---TODO: not used because dest. must be WCHAR[N] not WCHAR[?] (see winapi.font)
-function wcsmax(maxsz)
-	return function(s, cdata)
-		if type(s) ~= 'string' then return s end
-		local ws, sz = wcs_sz(s)
-		assert(sz <= maxsz, 'string too long. max length is %d', maxsz)
-		return ws
+--convert and store a utf8-encoded Lua string into a user-provided, fixed size wcs cdata.
+function wcs_to(s, ws)
+	if s == nil then s = '' end
+	if type(s) ~= 'string' then return s end
+	local sz = checknz(MB2WC(CP, MB, s, #s + 1, nil, 0))
+	if sz > ffi.sizeof(ws) / 2 then
+		error('string too long. max chars: '..(ffi.sizeof(ws) / 2 - 1))
 	end
+	checknz(MB2WC(CP_UTF8, 0, s, #s + 1, ws, ffi.sizeof(ws)))
 end
 
