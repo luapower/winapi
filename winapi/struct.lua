@@ -30,14 +30,16 @@ function Struct:set(cdata, field, value) --hot code
 		end
 		return
 	end
-	--masked bitfield support
+	--masked bitfield support.
 	def = self.bitfields and self.bitfields[field]
 	if def then
+		--support the syntax `struct.field = {BITNAME = true|false, ...}`
 		for bitname, enabled in pairs(value) do
 			cdata[field..'_'..bitname] = enabled
 		end
 		return
 	else
+		--support the syntax `struct.field_BITNAME = true|false`.
 		local fieldname, bitname = field:match'^([^_]+)_(.*)'
 		if fieldname then
 			def = self.bitfields[fieldname]
@@ -65,7 +67,11 @@ function Struct:get(cdata, field, value) --hot code
 		local name, mask, _, cast = unpack(def, 1, 4)
 		if not mask or getbit(cdata[self.mask], mask) then
 			if not name then
-				return true
+				if cast then
+					return cast(cdata)
+				else
+					return true
+				end
 			elseif not cast then
 				return cdata[name]
 			else
@@ -83,7 +89,11 @@ function Struct:get(cdata, field, value) --hot code
 			local datafield, maskfield, prefix = unpack(def, 1, 3)
 			local mask = _M[prefix..'_'..bitname]
 			if mask then
-				return getbit(cdata[maskfield], mask) or nil
+				if getbit(cdata[maskfield] or 0, mask) then
+					return getbit(cdata[datafield] or 0, mask)
+				else
+					return nil --masked off
+				end
 			end
 		end
 	end
@@ -165,9 +175,9 @@ local function checkdefs(s) --typecheck a struct definition
 		assert(valid_struct_keys[k], 'invalid struct key "%s"', k)
 	end
 	if s.fields then --check for accidentaly hidden fields
-		for k,v in pairs(s.fields) do
-			local vname, sname, mask, cast = unpack(v, 1, 4)
-			assert(vname ~= sname, 'virtual field "%s" not visible', v[1])
+		for vname,def in pairs(s.fields) do
+			local sname, mask, setter, getter = unpack(def, 1, 4)
+			assert(vname ~= sname, 'virtual field "%s" not visible', vname)
 		end
 	end
 end
@@ -221,5 +231,19 @@ function mfields(t)
 		}
 	end
 	return dt
+end
+
+--create a struct setter for setting a fixed-size WCHAR[n] field with a Lua string.
+function wc_set(field)
+	return function(s, cdata)
+		wcs_to(s, cdata[field])
+	end
+end
+
+--create a struct getter for getting a fixed-size WCHAR[n] field as a Lua string.
+function wc_get(field)
+	return function(cdata)
+		return mbs(ffi.cast('WCHAR*', cdata[field]))
+	end
 end
 
