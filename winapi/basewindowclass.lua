@@ -7,7 +7,6 @@ require'winapi.gdi'
 require'winapi.keyboard'
 require'winapi.mouse'
 require'winapi.monitor'
-require'winapi.wmapp'
 
 --window tracker
 
@@ -73,9 +72,6 @@ end
 MessageRouter = MessageRouter() --singleton
 
 --message loop
-
---message sent to the thread (thus the message loop) to unregister a window class after a window is destroyed.
-WM_UNREGISTER_CLASS = acquire_message_code()
 
 function ProcessMessage(msg)
 	local window = Windows.active_window
@@ -623,6 +619,15 @@ function BaseWindow:WM_COMPAREITEM(hwnd, ci)
 	local window = Windows:find(hwnd)
 	if window and window.on_compare_items then
 		return window:on_compare_items(ci.i1, ci.i2)
+	end
+end
+
+--WM_NOTIFYICON routing
+
+function BaseWindow:WM_NOTIFYICON(id, WM)
+	local notify_icon = NotifyIcons:find(id)
+	if notify_icon then
+		notify_icon:WM_NOTIFYICON(WM)
 	end
 end
 

@@ -780,7 +780,7 @@ WM_AFXLAST                       = 0x037F
 WM_PENWINFIRST                   = 0x0380
 WM_PENWINLAST                    = 0x038F
 
-WM_APP                           = 0x8000 --tip: use the wmapp module to manage those.
+WM_APP                           = 0x8000 --tip: see the wmapp module on how to manage those.
 WM_USER                          = 0x0400
 
 --dev note: make a comment on obsolete messages but keep them anyway,
@@ -996,6 +996,14 @@ WM_NAMES = constants{
 	WM_APPCOMMAND                    = 0x0319,
 	WM_THEMECHANGED                  = 0x031A,
 }
+
+require'winapi.wmapp'
+
+--message sent to the thread (thus the message loop) to unregister a window class after a window is destroyed.
+register_message'WM_UNREGISTER_CLASS'
+
+--default message routed by BaseWindowClass through the NotifyIcons tracker.
+register_message'WM_NOTIFYICON'
 
 --decode a message based on registered decoders from various submodules.
 function DecodeMessage(WM_, wParam, lParam) --returns decoded results...
