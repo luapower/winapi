@@ -8,6 +8,18 @@ HICON LoadIconW(
 	  LPCWSTR lpIconName);
 
 BOOL DestroyIcon(HICON hIcon);
+
+
+typedef struct _ICONINFO {
+    BOOL    fIcon;
+    DWORD   xHotspot;
+    DWORD   yHotspot;
+    HBITMAP hbmMask;
+    HBITMAP hbmColor;
+} ICONINFO;
+typedef ICONINFO *PICONINFO;
+
+HICON CreateIconIndirect(PICONINFO piconinfo);
 ]]
 
 IDI_APPLICATION   = 32512
@@ -19,13 +31,20 @@ IDI_WINLOGO       = 32517 --same as IDI_APPLICATION in XP
 IDI_SHIELD        = 32518 --not found in XP
 
 function LoadIconFromInstance(hInstance, name)
-	if not name then hInstance, name = nil, hInstance end
+	if not name then hInstance, name = nil, hInstance end --hInstance is optional
 	return own(checkh(C.LoadIconW(hInstance,
-							ffi.cast('LPCWSTR', wcs(MAKEINTRESOURCE(name))))), DestroyIcon)
+		ffi.cast('LPCWSTR', wcs(MAKEINTRESOURCE(flags(name)))))), DestroyIcon)
 end
 
 function DestroyIcon(hicon)
 	checknz(C.DestroyIcon(hicon))
+end
+
+ICONINFO = types.ICONINFO
+
+function CreateIconIndirect(info)
+	info = ICONINFO(info)
+	return checkh(C.CreateIconIndirect(info))
 end
 
 if not ... then

@@ -60,7 +60,6 @@ NotifyIcon.__wm_handler_names = index{
 
 function NotifyIcon:WM_NOTIFYICON(WM)
 	local wm_name = WM_NAMES[WM]
-	print(wm_name)
 	if self[wm_name] then
 		if self[wm_name](self) ~= nil then
 			return
@@ -102,23 +101,42 @@ end
 if not ... then
 require'winapi.windowclass'
 require'winapi.icon'
+require'winapi.menu'
 
 local win = Window{w = 500, h = 300, visible = false, autoquit = true}
 
+local nicon, pmenu
+
 function win:on_show()
-	self.notify_icon = NotifyIcon{
+
+	--create a notification icon.
+	nicon = NotifyIcon{
 		window = self,
 		icon = LoadIconFromInstance(IDI_INFORMATION),
 	}
+
+	--alternate the icon on a timer.
 	local alt = true
 	self:settimer(200, function()
-		self.notify_icon.icon = LoadIconFromInstance(alt == true and IDI_WARNING or IDI_INFORMATION)
+		nicon.icon = LoadIconFromInstance(alt == true and IDI_WARNING or IDI_INFORMATION)
 		alt = not alt
 	end)
+
+	--popup a menu when right-clicking on the icon.
+	pmenu = Menu()
+	pmenu.items:add{text = 'Hello1'}
+	pmenu.items:add{text = 'Hello2'}
+	pmenu.items:add{text = 'Hello3'}
+	pmenu.items:add{text = 'Hello4'}
+
+	function nicon:on_rbutton_up()
+		local pos = win.cursor_pos
+		pmenu:popup(win, pos.x, pos.y)
+	end
 end
 
 function win:on_destroy()
-	self.notify_icon:free()
+	nicon:free()
 end
 
 win:show()

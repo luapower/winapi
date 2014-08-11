@@ -1,5 +1,5 @@
 --ffi/wintypes: basic windows types and macros from multiple headers.
---we don't define time_t as it's 64 in windows but 32bit in mingw: use explicit types.
+--we don't define time_t because it's 64bit in windows but 32bit in mingw: use explicit types!
 local ffi = require'ffi'
 require'ctypes'
 
@@ -34,8 +34,9 @@ typedef WORD            *LPWORD;
 typedef long            *LPLONG;
 typedef DWORD           *PDWORD;
 typedef DWORD           *LPDWORD;
-typedef void            *LPVOID;
-typedef const void      *LPCVOID;
+typedef void            VOID;
+typedef VOID            *LPVOID;
+typedef const VOID      *LPCVOID;
 typedef int             INT;
 typedef unsigned int    UINT;
 typedef unsigned int    *PUINT;
@@ -65,8 +66,8 @@ typedef ULONG_PTR       DWORD_PTR, *PDWORD_PTR;
 typedef __int64         LONG64, *PLONG64;
 typedef unsigned __int64 ULONG64, *PULONG64;
 typedef unsigned __int64 DWORD64, *PDWORD64;
-typedef void            *PVOID;
-typedef void * __ptr64  PVOID64;
+typedef VOID            *PVOID;
+typedef VOID* __ptr64   PVOID64;
 typedef char            CHAR;
 typedef short           SHORT;
 typedef long            LONG;
@@ -95,7 +96,7 @@ typedef LPSTR           PTSTR, LPTSTR, PUTSTR, LPUTSTR;
 typedef LPCSTR          PCTSTR, LPCTSTR, PCUTSTR, LPCUTSTR;
 typedef SHORT           *PSHORT;
 typedef LONG            *PLONG;
-typedef void            *HANDLE;
+typedef VOID            *HANDLE;
 typedef HANDLE          *PHANDLE;
 typedef BYTE            FCHAR;
 typedef WORD            FSHORT;

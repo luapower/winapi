@@ -407,11 +407,20 @@ typedef struct tagBITMAPINFO {
     RGBQUAD             bmiColors[1];
 } BITMAPINFO,  *LPBITMAPINFO, *PBITMAPINFO;
 
+HBITMAP  CreateBitmap(int nWidth, int nHeight, UINT cPlanes, UINT cBitsPerPel, const VOID *lpvBits);
 HBITMAP  CreateCompatibleBitmap(HDC hdc, int cx, int cy);
 COLORREF SetPixel(HDC hdc, int x, int y, COLORREF color);
 HBITMAP  CreateDIBSection(HDC hdc, const BITMAPINFO *lpbmi, UINT usage, void **ppvBits, HANDLE hSection, DWORD offset);
 BOOL     BitBlt(HDC hdc, int x, int y, int cx, int cy, HDC hdcSrc, int x1, int y1, DWORD rop);
 ]]
+
+BITMAPINFOHEADER = struct{ctype = 'BITMAPINFOHEADER', size = 'biSize'}
+BITMAPV4HEADER   = struct{ctype = 'BITMAPV4HEADER', size = 'bV4Size'}
+BITMAPV5HEADER   = struct{ctype = 'BITMAPV5HEADER', size = 'bV5Size'}
+
+function CreateBitmap(w, h, planes, bpp, bits)
+	return checkh(C.CreateBitmap(w, h, planes, bpp, bits))
+end
 
 function CreateCompatibleBitmap(hdc, w, h)
 	return checkh(C.CreateCompatibleBitmap(hdc, w, h))
