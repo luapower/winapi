@@ -687,7 +687,7 @@ end
 function SendMessage(hwnd, WM, wparam, lparam)
 	if wparam == nil then wparam = 0 end
 	if type(lparam) == 'nil' then lparam = 0 end
-	return C.SendMessageW(hwnd, WM,
+	return C.SendMessageW(hwnd, flags(WM),
 		ffi.cast('WPARAM', wparam),
 		ffi.cast('LPARAM', lparam))
 end

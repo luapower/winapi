@@ -100,16 +100,16 @@ function GetClassLong(hwnd, GCL) return GetClassLongW(hwnd, flags(GCL)) end
 function GetClassStyle(hwnd) return GetClassLong(hwnd, GCL_STYLE) end
 function SetClassStyle(hwnd, style) SetClassLong(hwnd, GCL_STYLE, flags(style)) end
 
-function GetClassIcon(hwnd) return ffi.cast('HICON', GetClassLong(hwnd, GCL_HICON)) end
+function GetClassIcon(hwnd) return ptr(ffi.cast('HICON', GetClassLong(hwnd, GCL_HICON))) end
 function SetClassIcon(hwnd, icon) SetClassLong(hwnd, GCL_HICON, icon) end
 
-function GetClassSmallIcon(hwnd) return ffi.cast('HICON', GetClassLong(hwnd, GCL_HICONSM)) end
+function GetClassSmallIcon(hwnd) return ptr(ffi.cast('HICON', GetClassLong(hwnd, GCL_HICONSM))) end
 function SetClassSmallIcon(hwnd, icon) SetClassLong(hwnd, GCL_HICONSM, icon) end
 
-function GetClassCursor(hwnd) return ffi.cast('HCURSOR', GetClassLong(hwnd, GCL_HCURSOR)) end
+function GetClassCursor(hwnd) return ptr(ffi.cast('HCURSOR', GetClassLong(hwnd, GCL_HCURSOR))) end
 function SetClassCursor(hwnd, cursor) SetClassLong(hwnd, GCL_HCURSOR, cursor) end
 
-function GetClassBackground(hwnd) return ffi.cast('HBRUSH', GetClassLong(hwnd, GCL_HBRBACKGROUND)) end
+function GetClassBackground(hwnd) return ptr(ffi.cast('HBRUSH', GetClassLong(hwnd, GCL_HBRBACKGROUND))) end
 function SetClassBackground(hwnd, bg) SetClassLong(hwnd, GCL_HBRBACKGROUND, bg) end
 
 --showcase
