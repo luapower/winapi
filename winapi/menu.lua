@@ -323,7 +323,7 @@ function CheckMenuItem(menu, i, byposition, checked)
 					checked and MF_CHECKED or MF_UNCHECKED))) == MF_CHECKED
 end
 
-function GetMenuState(menu, i, byposition)
+function GetMenuState(menu, i, byposition) --there's no SetMenuState.
 	return checkpoz(C.GetMenuState(menu, countfrom0(i), byposition and MF_BYPOSITION or MF_BYCOMMAND))
 end
 

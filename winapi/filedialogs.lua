@@ -86,10 +86,20 @@ local function set_filter(s)
 	return wcs(s)
 end
 
+local function set_filepath(s, info)
+	local pwcs, sz = wcs_sz(s)
+	info.lpstrFile = pwcs
+	info.nMaxFile = sz
+end
+
+local function get_filepath(info)
+	return mbs(info.lpstrFile)
+end
+
 OPENFILENAME = struct{
 	ctype = 'OPENFILENAMEW', size = 'lStructSize',
 	fields = sfields{
-		'filepath', 'lpstrFile', pass, mbs, --out
+		'filepath', '', set_filepath, get_filepath, --in/out
 		'filename', 'lpstrFileTitle', pass, mbs, --out
 		'filter', 'lpstrFilter', set_filter, mbs,
 		'custom_filter', 'lpstrCustomFilter', pass, mbs, --out
@@ -100,21 +110,60 @@ OPENFILENAME = struct{
 		'default_ext', 'lpstrDefExt', wcs, mbs,
 		'flags_ex', 'FlagsEx', flags, pass, --OFN_EX_*
 	},
+	init = function(info)
+		--TODO: make out and in/out buffer allocations declarative.
+		local p, psz = info.lpstrFile, info.nMaxFile
+		local wcs, sz = WCS(65536); pin(wcs, info); info.lpstrFile, info.nMaxFile = wcs, sz
+		if p ~= nil then ffi.copy(wcs, p, psz * 2) end
+		local wcs, sz = WCS(); pin(wcs, info);	info.lpstrFileTitle, info.nMaxFileTitle = wcs, sz
+		local wcs, sz = WCS(); pin(wcs, info);	info.lpstrCustomFilter, info.nMaxCustFilter = wcs, sz
+	end,
 }
 
 function GetSaveFileName(info)
 	info = OPENFILENAME(info)
-	info.lpstrFile, info.nMaxFile = WCS()
-	info.lpstrFileTitle, info.nMaxFileTitle = WCS()
-	info.lpstrCustomFilter, info.nMaxCustFilter = WCS()
 	return checkcomdlg(comdlg.GetSaveFileNameW(info)), info
+end
+
+--custom function, don't look for it in msdn!
+--for multiselect, info.lpstrFile contains dir \0 filename1 \0 ... \0\0,
+--except if a single file is selected, in which case it's just path \0\0.
+--this function extracts and rejoins the dir and filenames to a list of paths.
+function GetOpenFileNamePaths(info)
+
+	--split at \0 to a list of offset1, size1, ...
+	local t, i0 = {}, 0
+	for i = 0, info.nMaxFile - 1 do
+		if info.lpstrFile[i] == 0 then
+			local sz = i - i0 - 1
+			if sz < 0 then break end
+			t[#t+1] = i0
+			t[#t+1] = sz
+			i0 = i + 1
+		end
+	end
+
+	--convert to utf8
+	local dt = {}
+	for i=1,#t,2 do
+		local offset, size = t[i], t[i+1]
+		dt[#dt+1] = mbs(info.lpstrFile + offset, size)
+	end
+
+	--if a single file selected, that is the full path
+	if #dt == 1 then return dt end
+
+	--remove dir from the list and prepend it to each filename
+	local dir = table.remove(dt, 1)
+	for i=1,#dt do
+		dt[i] = dir .. '\\' .. dt[i]
+	end
+
+	return dt
 end
 
 function GetOpenFileName(info)
 	info = OPENFILENAME(info)
-	info.lpstrFile, info.nMaxFile = WCS()
-	info.lpstrFileTitle, info.nMaxFileTitle = WCS()
-	info.lpstrCustomFilter, info.nMaxCustFilter = WCS()
 	return checkcomdlg(comdlg.GetOpenFileNameW(info)), info
 end
 
@@ -128,5 +177,15 @@ if not ... then
 		flags = 'OFN_SHOWHELP',
 	}
 	print(ok, info.filepath, info.filename, info.filter_index, info.custom_filter)
+
+	local ok, info = GetOpenFileName{
+		title = 'Open\'em up!',
+		filter = {'All Files','*.*','Text Files','*.txt'},
+		filter_index = 1,
+		flags = 'OFN_ALLOWMULTISELECT|OFN_EXPLORER',
+	}
+
+	print(ok, info.filepath, info.filename, info.filter_index, info.custom_filter)
+	require'pp'(GetOpenFileNamePaths(info))
 end
 

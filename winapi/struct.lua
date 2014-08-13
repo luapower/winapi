@@ -127,16 +127,23 @@ function Struct:clearmask(cdata) --clear all mask bits (prepare for setting data
 	if self.mask then cdata[self.mask] = 0 end
 end
 
-function Struct:new(t) --create with a clear mask and initialized with defaults, or use existing cdata as is
+function Struct:init(cdata) end --stub
+
+--create with a clear mask and initialized with defaults, or use existing cdata as is
+function Struct:new(t)
 	if type(t) == 'cdata' then return t end
 	local cdata = self.ctype_cons()
 	if self.size then cdata[self.size] = ffi.sizeof(cdata) end
 	self:setdefaults(cdata)
 	self:setall(cdata, t)
+	--TODO: provide a way to make in/out buffer allocations declarative
+	--instead of manually via init constructor (see winapi.filedialogs).
+	self.init(cdata)
 	return cdata
 end
 
-function Struct:setmask(cdata) --create/use existing and set all mask bits (prepare for receiving data)
+--create/use existing and set all mask bits (prepare for receiving data)
+function Struct:setmask(cdata)
 	if not cdata then
 		cdata = self.ctype_cons()
 		if self.size then cdata[self.size] = ffi.sizeof(cdata) end
@@ -167,7 +174,7 @@ end
 --struct definition
 
 local valid_struct_keys =
-	index{'ctype', 'size', 'mask', 'fields', 'defaults', 'bitfields'}
+	index{'ctype', 'size', 'mask', 'fields', 'defaults', 'bitfields', 'init'}
 
 local function checkdefs(s) --typecheck a struct definition
 	assert(s.ctype ~= nil, 'ctype missing')
