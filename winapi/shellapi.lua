@@ -152,3 +152,31 @@ function Shell_NotifyIcon(msg, data)
 	checknz(shell32.Shell_NotifyIconW(msg, data))
 end
 
+--drag/drop files
+
+ffi.cdef[[
+struct HDROP__ { int unused; };
+typedef struct HDROP__ *HDROP;
+
+UINT DragQueryFileW(HDROP hDrop, UINT iFile, LPWSTR lpszFile, UINT cch);
+]]
+
+function DragQueryFile(hdrop, ifile, buf, sz) --returns buf, actual_sz
+	if not ifile then
+		return checknz(shell32.DragQueryFileW(hdrop, 0xFFFFFFFF, nil, 0)) --get number of files
+	end
+	if not buf then buf, sz = WCS() end
+	return buf, checknz(shell32.DragQueryFileW(hdrop, ifile, buf, sz + 1))
+end
+
+--custom function, don't look it up in msdn.
+function DragQueryFiles(hdrop)
+	local buf, sz = WCS()
+	local n = DragQueryFile(hdrop)
+	local t = {}
+	for i=0,n-1 do
+		t[#t+1] = mbs(DragQueryFile(hdrop, i, buf, sz))
+	end
+	return t
+end
+

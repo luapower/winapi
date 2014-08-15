@@ -1,30 +1,34 @@
 --clipboard API
 setfenv(1, require'winapi')
 require'winapi.winusertypes'
+require'winapi.memory'
 
 -- Predefined Clipboard Formats
-CF_TEXT              = 1
-CF_BITMAP            = 2
-CF_METAFILEPICT      = 3
-CF_SYLK              = 4
-CF_DIF               = 5
-CF_TIFF              = 6
-CF_OEMTEXT           = 7
-CF_DIB               = 8
-CF_PALETTE           = 9
-CF_PENDATA           = 10
-CF_RIFF              = 11
-CF_WAVE              = 12
-CF_UNICODETEXT       = 13
-CF_ENHMETAFILE       = 14
-CF_HDROP             = 15
-CF_LOCALE            = 16
-CF_DIBV5             = 17
-CF_OWNERDISPLAY      = 0x0080
-CF_DSPTEXT           = 0x0081
-CF_DSPBITMAP         = 0x0082
-CF_DSPMETAFILEPICT   = 0x0083
-CF_DSPENHMETAFILE    = 0x008E
+CF_NAMES = constants{
+	CF_TEXT              = 1,
+	CF_BITMAP            = 2,
+	CF_METAFILEPICT      = 3,
+	CF_SYLK              = 4,
+	CF_DIF               = 5,
+	CF_TIFF              = 6,
+	CF_OEMTEXT           = 7,
+	CF_DIB               = 8,
+	CF_PALETTE           = 9,
+	CF_PENDATA           = 10,
+	CF_RIFF              = 11,
+	CF_WAVE              = 12,
+	CF_UNICODETEXT       = 13,
+	CF_ENHMETAFILE       = 14,
+	CF_HDROP             = 15,
+	CF_LOCALE            = 16,
+	CF_DIBV5             = 17,
+	CF_OWNERDISPLAY      = 0x0080,
+	CF_DSPTEXT           = 0x0081,
+	CF_DSPBITMAP         = 0x0082,
+	CF_DSPMETAFILEPICT   = 0x0083,
+	CF_DSPENHMETAFILE    = 0x008E,
+}
+
 -- "Private" formats don't get GlobalFree()'d
 CF_PRIVATEFIRST      = 0x0200
 CF_PRIVATELAST       = 0x02FF
@@ -39,6 +43,8 @@ BOOL IsClipboardFormatAvailable(UINT format);
 HANDLE GetClipboardData(UINT uFormat);
 BOOL EmptyClipboard(void);
 HANDLE SetClipboardData(UINT uFormat, HANDLE hMem);
+UINT EnumClipboardFormats(UINT format);
+int GetClipboardFormatNameW(UINT format, LPWSTR lpszFormatName, int cchMaxCount);
 ]]
 
 function OpenClipboard(hwnd)
@@ -65,41 +71,129 @@ function SetClipboardData(format, hmem)
 	return checkh(ffi.C.SetClipboardData(flags(format), hmem))
 end
 
---hi-level API: get/set utf8 text from/to clipboard
+function EnumClipboardFormats(last_format)
+	local ret = callnz2(C.EnumClipboardFormats, last_format or 0)
+	return ret ~= 0 and ret or nil
+end
 
-function GetClipboardText()
-	if not IsClipboardFormatAvailable(CF_UNICODETEXT) then
-		return
-	end
-	require'winapi.memory'
+function GetClipboardFormatName(format, buf, sz)
+	if not buf then buf, sz = WCS(sz) end
+	sz = checknz(C.GetClipboardFormatNameW(format, buf, sz))
+	return buf, sz
+end
+
+--hi-level API: get/set data from/to clipboard.
+--custom functions, don't look them up in msdn.
+
+--return a list of available clipboard formats, in original order.
+function GetClipboardFormats()
 	OpenClipboard()
 	return glue.fcall(function()
-		local h = GetClipboardData(CF_UNICODETEXT)
+		local format
+		local t = {}
+		repeat
+			format = EnumClipboardFormats(format)
+			t[#t+1] = format
+		until not format
+		return t
+	end, CloseClipboard)
+end
+
+--return a list of available clipboard format names, in original order.
+--for built-in formats, the format number is returned instead.
+function GetClipboardFormatNames()
+	local t = GetClipboardFormats()
+	local buf, sz
+	for i=1,#t do
+		local format = t[i]
+		local name
+		if CF_NAMES[format] then
+			name = format
+		else
+			if not buf then buf, sz = WCS() end
+			name = mbs(GetClipboardFormatName(format, buf, sz))
+		end
+		t[i] = name
+	end
+	return t
+end
+
+--get the data buffer of a specific format, pass it to a function,
+--and return the result of that function.
+function GetClipboardDataBuffer(format, copy)
+	if not IsClipboardFormatAvailable(format) then
+		return
+	end
+	OpenClipboard()
+	return glue.fcall(function()
+		local h = GetClipboardData(format)
 		local buf = GlobalLock(h)
+		local sz = GlobalSize(h)
 		return glue.fcall(function()
-			return mbs(ffi.cast('WCHAR*', buf))
+			return copy(buf, sz)
 		end, function() GlobalUnlock(h) end)
 	end, CloseClipboard)
 end
 
-function SetClipboardText(s)
-	require'winapi.memory'
+--set the clipboard data for a specific format from a buffer or string.
+function SetClipboardDataBuffer(format, buf, sz)
+	sz = sz or #buf
 	OpenClipboard()
 	glue.fcall(function()
 		EmptyClipboard()
-		local wbuf, wsz = wcs_sz(s)
-		local sz = wsz * 2
 		local h = GlobalAlloc(GMEM_MOVEABLE, sz) --windows frees this
-		local buf = GlobalLock(h)
-		ffi.copy(buf, wbuf, sz)
+		local destbuf = GlobalLock(h)
+		ffi.copy(destbuf, buf, sz)
 		GlobalUnlock(h)
-		SetClipboardData(CF_UNICODETEXT, h)
+		SetClipboardData(format, h)
 	end, CloseClipboard)
 end
 
+--get utf8 text out of the clipboard.
+function GetClipboardText()
+	return GetClipboardDataBuffer(CF_UNICODETEXT, function(buf)
+		return mbs(ffi.cast('WCHAR*', buf))
+	end)
+end
+
+--set utf8 text into the clipboard.
+function SetClipboardText(s)
+	local buf = wcs(s)
+	SetClipboardDataBuffer(CF_UNICODETEXT, buf, ffi.sizeof(buf))
+end
+
+--return a list of files
+function GetClipboardFiles()
+	require'winapi.shellapi'
+	return GetClipboardDataBuffer(CF_HDROP, function(buf)
+		local hdrop = ffi.cast('HDROP', buf)
+		return DragQueryFiles(hdrop)
+	end)
+end
+
+function SetClipboardFiles(files)
+	--TODO
+	require'winapi.shellapi'
+	return SetClipboardDataBuffer(CF_HDROP, function(buf)
+		return ffi.cast('HDROP', buf)
+	end)
+end
 
 if not ... then
+	print'Clipboard right now:'
+	print'--------------------'
+	for i,format in ipairs(GetClipboardFormatNames()) do
+		print('>' .. (CF_NAMES[format] or format))
+		if format == CF_UNICODETEXT then
+			print(GetClipboardText())
+		elseif format == CF_HDROP then
+			require'pp'(GetClipboardFiles())
+		end
+	end
+
 	local s = 'hello from the clipboard!'
 	SetClipboardText(s)
+	assert(#GetClipboardFormatNames() == 1)
+	assert(GetClipboardFormatNames()[1] == CF_UNICODETEXT)
 	assert(GetClipboardText() == s)
 end

@@ -83,7 +83,7 @@ local function callwith2(valid)
 	return function(f,...)
 		SetLastError(0)
 		local ret = f(...)
-		if type(ret) == 'cdata' and ret == NULL then ret = nil end --discard NULL pointers
+		ret = ptr(ret) --discard NULL pointers
 		local valid_for_sure, err = valid(ret)
 		if not valid_for_sure then --still possibly valid
 			local code = GetLastError()
@@ -97,7 +97,7 @@ local function callwith2(valid)
 end
 
 --common special call wrappers.
-callnz2 = callwith2(validnz)
+callnz2 = callwith2(validnz) --EnumClipboardFormats() is a candidate for this.
 callh2 = callwith2(validh)
 
 --own an object by assigning it a finalizer.

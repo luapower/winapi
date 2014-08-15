@@ -72,7 +72,11 @@ W = wcs --fancy sugar to use on string constants
 
 DEFAULT_WCS_BUFFER_SIZE = 2048 --some APIs don't have a way to tell us how much to allocate
 
-function WCS(n) --wcs buffer constructor
+--wcs buffer constructor: allocates a WCHAR[?] buffer and returns the buffer
+--and its size in WCHARs, minus the null-terminator.
+--given a number, allocate a WCHAR buffer of size n + 1 (default n = 2048).
+--given a WCHAR[?] cdata, return it back along with its size in WCHARs minus the null terminator.
+function WCS(n)
 	if type(n) == 'number' then
 		return WCS_ctype(n+1), n
 	elseif ffi.istype(WCS_ctype, n) then
