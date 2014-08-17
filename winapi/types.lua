@@ -6,8 +6,6 @@
 
 local ffi = require'ffi'
 
-require'ctypes'
-
 ffi.cdef[[
 typedef size_t          rsize_t;
 typedef unsigned short  wctype_t;
