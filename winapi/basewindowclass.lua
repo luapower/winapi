@@ -528,6 +528,7 @@ function BaseWindow:WM_WINDOWPOSCHANGING(wp)
 		for child in self:children() do
 			child:__parent_resizing(wp)
 		end
+
 		if self.on_pos_changing then
 			self:on_pos_changing(wp)
 		end
