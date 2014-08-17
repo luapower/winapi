@@ -1,6 +1,5 @@
 --proc/rawinput: raw input API
 setfenv(1, require'winapi')
-require'winapi.winusertypes'
 
 ffi.cdef[[
 struct HRAWINPUT__ { int unused; }; typedef struct HRAWINPUT__ *HRAWINPUT;

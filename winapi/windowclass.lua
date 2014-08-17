@@ -197,9 +197,18 @@ end
 
 --maximize size/position constraints
 
+--clamp with upper limit taking precedence over the lower limit.
+local function clamp(x, min, max)
+	return math.min(math.max(x, min or -math.huge), max or math.huge)
+end
+
 function Window:WM_GETMINMAXINFO(info)
-	if self.maximized_pos then info.ptMaxPosition = self.maximized_pos end
-	if self.maximized_size then info.ptMaxSize = self.maximized_size end
+	if self.maximized_pos then
+		info.ptMaxPosition = self.maximized_pos
+	end
+	if self.maximized_size then
+		info.ptMaxSize = self.maximized_size
+	end
 	return 0
 end
 
@@ -299,7 +308,7 @@ end
 function Window:get_restore_to_maximized()
 	local wp = GetWindowPlacement(self.hwnd)
 	if wp.showCmd == SW_SHOWMINIMIZED then
-		return bit.band(wp.flags, WPF_RESTORETOMAXIMIZED) ~= 0
+		return getibt(wp.flags, WPF_RESTORETOMAXIMIZED)
 	end
 end
 

@@ -1,6 +1,5 @@
 --proc/keyboard: keyboard input handling and keyboard layouts
 setfenv(1, require'winapi')
-require'winapi.winusertypes'
 
 --NOTE: can't distinguish between cursor keys and numpad cursor keys with GetKeyState(), but you can on WM_KEYDOWN et al.
 --NOTE: pressing both shift keys and then depressing one of them doesn't trigger WM_KEYUP, but does trigger WM_INPUT.

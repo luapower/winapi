@@ -1,6 +1,5 @@
 --clipboard API
 setfenv(1, require'winapi')
-require'winapi.winusertypes'
 require'winapi.memory'
 
 -- Predefined Clipboard Formats

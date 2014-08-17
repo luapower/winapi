@@ -1,6 +1,5 @@
 --proc/winuser: winuser types and macros from multiple headers.
 setfenv(1, require'winapi')
-require'winapi.winusertypes'
 
 --constants
 

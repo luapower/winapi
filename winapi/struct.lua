@@ -1,6 +1,5 @@
 --ffi/struct: struct ctype wrapper
 setfenv(1, require'winapi.namespace')
-require'winapi.ffi'
 require'winapi.util'
 
 local Struct = {}

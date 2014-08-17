@@ -1,8 +1,7 @@
 --ffi/wcs: utf8 to wide character string and back.
 setfenv(1, require'winapi.namespace')
-require'winapi.ffi'
+require'winapi.types'
 require'winapi.util'
-require'winapi.wintypes'
 
 ffi.cdef[[
 size_t wcslen(const wchar_t *str);

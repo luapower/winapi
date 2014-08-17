@@ -1,6 +1,5 @@
 --proc/mouse: mouse functions
 setfenv(1, require'winapi')
-require'winapi.winusertypes'
 
 TME_HOVER       = 0x00000001
 TME_LEAVE       = 0x00000002

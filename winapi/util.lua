@@ -1,12 +1,31 @@
 --ffi/util: filters and conversion functions for winapi args and return-values.
 setfenv(1, require'winapi.namespace')
-require'winapi.ffi'
-require'winapi.wintypes'
+require'winapi.types'
+
+--ffi, bit, C ----------------------------------------------------------------
+
+ffi = require'ffi'
+bit = require'bit'
+C = ffi.C
+
+assert(ffi.abi'win', 'platform not Windows')
+
+--glue -----------------------------------------------------------------------
 
 glue = require'glue'
-local string = string
-import(glue)
-_M.string = string --put string module back (glue has glue.string)
+
+assert       = glue.assert
+extend       = glue.extend
+fcall        = glue.fcall
+index        = glue.index
+inherit      = glue.inherit
+merge        = glue.merge
+pass         = glue.pass
+pcall        = glue.pcall
+trim         = glue.trim
+update       = glue.update
+
+--error reporting -------------------------------------------------------------
 
 ffi.cdef[[
 DWORD GetLastError(void);
@@ -43,6 +62,8 @@ local function get_error_message(id)
 	assert(sz ~= 0, 'error getting error message for %d: %d', id, GetLastError())
 	return ffi.string(buf, sz)
 end
+
+--error handling -------------------------------------------------------------
 
 local NULL = ffi.new'void*'
 
@@ -100,6 +121,8 @@ end
 callnz2 = callwith2(validnz) --EnumClipboardFormats() is a candidate for this.
 callh2 = callwith2(validh)
 
+--garbage collection ---------------------------------------------------------
+
 --own an object by assigning it a finalizer.
 --you should own all objects that winapi doesn't own to avoid leaking.
 function own(o, finalizer)
@@ -111,6 +134,22 @@ end
 function disown(o)
 	return o and ffi.gc(o, nil)
 end
+
+local pins = setmetatable({}, {__mode = 'v'})
+
+--anchor a resource to a target object so that it is guaranteed not to get collected
+--as long as the target is alive. more than one resource can be pinned to the same target.
+function pin(resource, target)
+	pins[resource] = target
+	return resource
+end
+
+function unpin(resource)
+	pins[resource] = nil
+	return resource
+end
+
+--index adjustment -----------------------------------------------------------
 
 --adjust a number from counting from 1 to counting from 0.
 --nil turns to -1. anything else passes through.
@@ -130,6 +169,8 @@ function countfrom1(n)
 	return n+1
 end
 
+--pointer filters ------------------------------------------------------------
+
 --turn a pointer into a number to make it indexable in a Lua table. nil passes through.
 --NOTE: winapi handles are are safe to convert on x64 as they are kept into the low 32bit.
 function ptonumber(p)
@@ -141,6 +182,8 @@ end
 function ptr(p)
 	return p ~= NULL and p or nil
 end
+
+--flags parser ---------------------------------------------------------------
 
 local band, bor, bnot, rshift = bit.band, bit.bor, bit.bnot, bit.rshift --cache
 
@@ -162,6 +205,8 @@ function flags(s)
 	return x
 end
 
+--integer splitter -----------------------------------------------------------
+
 --return the low and the high word of a signed long (usually LPARAM or LRESULT).
 function splitlong(n)
 	return band(n, 0xffff), rshift(n, 16)
@@ -175,6 +220,8 @@ function splitsigned(n)
 	if y >= 0x8000 then y = y-0xffff end
 	return x, y
 end
+
+--bitmask utils --------------------------------------------------------------
 
 --extract the bool value of a bitmask from a value.
 function getbit(from, mask)
@@ -191,17 +238,59 @@ function setbits(over, mask, bits)
 	return bor(bits, band(over, bnot(mask)))
 end
 
-local pins = setmetatable({}, {__mode = 'v'})
+--ctype constructor ----------------------------------------------------------
 
---anchor a resource to a target object so that it is guaranteed not to get collected
---as long as the target is alive. more than one resource can be pinned to the same target.
-function pin(resource, target)
-	pins[resource] = target
-	return resource
+--use arg = types.FOO(arg) instead of arg = ffi.new('FOO', arg): if arg is
+--already a FOO, it is passed through instead of being copied over, thus
+--allowing the user to pre-allocate args if needed to lower gc pressure.
+
+types = {}
+setmetatable(types, types)
+
+function types:__index(type_str)
+	local ctype = ffi.typeof(type_str)
+	self[type_str] = function(t,...)
+		if ffi.istype(ctype, t) then return t end
+		if t == nil then return ctype() end
+		return ctype(t,...)
+	end
+	return self[type_str]
 end
 
-function unpin(resource)
-	pins[resource] = nil
-	return resource
-end
+--array constructor ----------------------------------------------------------
+
+--use arg = arrays.FOO(arg) instead of arg == ffi.new('FOO[?]', n, arg).
+--if arg is a table, this allows the creation of a #t-sized VLA array
+--initialized with the elements from the table, so no need to pass the length.
+--the constructor is also returning the number of elements as the second
+--retval since APIs usually need that. see arrays_test.lua for full semantics.
+arrays = setmetatable({}, {
+	__index = function(t,k)
+		local ctype = ffi.typeof(k..'[?]')
+		t[k] = function(t,...)
+			local n
+			if type(t) == 'table' then --arr{elem1, elem2, ...} constructor
+ 				n = #t
+				t = ctype(n, t)
+			else --arr(n, elem1, elem2, ...) constructor
+				n = t
+				t = ctype(t,...)
+			end
+			return t, n
+		end
+		return t[k]
+	end
+})
+
+--struct constructor ---------------------------------------------------------
+
+--require'winapi.struct'
+
+--bitmask constructor --------------------------------------------------------
+
+--require'winapi.bitmask'
+
+--wide char <-> utf8 converters ----------------------------------------------
+
+--require'winapi.wcs'
 

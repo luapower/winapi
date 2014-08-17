@@ -477,7 +477,7 @@ function BaseWindow:get_is_visible() --visible and all parents are visible too
 end
 
 function BaseWindow:get_visible()
-	return bit.band(GetWindowStyle(self.hwnd), WS_VISIBLE) == WS_VISIBLE
+	return getbit(GetWindowStyle(self.hwnd), WS_VISIBLE)
 end
 
 function BaseWindow:set_visible(visible)
@@ -519,7 +519,7 @@ end
 
 --restrict size by min/max constraints and resize children.
 function BaseWindow:WM_WINDOWPOSCHANGING(wp)
-	if bit.band(wp.flags, SWP_NOSIZE) ~= SWP_NOSIZE then
+	if not getbit(wp.flags, SWP_NOSIZE) then
 
 		--apply size constraints.
 		self:__apply_constraints(wp)
@@ -762,7 +762,7 @@ end
 --z-order
 
 function BaseWindow:get_topmost()
-	return bit.band(GetWindowExStyle(self.hwnd), WS_EX_TOPMOST) == WS_EX_TOPMOST
+	return getbit(GetWindowExStyle(self.hwnd), WS_EX_TOPMOST)
 end
 
 function BaseWindow:set_topmost(topmost)
