@@ -6,6 +6,16 @@ require'winapi.color'
 require'winapi.cursor'
 require'winapi.waitemlistclass'
 
+--extend the Windows class with methods for top-level windows.
+
+function Windows:client_to_frame(info, ...) --x1,y1,x2,y2 or rect
+	local rect = RECT(...)
+	local style = Window:__style_args(info)
+	local style_ex = Window:__style_ex_args(info)
+	local has_menu = info.menu ~= nil
+	return AdjustWindowRect(rect, style, style_ex, has_menu)
+end
+
 Window = subclass({
 	__class_style_bitmask = bitmask{ --only static, frame styles here
 		noclose = CS_NOCLOSE, --disable close button and ALT+F4
@@ -112,6 +122,26 @@ local function name_generator(format)
 end
 local gen_classname = name_generator'Window%d'
 
+function Window:__style_args(info)
+	local style = Window.__index.__style_args(self, info)
+
+	--WS_MINIMIZE and WS_MAXIMIZE flags don't work together, hence the 'state' property.
+	--the combination WS_MINIMIZE + WS_MAXIMIZE makes ShowWindow(SW_RESTORE) have no effect.
+	local style = bit.bor(style,
+								info.state == 'minimized' and WS_MINIMIZE or 0,
+								info.state == 'maximized' and WS_MAXIMIZE or 0)
+
+	return style
+end
+
+function Window:__style_ex_args(info)
+	local style_ex = Window.__index.__style_ex_args(self, info)
+
+	local style_ex = bit.bor(style_ex, info.topmost and WS_EX_TOPMOST or 0)
+
+	return style_ex
+end
+
 function Window:__before_create(info, args)
 	Window.__index.__before_create(self, info, args)
 
@@ -127,14 +157,6 @@ function Window:__before_create(info, args)
 
 	args.parent = info.owner and info.owner.hwnd
 	args.text = info.title
-
-	--WS_MINIMIZE and WS_MAXIMIZE flags don't work together, hence the 'state' property.
-	--the combination WS_MINIMIZE + WS_MAXIMIZE makes ShowWindow(SW_RESTORE) have no effect.
-	args.style = bit.bor(args.style,
-								info.state == 'minimized' and WS_MINIMIZE or 0,
-								info.state == 'maximized' and WS_MAXIMIZE or 0)
-
-	args.style_ex = bit.bor(args.style_ex, info.topmost and WS_EX_TOPMOST or 0)
 
 	self.__state.maximized_pos = info.maximized_pos
 	self.__state.maximized_size = info.maximized_size

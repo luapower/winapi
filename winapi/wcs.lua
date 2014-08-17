@@ -116,14 +116,27 @@ function wcsncpy(dest, src, count) --wcsncpy variant that null-terminates even o
 	dest[count-1] = 0
 end
 
---convert and store a utf8-encoded Lua string into a user-provided, fixed size wcs cdata.
-function wcs_to(s, ws)
+--convert and store a utf8-encoded Lua string into a user-provided wcs cdata.
+--nil means empty string. anything else passes through.
+--if the dest. buffer is a pointer instead of a VLA, max size must be given too.
+function wcs_to(s, ws, maxsz)
 	if s == nil then s = '' end
 	if type(s) ~= 'string' then return s end
+
+	if ffi.type(ws, WCS_ctype) then
+		--VLA, size known, check maxsz against it
+		local wsz = ffi.sizeof(ws) / 2
+		maxsz = math.min(maxsz or wsz, wsz)
+	else
+		--pointer, size unknown, maxsz must be given
+		assert(maxsz, 'max size missing')
+	end
+
 	local sz = checknz(MB2WC(CP, MB, s, #s + 1, nil, 0))
-	if sz > ffi.sizeof(ws) / 2 then
+	if sz > maxsz then
 		error('string too long. max chars: '..(ffi.sizeof(ws) / 2 - 1))
 	end
+
 	checknz(MB2WC(CP_UTF8, 0, s, #s + 1, ws, ffi.sizeof(ws)))
 end
 

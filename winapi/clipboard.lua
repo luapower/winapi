@@ -37,18 +37,19 @@ CF_GDIOBJFIRST       = 0x0300
 CF_GDIOBJLAST        = 0x03FF
 
 ffi.cdef[[
-BOOL OpenClipboard(HWND hWndNewOwner);
-BOOL CloseClipboard(void);
-BOOL IsClipboardFormatAvailable(UINT format);
+BOOL   OpenClipboard(HWND hWndNewOwner);
+BOOL   CloseClipboard(void);
+BOOL   IsClipboardFormatAvailable(UINT format);
+int    CountClipboardFormats(void);
 HANDLE GetClipboardData(UINT uFormat);
-BOOL EmptyClipboard(void);
+BOOL   EmptyClipboard(void);
 HANDLE SetClipboardData(UINT uFormat, HANDLE hMem);
-UINT EnumClipboardFormats(UINT format);
-int GetClipboardFormatNameW(UINT format, LPWSTR lpszFormatName, int cchMaxCount);
+UINT   EnumClipboardFormats(UINT format);
+int    GetClipboardFormatNameW(UINT format, LPWSTR lpszFormatName, int cchMaxCount);
 ]]
 
 function OpenClipboard(hwnd)
-	return checknz(ffi.C.OpenClipboard(hwnd))
+	return ffi.C.OpenClipboard(hwnd) ~= 0
 end
 
 function CloseClipboard(hwnd)
@@ -57,6 +58,10 @@ end
 
 function IsClipboardFormatAvailable(format)
 	return ffi.C.IsClipboardFormatAvailable(flags(format)) ~= 0
+end
+
+function CountClipboardFormats()
+	return callnz2(ffi.C.CountClipboardFormats)
 end
 
 function GetClipboardData(uFormat)
@@ -87,16 +92,13 @@ end
 
 --return a list of available clipboard formats, in original order.
 function GetClipboardFormats()
-	OpenClipboard()
-	return glue.fcall(function()
-		local format
-		local t = {}
-		repeat
-			format = EnumClipboardFormats(format)
-			t[#t+1] = format
-		until not format
-		return t
-	end, CloseClipboard)
+	local format
+	local t = {}
+	repeat
+		format = EnumClipboardFormats(format)
+		t[#t+1] = format
+	until not format
+	return t
 end
 
 --return a list of available clipboard format names, in original order.
@@ -124,29 +126,23 @@ function GetClipboardDataBuffer(format, copy)
 	if not IsClipboardFormatAvailable(format) then
 		return
 	end
-	OpenClipboard()
+	local h = GetClipboardData(format)
+	local buf = GlobalLock(h)
+	local sz = GlobalSize(h)
 	return glue.fcall(function()
-		local h = GetClipboardData(format)
-		local buf = GlobalLock(h)
-		local sz = GlobalSize(h)
-		return glue.fcall(function()
-			return copy(buf, sz)
-		end, function() GlobalUnlock(h) end)
-	end, CloseClipboard)
+		return copy(buf, sz)
+	end, function() GlobalUnlock(h) end)
 end
 
 --set the clipboard data for a specific format from a buffer or string.
 function SetClipboardDataBuffer(format, buf, sz)
 	sz = sz or #buf
-	OpenClipboard()
-	glue.fcall(function()
-		EmptyClipboard()
-		local h = GlobalAlloc(GMEM_MOVEABLE, sz) --windows frees this
-		local destbuf = GlobalLock(h)
-		ffi.copy(destbuf, buf, sz)
-		GlobalUnlock(h)
-		SetClipboardData(format, h)
-	end, CloseClipboard)
+	--windows will own this memory, no need to free it.
+	local h = GlobalAlloc(bit.bor(GMEM_MOVEABLE, GMEM_ZEROINIT, GMEM_SHARE), sz)
+	local destbuf = GlobalLock(h)
+	ffi.copy(destbuf, buf, sz)
+	GlobalUnlock(h)
+	SetClipboardData(format, h)
 end
 
 --get utf8 text out of the clipboard.
@@ -162,7 +158,7 @@ function SetClipboardText(s)
 	SetClipboardDataBuffer(CF_UNICODETEXT, buf, ffi.sizeof(buf))
 end
 
---return a list of files
+--get a list of files from clipboard.
 function GetClipboardFiles()
 	require'winapi.shellapi'
 	return GetClipboardDataBuffer(CF_HDROP, function(buf)
@@ -171,17 +167,23 @@ function GetClipboardFiles()
 	end)
 end
 
+--put a list of files in clipboard.
 function SetClipboardFiles(files)
-	--TODO
 	require'winapi.shellapi'
-	return SetClipboardDataBuffer(CF_HDROP, function(buf)
-		return ffi.cast('HDROP', buf)
-	end)
+	local df = DROPFILES(files)
+	return SetClipboardDataBuffer(CF_HDROP, df, ffi.sizeof(df))
 end
 
+--test/demo
+
 if not ... then
-	print'Clipboard right now:'
-	print'--------------------'
+	if not OpenClipboard() then
+		error'OpenClipboard() failed'
+	end
+
+	print''
+	print'clipboard as found:'
+	print''
 	for i,format in ipairs(GetClipboardFormatNames()) do
 		print('>' .. (CF_NAMES[format] or format))
 		if format == CF_UNICODETEXT then
@@ -191,9 +193,25 @@ if not ... then
 		end
 	end
 
+	print''
+	print'utf8 text:'
+	print''
 	local s = 'hello from the clipboard!'
+	EmptyClipboard()
 	SetClipboardText(s)
+
 	assert(#GetClipboardFormatNames() == 1)
 	assert(GetClipboardFormatNames()[1] == CF_UNICODETEXT)
 	assert(GetClipboardText() == s)
+
+	print''
+	print'list of files:'
+	print''
+	EmptyClipboard()
+	SetClipboardFiles{'file1', 'file2', 'file3'}
+	assert(#GetClipboardFiles() == 3)
+	assert(GetClipboardFiles()[3] == 'file3')
+	require'pp'(GetClipboardFiles())
+
+	CloseClipboard()
 end

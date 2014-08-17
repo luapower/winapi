@@ -284,6 +284,18 @@ function BaseWindow:__check_style_ex(wanted)
 	self:__check_bitmask('ex style', self.__style_ex_bitmask, wanted, GetWindowExStyle(self.hwnd))
 end
 
+--abstract class method
+function BaseWindow:__style_args(info)
+	local style = self.__style_bitmask:set(0, info)
+	local style = bit.bor(style, info.enabled and 0 or WS_DISABLED)
+	return style
+end
+
+--abstract class method
+function BaseWindow:__style_ex_args(info)
+	return self.__style_ex_bitmask:set(0, info)
+end
+
 function BaseWindow:__init(info)
 
 	--given a window handle, wrap it up in a window object, in which case we ignore info completely
@@ -307,9 +319,9 @@ function BaseWindow:__init(info)
 	args.w = info.w
 	args.h = info.h
 	self:__adjust_wh(args) --adjust t.w,t.h with min/max_w/h
-	args.style = self.__style_bitmask:set(args.style or 0, info)
-	args.style_ex = self.__style_ex_bitmask:set(args.style_ex or 0, info)
-	args.style = bit.bor(args.style, info.enabled and 0 or WS_DISABLED)
+
+	args.style = self:__style_args(info)
+	args.style_ex = self:__style_ex_args(info)
 	self:__before_create(info, args)
 
 	self.hwnd = CreateWindow(args)

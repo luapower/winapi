@@ -51,12 +51,6 @@ function SetCursor(cursor)
 	return ptr(C.SetCursor(cursor))
 end
 
-function GetCursorPos(p) --NOTE: use GetCursorInfo() instead due to a bug in WinXP x64 with this function
-	p = POINT(p)
-	checknz(C.GetCursorPos(p))
-	return p
-end
-
 function GetMessagePos()
 	return splitsigned(C.GetMessagePos())
 end
@@ -64,10 +58,26 @@ end
 CURSOR_SHOWING     = 1
 CURSOR_SUPPRESSED  = 2 --Win8+
 
+CURSORINFO = struct{ctype = 'CURSORINFO', size = 'cbSize'}
+
 function GetCursorInfo(pci)
-	pci = types.CURSORINFO(pci)
+	pci = CURSORINFO(pci)
 	checknz(C.GetCursorInfo(pci))
 	return pci
+end
+
+--NOTE: GetCursorPos() must be passed in a POINT* in the low 2GB of address
+--space or it will fail. This is safe with LuaJIT 2.x but to future-proof it,
+--we emulate GetCursorPos() with GetCursorInfo() which doesn't suffer from this.
+function GetCursorPos(p, pci)
+	pci = GetCursorInfo(pci)
+	if p then
+		p.x = pci.ptScreenPos.x
+		p.y = pci.ptScreenPos.y
+	else
+		p = POINT(pci.ptScreenPos)
+	end
+	return p
 end
 
 --messages
@@ -83,5 +93,11 @@ if not ... then
 	print(LoadCursor(IDC_ARROW))
 	assert(LoadCursor(IDC_ARROW) == LoadCursor(IDC_ARROW)) --same handle every time, no worry about freeing these
 	print(LoadCursor(IDC_HELP))
+
+	local p1 = GetCursorPos()
+	local p2 = GetCursorInfo().ptScreenPos
+	assert(p1.x == p2.x and p1.y == p2.y)
+	local p3 = GetCursorPos(p1)
+	assert(p1 == p3)
 end
 

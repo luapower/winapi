@@ -8,17 +8,16 @@ shell32 = ffi.load'Shell32'
 --file info
 
 ffi.cdef[[
-typedef struct _SHFILEINFOW
-{
-        HICON       hIcon;
-        int         iIcon;
-        DWORD       dwAttributes;
-        WCHAR       szDisplayName[260];
-        WCHAR       szTypeName[80];
+typedef struct _SHFILEINFOW {
+	HICON hIcon;
+	int   iIcon;
+	DWORD dwAttributes;
+	WCHAR szDisplayName[260];
+	WCHAR szTypeName[80];
 } SHFILEINFOW;
 
-extern  DWORD_PTR  SHGetFileInfoW(LPCWSTR pszPath, DWORD dwFileAttributes,  SHFILEINFOW *psfi,
-    UINT cbFileInfo, UINT uFlags);
+extern DWORD_PTR SHGetFileInfoW(LPCWSTR pszPath, DWORD dwFileAttributes,
+	SHFILEINFOW *psfi, UINT cbFileInfo, UINT uFlags);
 ]]
 
 SHFILEINFO = struct{
@@ -47,7 +46,7 @@ SHGFI_OVERLAYINDEX      = 0x000000040 -- Get the index of the overlay
 function SHGetFileInfo(path, fileattr, SHGFI, fileinfo)
 	fileinfo = SHFILEINFO(fileinfo)
 	return shell32.SHGetFileInfoW(wcs(path), flags(fileattr), fileinfo,
-											ffi.sizeof'SHFILEINFOW', flags(SHGFI)), fileinfo
+		ffi.sizeof'SHFILEINFOW', flags(SHGFI)), fileinfo
 end
 
 --notify icons (WinXP/Win2K+)
@@ -158,17 +157,53 @@ ffi.cdef[[
 struct HDROP__ { int unused; };
 typedef struct HDROP__ *HDROP;
 
+typedef struct _DROPFILES {
+	DWORD pFiles;                       // offset of file list, i.e. sizeof(DROPFILES)
+	                                    // if it immediately follows the struct.
+	POINT pt;                           // drop point (client coords).
+	BOOL fNC;                           // is it on NonClient area and pt is in screen coords.
+	BOOL fWide;                         // WIDE character switch.
+} DROPFILES, *LPDROPFILES;
+
+typedef struct DROPFILESW_VLS {
+	DROPFILES;
+	WCHAR files[?];
+} DROPFILESW_VLS;
+
 UINT DragQueryFileW(HDROP hDrop, UINT iFile, LPWSTR lpszFile, UINT cch);
 ]]
 
-function DragQueryFile(hdrop, ifile, buf, sz) --returns buf, actual_sz
+--special constructor for a Lua list of utf-8 (or wcs) filenames.
+DROPFILES = function(files)
+	local bufsz = 1 --trailing \0
+	local t = {}
+	for i=1,#files do
+		local buf, sz = wcs_sz(files[i])
+		bufsz = bufsz + sz + 1 --string + \0
+		t[i] = buf
+	end
+	local df = ffi.new('DROPFILESW_VLS', bufsz)
+	df.pFiles = ffi.sizeof'DROPFILES'
+	df.fWide = 1
+	local offset = 0
+	for i=1,#t do
+		ffi.copy(df.files + offset, t[i], ffi.sizeof(t[i]))
+		offset = offset + ffi.sizeof(t[i]) / 2
+	end
+	df.files[offset] = 0 --trailing \0
+	return df
+end
+
+function DragQueryFile(hdrop, ifile, buf, sz) --returns nfiles | buf,nchars
 	if not ifile then
-		return checknz(shell32.DragQueryFileW(hdrop, 0xFFFFFFFF, nil, 0)) --get number of files
+		--get number of files
+		return checknz(shell32.DragQueryFileW(hdrop, 0xFFFFFFFF, nil, 0))
 	end
 	if not buf then buf, sz = WCS() end
 	return buf, checknz(shell32.DragQueryFileW(hdrop, ifile, buf, sz + 1))
 end
 
+--return the list of files that are being dragged or in clipboard.
 --custom function, don't look it up in msdn.
 function DragQueryFiles(hdrop)
 	local buf, sz = WCS()

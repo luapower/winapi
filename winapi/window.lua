@@ -531,13 +531,13 @@ function RealChildWindowFromPoint(hwnd, ...)
 	return ptr(C.RealChildWindowFromPoint(hwnd, POINT(...)))
 end
 
-function AdjustWindowRect(cr, wstyle, wstylex, hasmenu, rect)
+function AdjustWindowRect(cr, style, style_ex, has_menu, rect)
 	rect = RECT(rect)
 	rect.x1 = cr.x1
 	rect.y1 = cr.y1
 	rect.x2 = cr.x2
 	rect.y2 = cr.y2
-	checknz(C.AdjustWindowRectEx(rect))
+	checknz(C.AdjustWindowRectEx(rect, style, has_menu, style_ex))
 	return rect
 end
 
