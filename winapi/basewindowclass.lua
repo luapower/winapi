@@ -13,15 +13,15 @@ require'winapi.monitor'
 Windows = class(HandleList) --track window objects by their hwnd
 
 --the active window goes nil when the app is deactivated, but if
---SetActiveWindow() is called while the app is not active, the active
---window will be set nevertheless.
+--SetActiveWindow() is called while the app is inactive, the active
+--window will be set immediately, even if the window doesn't activate.
 function Windows:get_active_window()
 	return self:find(GetActiveWindow())
 end
 
 --the difference between active window and foreground window is that
 --the foreground window is always nil when the app is not active,
---even if SetActiveWindow() is called.
+--even after calling SetActiveWindow().
 function Windows:get_foreground_window()
 	return self:find(GetForegroundWindow())
 end
@@ -41,6 +41,25 @@ end
 function Windows:get_cursor_pos(in_window)
 	local p = GetCursorPos()
 	return in_window and self:map_point(in_window, p) or p
+end
+
+function Windows:client_to_frame(info, ...) --x1,y1,x2,y2 or rect
+	local rect = RECT(...)
+	local style = Window:__info_style(info)
+	local style_ex = Window:__info_style_ex(info)
+	local has_menu = info.menu ~= nil
+	return AdjustWindowRect(rect, style, style_ex, has_menu)
+end
+
+function Windows:frame_to_client(info, ...) --x1,y1,x2,y2 or rect
+	local r = RECT(...)
+	local x1, y1, w1, h1 = self:client_to_frame(info, 0, 0, 200, 200)
+	local dr = RECT()
+	dr.x = r.x - x1
+	dr.y = r.y - y1
+	dr.w = r.w - w1 - x1 - 200
+	dr.h = r.h - h1 - y1 - 200
+	return dr
 end
 
 Windows = Windows'hwnd' --singleton
@@ -130,8 +149,6 @@ BaseWindow = {
 		enabled = true,
 		x = 0,
 		y = 0,
-		min_w = 0,
-		min_h = 0,
 	},
 	__init_properties = {},            --subclasses add after-create properties that are relevant to them
 	__wm_handler_names = index{        --subclasses add messages that are relevant to them
@@ -285,14 +302,14 @@ function BaseWindow:__check_style_ex(wanted)
 end
 
 --abstract class method
-function BaseWindow:__style_args(info)
+function BaseWindow:__info_style(info)
 	local style = self.__style_bitmask:set(0, info)
 	local style = bit.bor(style, info.enabled and 0 or WS_DISABLED)
 	return style
 end
 
 --abstract class method
-function BaseWindow:__style_ex_args(info)
+function BaseWindow:__info_style_ex(info)
 	return self.__style_ex_bitmask:set(0, info)
 end
 
@@ -312,16 +329,30 @@ function BaseWindow:__init(info)
 	self.__state.min_h = info.min_h
 	self.__state.max_w = info.max_w
 	self.__state.max_h = info.max_h
+	self.__state.min_cw = info.min_cw
+	self.__state.min_ch = info.min_ch
+	self.__state.max_cw = info.max_cw
+	self.__state.max_ch = info.max_ch
 
 	local args = {}
 	args.x = info.x
 	args.y = info.y
 	args.w = info.w
 	args.h = info.h
-	self:__adjust_wh(args) --adjust t.w,t.h with min/max_w/h
 
-	args.style = self:__style_args(info)
-	args.style_ex = self:__style_ex_args(info)
+	--if there are constraints on the client rect, we need to find the frame
+	--thickness to be able to apply the constraints.
+	local dw, dh
+	if self.min_cw or self.min_ch or self.max_cw or self.max_ch then
+		local r = Windows:client_to_frame(info, 0, 0, 200, 200)
+		dw = r.w - 200
+		dh = r.h - 200
+	end
+	self:__apply_constraints(args, dw, dh)
+
+	args.style = self:__info_style(info)
+	args.style_ex = self:__info_style_ex(info)
+
 	self:__before_create(info, args)
 
 	self.hwnd = CreateWindow(args)
@@ -462,18 +493,40 @@ function BaseWindow:__parent_resizing(wp)
 	end
 end
 
---restrict width and height to min and max constraints.
-function BaseWindow:__adjust_wh(t)
-	t.w = math.min(math.max(t.w, self.min_w or t.w), self.max_w or t.w)
-	t.h = math.min(math.max(t.h, self.min_h or t.h), self.max_h or t.h)
+--clamp with upper limit taking precedence over the lower limit.
+local function clamp(x, min, max)
+	return math.min(math.max(x, min or -math.huge), max or math.huge)
 end
 
---restrict size by min/max constraints and resize children
+function BaseWindow:__apply_constraints(t, dw, dh)
+	--constrain client size.
+	if self.min_cw or self.max_cw then
+		dw = dw or self.w - self.client_w
+		local cw = t.w - dw
+		cw = clamp(cw, self.min_cw, self.max_cw)
+		t.w = cw + dw
+	end
+	if self.min_ch or self.max_ch then
+		dh = dh or self.h - self.client_h
+		local ch = t.h - dh
+		ch = clamp(ch, self.min_ch, self.max_ch)
+		t.h = ch + dh
+	end
+	--constrain frame size.
+	t.w = clamp(t.w, self.min_w, self.max_w)
+	t.h = clamp(t.h, self.min_h, self.max_h)
+end
+
+--restrict size by min/max constraints and resize children.
 function BaseWindow:WM_WINDOWPOSCHANGING(wp)
 	if bit.band(wp.flags, SWP_NOSIZE) ~= SWP_NOSIZE then
-		self:__adjust_wh(wp)
+
+		--apply size constraints.
+		self:__apply_constraints(wp)
+
+		--children can resize the parent by modifying wp.
 		for child in self:children() do
-			child:__parent_resizing(wp) --children can resize the parent by modifying wp
+			child:__parent_resizing(wp)
 		end
 		if self.on_pos_changing then
 			self:on_pos_changing(wp)
@@ -488,12 +541,40 @@ function BaseWindow:__force_resize() --force move + resize events
 	SetWindowPos(self.hwnd, nil, r.x, r.y, r.w, r.h, flags)
 end
 
-function BaseWindow:set_min_w()
+local function set_minmax(self)
 	self:__force_resize()
 end
-BaseWindow.set_min_h = BaseWindow.set_min_w
-BaseWindow.set_max_w = BaseWindow.set_min_w
-BaseWindow.set_max_h = BaseWindow.set_min_w
+
+BaseWindow.set_min_w = set_minmax
+BaseWindow.set_min_h = set_minmax
+BaseWindow.set_max_w = set_minmax
+BaseWindow.set_max_h = set_minmax
+
+BaseWindow.set_min_cw = set_minmax
+BaseWindow.set_min_ch = set_minmax
+BaseWindow.set_max_cw = set_minmax
+BaseWindow.set_max_ch = set_minmax
+
+--set many constraints at once but trigger a single resize event.
+--a false value indicates clearing the constraint.
+function BaseWindow:setminmax(t)
+
+	local function set(name)
+		if t[name] == false then
+			self.__state[name] = nil
+		elseif t[name] then
+			self.__state[name] = t[name]
+		end
+	end
+
+	set'min_w' set'min_h'
+	set'max_w' set'max_h'
+
+	set'min_cw' set'min_ch'
+	set'max_cw' set'max_ch'
+
+	self:__force_resize()
+end
 
 --moving and resizing
 
