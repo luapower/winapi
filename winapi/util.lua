@@ -282,15 +282,3 @@ arrays = setmetatable({}, {
 	end
 })
 
---struct constructor ---------------------------------------------------------
-
---require'winapi.struct'
-
---bitmask constructor --------------------------------------------------------
-
---require'winapi.bitmask'
-
---wide char <-> utf8 converters ----------------------------------------------
-
---require'winapi.wcs'
-
