@@ -207,10 +207,10 @@ function struct(s)
 	return s
 end
 
---struct field definition constructors ---------------------------------------
+--struct field definitions constructors --------------------------------------
 
---sugar constructor for defining non-masked struct fields.
---t is a table of form {aliasname1, structname1, setter, getter, fieldname2, ...}.
+--field definitions constructor for defining non-masked struct fields.
+--t is a table of form {virtfield1, cfield1, setter, getter, virtfield2, ...}.
 function sfields(t)
 	local dt = {}
 	for i=1,#t,4 do
@@ -226,8 +226,8 @@ function sfields(t)
 	return dt
 end
 
---sugar constructor for defining masked struct fields.
---t is a table of form {aliasname1, structname1, mask, setter, getter, aliasname2, ...}.
+--field definitions constructor for defining masked struct fields.
+--t is a table of form {virtfield1, cfield1, mask, setter, getter, virtfield2, ...}.
 function mfields(t)
 	local dt = {}
 	for i=1,#t,5 do
