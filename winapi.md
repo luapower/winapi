@@ -1,48 +1,46 @@
 ---
 project: winapi
-tagline: windows & widgets
+tagline: win32 windows & controls
 platforms: mingw32
 ---
 
 ## Scope
 
-Windows, common controls and dialogs, message loop, support APIs, OpenGL and cairo integration.
+Windows, common controls and dialogs, message loop, support APIs,
+OpenGL and cairo integration.
 
 ## Features
 
-  * accepts (and returns) utf-8 encoded Lua strings throughout (accepts wide char buffers too)
-  * winapi calls are error-checked so you don't have to
-  * objects are automatically tied to the garbage collector when not owned by other winapi objects
-  * flags can be passed as `'FLAG1 | FLAG2'`
+  * accepting and returning UTF8 Lua strings (also accepting wide char buffers)
+  * out-of-band error signaling with Lua errors
+  * automatic memory management (ownership management, allocation of in/out buffers)
+  * flags can be passed as `'FLAG1 FLAG2'`
   * counting from 1 everywhere
   * object system with virtual properties (eg. `window.w = 500` changes a window's width)
   * Delphi-style anchor-based layout model for all controls
-  * [binding infrastructure][winapi_binding] tailored to winapi conventions, facilitating the binding of more APIs
-  * cairo, opengl and openvg panel widgets
+  * [binding infrastructure][winapi_binding] tailored to winapi conventions,
+  facilitating the binding of more APIs
+  * cairo, OpenGL and OpenVG panel widgets.
 
 ## Modules
 
 --------------------------- --------------------------------------
 __binding infrastructure__
-[winapi.init]               load the namespace + ffi tools + wintypes
-[winapi.namespace]          the namespace table for the entire API
-[winapi.ffi]                load the ffi and bit libs and check the platform
+[winapi.init]               load the namespace + ffi tools + types
+[winapi.namespace]          the namespace table
 [winapi.util]               wrapping and conversion functions
-[winapi.types]              ctype wrapper/memoizer
 [winapi.struct]             struct ctype wrapper
-[winapi.arrays]             variable length array (VLA) wrapper/memoizer
 [winapi.bitmask]            bitmask encoding and decoding
 [winapi.wcs]                utf8 to wide character string and back
-[winapi.debug]              strict mode and some debug tools. entirely optional module
+[winapi.debug]              strict mode and debug tools. entirely optional module
 __types__
-[winapi.wintypes]           basic windows types and macros from multiple headers
+[winapi.types]              windows types and macros from multiple headers
 [winapi.winuser]            winuser types and macros from multiple headers
-[winapi.winusertypes]       winuser types that we keep separate for use by external libs
 [winapi.logfonttype]        LOGFONTW type
 __windows__
-[winapi.window]             common API for windows and standard controls
+[winapi.window]             windows and standard controls
 __standard controls__
-[winapi.comctl]             common controls API
+[winapi.comctl]             common controls
 [winapi.messagebox]         standard message box dialog
 [winapi.button]             button and button-like controls
 [winapi.combobox]           standard (old, not comctl-based) combobox control
@@ -51,7 +49,7 @@ __standard controls__
 [winapi.listbox]            standard listbox control
 [winapi.listview]           standard listview control
 [winapi.menu]               standard menu control
-[winapi.accelerator]        accelerator tables
+[winapi.accelerator]        accelerators
 [winapi.richedit]           standard richedit control
 [winapi.edit]               standard edit control
 [winapi.static]             standard static (aka label, text) control
@@ -84,7 +82,7 @@ __support APIs__
 [winapi.spi]                system parameters info API
 [winapi.winbase]            winbase.h. incomplete :)
 [winapi.winnt]              don't know the scope of this yet
-[winapi.multimon]           multi-monitor API
+[winapi.monitor]            multi-monitor API
 [winapi.clipboard]          clipboard access
 [winapi.rpc]                RPC runtime and types
 [winapi.uuid]               UUID API from rpcdce.h
@@ -132,10 +130,6 @@ __oo custom panels__
                             on `self:on_render()` to render a cairo scene graph
 --------------------------- --------------------------------------
 
-> There is also an unfinished [designer][windesigner] app that could serve as
-feature showcase, live testing environment, and ultimately as a GUI designer.
-I have no plans to continue working on that though.
-
 ## Usage
 
 ~~~{.lua}
@@ -151,13 +145,18 @@ local main = winapi.Window{
 os.exit(winapi.MessageLoop())
 ~~~
 
-> __NOTE:__ The oo modules can also be run as standalone scripts, for showcasing the module's functionality.
+> __Tip:__ The oo modules can be run as standalone scripts, which will
+showcase the module's functionality.
+
 
 ## Documentation
 
-There's no method-by-method documentation, but there's a [tech doc], [dev doc], and a [narrative][history]
-which should give you more context. Also, oo modules have a small runnable demo at the bottom of the file
-which showcases the module's functionality. Run the module as a standalone script to check it out.
+There's no method-by-method documentation, but there's a [tech doc],
+a [dev doc], and a [narrative][history] which should give you more context.
+The code is also well documented IMHO, including API quirks and empirical
+knowledge. Also, oo modules have a small runnable demo at the bottom of the
+file which showcases the module's functionality. Run the module as a
+standalone script to check it out.
 
 [tech doc]:     winapi_design.html
 [dev doc]:      winapi_binding.html
@@ -166,7 +165,6 @@ which showcases the module's functionality. Run the module as a standalone scrip
 [winapi.accelerator]: https://github.com/luapower/winapi/blob/master/winapi/accelerator.lua
 [winapi.amanithvgpanel]: https://github.com/luapower/winapi/blob/master/winapi/amanithvgpanel.lua
 [winapi.amanithvgpanel_demo]: https://github.com/luapower/winapi/blob/master/winapi/amanithvgpanel_demo.lua
-[winapi.arrays]: https://github.com/luapower/winapi/blob/master/winapi/arrays.lua
 [winapi.basebuttonclass]: https://github.com/luapower/winapi/blob/master/winapi/basebuttonclass.lua
 [winapi.basewindowclass]: https://github.com/luapower/winapi/blob/master/winapi/basewindowclass.lua
 [winapi.bitmask]: https://github.com/luapower/winapi/blob/master/winapi/bitmask.lua
@@ -189,7 +187,6 @@ which showcases the module's functionality. Run the module as a standalone scrip
 [winapi.debug]: https://github.com/luapower/winapi/blob/master/winapi/debug.lua
 [winapi.edit]: https://github.com/luapower/winapi/blob/master/winapi/edit.lua
 [winapi.editclass]: https://github.com/luapower/winapi/blob/master/winapi/editclass.lua
-[winapi.ffi]: https://github.com/luapower/winapi/blob/master/winapi/ffi.lua
 [winapi.filedialogs]: https://github.com/luapower/winapi/blob/master/winapi/filedialogs.lua
 [winapi.font]: https://github.com/luapower/winapi/blob/master/winapi/font.lua
 [winapi.fontex]: https://github.com/luapower/winapi/blob/master/winapi/fontex.lua
@@ -216,7 +213,7 @@ which showcases the module's functionality. Run the module as a standalone scrip
 [winapi.messagebox]: https://github.com/luapower/winapi/blob/master/winapi/messagebox.lua
 [winapi.module]: https://github.com/luapower/winapi/blob/master/winapi/module.lua
 [winapi.mouse]: https://github.com/luapower/winapi/blob/master/winapi/mouse.lua
-[winapi.multimon]: https://github.com/luapower/winapi/blob/master/winapi/multimon.lua
+[winapi.monitor]: https://github.com/luapower/winapi/blob/master/winapi/monitor.lua
 [winapi.namespace]: https://github.com/luapower/winapi/blob/master/winapi/namespace.lua
 [winapi.object]: https://github.com/luapower/winapi/blob/master/winapi/object.lua
 [winapi.panelclass]: https://github.com/luapower/winapi/blob/master/winapi/panelclass.lua
@@ -255,6 +252,4 @@ which showcases the module's functionality. Run the module as a standalone scrip
 [winapi.windowclass]: https://github.com/luapower/winapi/blob/master/winapi/windowclass.lua
 [winapi.gdi]: https://github.com/luapower/winapi/blob/master/winapi/gdi.lua
 [winapi.winnt]: https://github.com/luapower/winapi/blob/master/winapi/winnt.lua
-[winapi.wintypes]: https://github.com/luapower/winapi/blob/master/winapi/wintypes.lua
 [winapi.winuser]: https://github.com/luapower/winapi/blob/master/winapi/winuser.lua
-[winapi.winusertypes]: https://github.com/luapower/winapi/blob/master/winapi/winusertypes.lua

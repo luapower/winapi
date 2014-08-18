@@ -1,31 +1,35 @@
 --ffi/struct: struct ctype wrapper
+
 setfenv(1, require'winapi.namespace')
 require'winapi.util'
 
 local Struct = {}
 local Struct_meta = {__index = Struct}
 
+--struct virtual field setter and getter -------------------------------------
+
 local setbit = setbit --cache
+
 function Struct:set(cdata, field, value) --hot code
 	if type(field) ~= 'string' then
 		error(string.format('struct "%s" has no field of type "%s"', self.ctype, type(field)), 5)
 	end
 	local def = self.fields[field]
 	if def then
-		local name, mask, cast = unpack(def, 1, 3)
+		local name, mask, setter = unpack(def, 1, 3)
 		if mask then
 			cdata[self.mask] = setbit(cdata[self.mask] or 0, mask, value ~= nil)
 		end
 		if name then
-			if cast then
-				value = cast(value, cdata)
+			if setter then
+				value = setter(value, cdata)
 			end
 			if type(value) == 'cdata' then
 				pin(value, cdata)
 			end
 			cdata[name] = value
 		else
-			cast(value, cdata) --cast is a custom setter
+			setter(value, cdata) --custom setter
 		end
 		return
 	end
@@ -63,18 +67,18 @@ function Struct:get(cdata, field, value) --hot code
 	end
 	local def = self.fields[field]
 	if def then
-		local name, mask, _, cast = unpack(def, 1, 4)
+		local name, mask, _, getter = unpack(def, 1, 4)
 		if not mask or getbit(cdata[self.mask], mask) then
 			if not name then
-				if cast then
-					return cast(cdata)
+				if getter then
+					return getter(cdata)
 				else
 					return true
 				end
-			elseif not cast then
+			elseif not getter then
 				return cdata[name]
 			else
-				return cast(cdata[name], cdata)
+				return getter(cdata[name], cdata)
 			end
 		else
 			return nil
@@ -126,6 +130,8 @@ function Struct:clearmask(cdata) --clear all mask bits (prepare for setting data
 	if self.mask then cdata[self.mask] = 0 end
 end
 
+--struct instance constructor ------------------------------------------------
+
 function Struct:init(cdata) end --stub
 
 --create with a clear mask and initialized with defaults, or use existing cdata as is
@@ -170,7 +176,7 @@ function Struct:compute_mask()
 	return mask
 end
 
---struct definition
+--struct definition constructor ----------------------------------------------
 
 local valid_struct_keys =
 	index{'ctype', 'size', 'mask', 'fields', 'defaults', 'bitfields', 'init'}
@@ -203,6 +209,8 @@ function struct(s)
 	})
 	return s
 end
+
+--struct field definition constructors ---------------------------------------
 
 --sugar constructor for defining non-masked struct fields.
 --t is a table of form {aliasname1, structname1, setter, getter, fieldname2, ...}.
@@ -238,6 +246,11 @@ function mfields(t)
 	end
 	return dt
 end
+
+--struct field setters and getters -------------------------------------------
+
+--field setters: wcs, flags.
+--field getters: mbs.
 
 --create a struct setter for setting a fixed-size WCHAR[n] field with a Lua string.
 function wc_set(field)

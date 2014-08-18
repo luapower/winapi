@@ -1,4 +1,4 @@
---proc/comdlg/colorchooser: color chooser dialog.
+--proc/colorchooser: color chooser dialog.
 setfenv(1, require'winapi')
 require'winapi.comdlg'
 

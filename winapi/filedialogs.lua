@@ -1,4 +1,4 @@
---proc/comdlg/filedialogs: standard open and save file dialogs.
+--proc/filedialogs: standard open and save file dialogs.
 setfenv(1, require'winapi')
 require'winapi.comdlg'
 

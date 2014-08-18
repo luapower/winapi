@@ -54,3 +54,6 @@ local function unregister_message(code)
 	end
 end
 
+--usage:
+--WM_FOO = register_message'WM_FOO'
+--unregister_message(WM_FOO)

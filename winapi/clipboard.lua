@@ -1,4 +1,4 @@
---clipboard API
+--proc/clipboard: clipboard API
 setfenv(1, require'winapi')
 require'winapi.memory'
 

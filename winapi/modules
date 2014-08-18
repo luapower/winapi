@@ -1,0 +1,99 @@
+core/debug:                     strict mode and some debug tools. entirely optional module.
+core/namespace:                 create and return the only namespace for the entire API.
+core/winapi:                    winapi namespace + core + ffi: the platform for loading any proc/ file or oo/ file.
+
+ffi/array:                      variable length array (VLA) wrapper/memoizer
+ffi/bitmask:                    bitmask encoding and decoding.
+ffi/struct:                     struct ctype wrapper
+ffi/types:                      basic windows types and macros from multiple headers.
+ffi/util:                       filters and conversion functions for winapi args and return-values.
+ffi/wcs:                        utf8 to wide character string and back.
+
+proc/accelerator:               creating accelerator tables
+proc/button:                    button and button-like controls.
+proc/clipboard:                 clipboard API
+proc/color:                     standard color brushes
+proc/colorchooser:              color chooser dialog.
+proc/combobox:                  standard (old, not comctl-based) combobox control.
+proc/comboboxex:                standard (new, from comctl32) combobox control.
+proc/comctl:                    common controls API.
+proc/comdlg:                    common dialogs
+proc/cursor:                    cursor resources.
+proc/edit:                      standard edit control.
+proc/filedialogs:               standard open and save file dialogs.
+proc/font:                      font resources.
+proc/fontex:                    font resources (new API).
+proc/gdi/devcaps:               get device capabilities (submodule required by gdi)
+proc/gdi:                       windows GDI API.
+proc/gl:                        opengl dynamic namespace based on PFN*PROC cdefs and wglGetProcAddress.
+proc/gl11:                      opengl 1.1 API
+proc/gl21:                      opengl 2.1 API
+proc/guid:                      UUID API from rpcdce.h
+proc/headercontrol:             standard header control.
+proc/icon:                      icon resources.
+proc/imagelist:                 image list resources.
+proc/keyboard:                  keyboard input handling and keyboard layouts
+proc/listbox:                   standard listbox control.
+proc/listview:                  standard listview control.
+proc/logfonttype:               LOGFONTW type (separated from winapi.font because it's needed by cairo_win32_h.lua)
+proc/memory:                    memory management
+proc/menu:                      standard menu control.
+proc/messagebox:                standard message box dialog.
+proc/module:                    winuser submodule that deals with dlls.
+proc/monitor:                   multi-monitor API
+proc/mouse:                     mouse functions
+proc/process:                   process API.
+proc/rawinput:                  raw input API
+proc/registry:                  registry API.
+proc/resource:                  part of winuser dealing with resources.
+proc/richedit:                  standard richedit control.
+proc/rpc:                       RPC types
+proc/shellapi:                  shell API.
+proc/spi:                       system parameters info API.
+proc/static:                    standard static (aka label, text) control.
+proc/sysinfo:                   system info API
+proc/systemmetrics:             system metrics API
+proc/tabcontrol:                standard tab control.
+proc/time:                      time functions
+proc/toolbar:                   standard toolbar control.
+proc/tooltip:                   standard tooltip control.
+proc/treeview:                  standard treeview control.
+proc/wgl:                       windows opengl32 ffi module and WGL API from wingdi.h.
+proc/wglext:                    opengl WGL API from wglext.h
+proc/winbase:                   winbase.h. incomplete :)
+proc/window/class:              window classes (see msdn for what a window class means)
+proc/window/wmapp:              management of user-defined window messages.
+proc/window:                    common API for windows and standard controls.
+proc/winnt:                     don't know the scope of this yet.
+proc/winuser:                   winuser types and macros from multiple headers.
+
+test/showcase:                  showcase window for the showcase part of modules.
+
+oo/amanithvgpanel:              opengl + openvg-enabled panel using AmanithVG GLE implementation.
+oo/basebutton:                  base class for push-buttons, checkboxes, radio buttons.
+oo/basewindow:                  base class for both overlapping windows and controls.
+oo/button:                      push-button control.
+oo/cairopanel:                  provides on_render(surface) event to draw on a cairo pixman surface.
+oo/cairosgpanel:                cairo scene graph panel.
+oo/checkbox:                    checkbox control.
+oo/class:                       single inheritance object model.
+oo/combobox:                    standard combobox control based on ComboBoxEx32 control.
+oo/control:                     base class for standard controls.
+oo/edit:                        standard edit control.
+oo/groupbox:                    groupbox control.
+oo/handlelist:                  track objects by their corresponding 32bit pointer handle
+oo/imagelist:                   image list class.
+oo/itemlist:                    class template for lists of structured items.
+oo/listbox:                     standard listbox control.
+oo/listview:                    standard listview control.
+oo/menu:                        standard menu control.
+oo/notifyiconclass:             system tray icons.
+oo/object:                      base object class
+oo/panel:                       custom frameless child window.
+oo/radiobutton:                 radio button control.
+oo/tabcontrol:                  standard tab control.
+oo/toolbar:                     standard toolbar control.
+oo/vobject:                     object class with virtual properties.
+oo/wglpanel:                    opengl-enabled panel.
+oo/window/waitemlist:           accelerator item list.
+oo/window:                      overlapping (aka top-level) windows.

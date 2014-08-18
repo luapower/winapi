@@ -1,4 +1,4 @@
---winbase.h. incomplete :)
+--proc/winbase: winbase.h. incomplete :)
 setfenv(1, require'winapi')
 
 ffi.cdef[[

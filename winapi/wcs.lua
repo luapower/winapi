@@ -49,7 +49,10 @@ local MB2WC = C.MultiByteToWideChar
 local CP = CP_UTF8  --CP_* flags
 local MB = 0        --MB_* flags
 
-function wcs_sz(s) --accept and convert a utf8-encoded Lua string to a wcs cdata
+--accept and convert a utf8-encoded Lua string to a WCHAR[?] buffer.
+--anything not a string passes through untouched.
+--return the cdata and the size in WCHARs (not bytes) minus the null terminator.
+function wcs_sz(s)
 	if type(s) ~= 'string' then return s end
 	local sz = #s + 1 --assume 1 byte per character + null terminator
 	local buf = WCS_ctype(sz)
@@ -63,18 +66,22 @@ function wcs_sz(s) --accept and convert a utf8-encoded Lua string to a wcs cdata
 	return buf, sz
 end
 
+--same as wcs_sz but returns only the buffer. This allows you to pass wcs(s)
+--as the last argument of a ffi C call without the ffi bitching about excess args.
 function wcs(s)
 	return (wcs_sz(s))
 end
 
-W = wcs --fancy sugar to use on string constants
+--Some APIs don't have a way to tell how large they need an input buffer
+--to be, but then again it doesn't matter much either because it's usually
+--about small strings. In those cases, we give 2K (4 KBytes) and move on.
+DEFAULT_WCS_BUFFER_SIZE = 2048
 
-DEFAULT_WCS_BUFFER_SIZE = 2048 --some APIs don't have a way to tell us how much to allocate
-
---wcs buffer constructor: allocates a WCHAR[?] buffer and returns the buffer
+--wcs buffer constructor: allocate a WCHAR[?] buffer and return the buffer
 --and its size in WCHARs, minus the null-terminator.
---given a number, allocate a WCHAR buffer of size n + 1 (default n = 2048).
---given a WCHAR[?] cdata, return it back along with its size in WCHARs minus the null terminator.
+--1. given a number, allocate a WCHAR buffer of size n + 1.
+--2. given a WCHAR[?], return it along with its size in WCHARs minus the null terminator.
+--3. given no args, make a default-size buffer.
 function WCS(n)
 	if type(n) == 'number' then
 		return WCS_ctype(n+1), n
@@ -97,7 +104,9 @@ local PWCS_ctype = ffi.typeof'WCHAR*'
 local WC2MB = C.WideCharToMultiByte
 local WC = 0 --WC_* flags
 
-function mbs(ws) --accept and convert a wcs or pwcs buffer to a Lua string
+--accept and convert a WCHAR[?] or WCHAR* buffer to a Lua string.
+--anything else passes through.
+function mbs(ws)
 	if ffi.istype(WCS_ctype, ws) or ffi.istype(PWCS_ctype, ws) then
 		local sz = checknz(WC2MB(CP_UTF8, WC, ws, -1, nil, 0, nil, nil))
 		local buf = MBS_ctype(sz)
@@ -110,14 +119,15 @@ end
 
 wcslen = C.wcslen
 
-function wcsncpy(dest, src, count) --wcsncpy variant that null-terminates even on truncation
+--safer wcsncpy variant that null-terminates the result even on truncation.
+function wcsncpy(dest, src, count)
 	C.wcsncpy(dest, src, count)
 	dest[count-1] = 0
 end
 
---convert and store a utf8-encoded Lua string into a user-provided wcs cdata.
+--convert and store a utf8-encoded Lua string into a user-provided WCHAR[?] cdata.
 --nil means empty string. anything else passes through.
---if the dest. buffer is a pointer instead of a VLA, max size must be given too.
+--if the dest. buffer is a WCHAR* instead of a WCHAR[?], max size must be given too.
 function wcs_to(s, ws, maxsz)
 	if s == nil then s = '' end
 	if type(s) ~= 'string' then return s end

@@ -1,6 +1,6 @@
 --ffi/types: basic windows types and macros from multiple headers.
 
---NOTE: don't define time_t because it's 64bit in windows but 32bit in mingw: use explicit types!
+--NOTE: Don't define time_t because it's 64bit in windows but 32bit in mingw: use explicit types!
 --NOTE: SIZE has w and h in addition to cx and cy and these are the ones used.
 --NOTE: RECT has x1, y1, x2, y2 in addition to left, right, top, bottom and these are the ones used.
 

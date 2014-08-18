@@ -165,7 +165,7 @@ typedef struct _DROPFILES {
 	BOOL fWide;                         // WIDE character switch.
 } DROPFILES, *LPDROPFILES;
 
-typedef struct DROPFILESW_VLS {
+typedef struct DROPFILESW_VLS {        // don't look this up in msdn.
 	DROPFILES;
 	WCHAR files[?];
 } DROPFILESW_VLS;

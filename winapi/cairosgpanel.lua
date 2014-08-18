@@ -1,4 +1,5 @@
---cairo scene graph panel: call self.scene_graph:render(scene) on on_render() to render a cairo scene graph.
+--oo/cairosgpanel: cairo scene graph panel.
+--call self.scene_graph:render(scene) on on_render() to render a cairo scene graph.
 local winapi = require'winapi'
 local CairoPanel = require'winapi.cairopanel'
 local SG = require'sg_cairo'

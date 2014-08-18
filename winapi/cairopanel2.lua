@@ -1,4 +1,4 @@
---cairopanel: provides on_render(surface) event to draw on a cairo pixman surface.
+--oo/cairopanel2: provides on_render(surface) event to draw on a cairo pixman surface.
 --this implementation doesn't rely on cairo's win32 extensions.
 local ffi = require'ffi'
 local bit = require'bit'

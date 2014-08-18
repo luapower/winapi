@@ -1,6 +1,7 @@
 --proc/window/class: window classes (see msdn for what a window class means)
 setfenv(1, require'winapi')
 require'winapi.winuser'
+
 --register/unregister
 
 ffi.cdef[[

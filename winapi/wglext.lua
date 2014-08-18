@@ -1,4 +1,4 @@
---opengl/wglext: opengl WGL API from wglext.h
+--proc/wglext: opengl WGL API from wglext.h
 setfenv(1, require'winapi')
 require'winapi.winuser'
 require'gl_types'
