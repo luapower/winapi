@@ -103,6 +103,9 @@ function Struct:get(cdata, field, value) --hot code
 	error(string.format('struct "%s" has no field "%s"', self.ctype, field), 5)
 end
 
+--struct instance constructor ------------------------------------------------
+
+--set all fields with a table.
 function Struct:setall(cdata, t)
 	if not t then return end
 	for field, value in pairs(t) do
@@ -110,15 +113,7 @@ function Struct:setall(cdata, t)
 	end
 end
 
-function Struct:setvirtual(cdata, t)
-	if not t then return end
-	for field in pairs(self.fields) do
-		if t[field] ~= nil then
-			cdata[field] = t[field]
-		end
-	end
-end
-
+--set all fields which have default values to their default values.
 function Struct:setdefaults(cdata)
 	if not self.defaults then return end
 	for field, value in pairs(self.defaults) do
@@ -126,15 +121,10 @@ function Struct:setdefaults(cdata)
 	end
 end
 
-function Struct:clearmask(cdata) --clear all mask bits (prepare for setting data)
-	if self.mask then cdata[self.mask] = 0 end
-end
-
---struct instance constructor ------------------------------------------------
-
 function Struct:init(cdata) end --stub
 
---create with a clear mask and initialized with defaults, or use existing cdata as is
+--create a struct with a clear mask and default values.
+--cdata are passed through.
 function Struct:new(t)
 	if type(t) == 'cdata' then return t end
 	local cdata = self.ctype_cons()
@@ -147,7 +137,12 @@ function Struct:new(t)
 	return cdata
 end
 
---create/use existing and set all mask bits (prepare for receiving data)
+--clear all mask bits (prepare the struct for setting data).
+function Struct:clearmask(cdata)
+	if self.mask then cdata[self.mask] = 0 end
+end
+
+--create or use existing struct and set all mask bits (prepare for receiving data).
 function Struct:setmask(cdata)
 	if not cdata then
 		cdata = self.ctype_cons()
@@ -159,6 +154,7 @@ end
 
 Struct_meta.__call = Struct.new
 
+--collect the values of all virtual fields in a table.
 function Struct:collect(cdata)
 	local t = {}
 	for field in pairs(self.fields) do
@@ -167,6 +163,7 @@ function Struct:collect(cdata)
 	return t
 end
 
+--compute the struct's full mask (i.e. with all bitmasks set).
 function Struct:compute_mask()
 	local mask = 0
 	for field, def in pairs(self.fields) do
@@ -248,9 +245,6 @@ function mfields(t)
 end
 
 --struct field setters and getters -------------------------------------------
-
---field setters: wcs, flags.
---field getters: mbs.
 
 --create a struct setter for setting a fixed-size WCHAR[n] field with a Lua string.
 function wc_set(field)
