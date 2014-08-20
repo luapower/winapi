@@ -404,6 +404,9 @@ function BaseWindow:__init(info)
 	--hooking WNDPROC to MessageRouter is done in subclasses.
 	Windows:add(self)
 
+	--force a resize to apply any constraints.
+	self:resize(self.w, self.h)
+
 	--show the window, which was intentionally created without WS_VISIBLE
 	--to allow us to set up event routing first.
 	if info.visible and not self.visible then
