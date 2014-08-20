@@ -23,12 +23,12 @@ BaseButton = subclass({
 	},
 	__defaults = {
 		tabstop = true,
-		__wm_command_handler_names = index{
-			on_click = BN_CLICKED,
-			on_double_click = BN_DOUBLECLICKED,
-			on_focus = BN_SETFOCUS,
-			on_blur = BN_KILLFOCUS,
-		},
+	},
+	__wm_command_handler_names = index{
+		on_click = BN_CLICKED,
+		on_double_click = BN_DOUBLECLICKED,
+		on_focus = BN_SETFOCUS,
+		on_blur = BN_KILLFOCUS,
 	},
 	__init_properties = {
 		'image_list', 'icon', 'bitmap'

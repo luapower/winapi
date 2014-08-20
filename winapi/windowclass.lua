@@ -102,6 +102,7 @@ Window = subclass({
 		on_minimizing = SC_MINIMIZE, --before minimize; return false to prevent.
 		on_maximizing = SC_MAXIMIZE, --before maximize; return false to prevent.
 		on_menu_key   = SC_KEYMENU,  --get the 'f' in Alt+F if there's a `&File` menu.
+		on_restoring  = SC_RESTORE,
 	},
 }, BaseWindow)
 

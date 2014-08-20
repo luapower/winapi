@@ -12,7 +12,7 @@ Button = {
 		text_margin = {20,5}, --applied when autosize = true
 	},
 	__init_properties = {
-	'text_margin', 'pushed', 'autosize'
+		'text_margin', 'pushed', 'autosize'
 	},
 }
 
