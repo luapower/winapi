@@ -84,7 +84,7 @@ Window = subclass({
 	},
 	__wm_handler_names = index{
 		on_close = WM_CLOSE,
-		on_restoring = WM_QUERYOPEN, --return false to prevent restoring from minimized.
+		on_unminimizing = WM_QUERYOPEN, --return false to prevent.
 		--system changes
 		on_query_end_session = WM_QUERYENDSESSION,
 		on_end_session = WM_ENDSESSION,
@@ -100,7 +100,7 @@ Window = subclass({
 	},
 	__wm_syscommand_handler_names = index{
 		on_minimizing = SC_MINIMIZE, --before minimize; return false to prevent.
-		on_maximizing = SC_MAXIMIZE, --before maximize; return false  to prevent.
+		on_maximizing = SC_MAXIMIZE, --before maximize; return false to prevent.
 		on_menu_key   = SC_KEYMENU,  --get the 'f' in Alt+F if there's a `&File` menu.
 	},
 }, BaseWindow)
@@ -342,7 +342,7 @@ end
 function Window:get_restore_to_maximized()
 	local wp = GetWindowPlacement(self.hwnd)
 	if wp.showCmd == SW_SHOWMINIMIZED then
-		return getibt(wp.flags, WPF_RESTORETOMAXIMIZED)
+		return getbit(wp.flags, WPF_RESTORETOMAXIMIZED)
 	end
 end
 
