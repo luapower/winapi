@@ -26,6 +26,7 @@ Window = subclass({
 		clip_siblings = WS_CLIPSIBLINGS,
 	},
 	__style_ex_bitmask = bitmask{
+		topmost = WS_EX_TOPMOST,
 		window_edge = WS_EX_WINDOWEDGE,  --needs to be the same as WS_DLGFRAME
 		dialog_frame = WS_EX_DLGMODALFRAME, --double border and no system menu icon!
 		help_button = WS_EX_CONTEXTHELP, --only shown if both minimize and maximize buttons are hidden
@@ -53,6 +54,7 @@ Window = subclass({
 		clip_children = true,
 		clip_siblings = true,
 		--window ex style bits
+		topmost = false,
 		window_edge = true,
 		dialog_frame = false,
 		help_button = false,
@@ -73,6 +75,8 @@ Window = subclass({
 		h = CW_USEDEFAULT,
 		autoquit = false,
 		menu = nil,
+		--behavior
+		remember_maximized_pos = false, --see below for explanation of this flag
 	},
 	__init_properties = {
 		'menu',
@@ -80,7 +84,7 @@ Window = subclass({
 	},
 	__wm_handler_names = index{
 		on_close = WM_CLOSE,
-		on_restoring = WM_QUERYOPEN, --return false to prevent restoring from minimize state.
+		on_restoring = WM_QUERYOPEN, --return false to prevent restoring from minimized.
 		--system changes
 		on_query_end_session = WM_QUERYENDSESSION,
 		on_end_session = WM_ENDSESSION,
@@ -101,29 +105,22 @@ Window = subclass({
 	},
 }, BaseWindow)
 
---instantiating
+--instantiating --------------------------------------------------------------
 
-local function name_generator(format)
-	local n = 0
-	return function()
-		n = n + 1
-		return string.format(format, n)
-	end
+local n = 0
+local function gen_classname()
+	n = n + 1
+	return 'Window'..n
 end
-local gen_classname = name_generator'Window%d'
 
 function Window:__info_style(info)
 	local style = Window.__index.__info_style(self, info)
-	--WS_MINIMIZE and WS_MAXIMIZE flags don't work together, hence the 'state' property.
-	--the combination WS_MINIMIZE + WS_MAXIMIZE makes ShowWindow(SW_RESTORE) have no effect.
+	--NOTE: WS_MINIMIZE and WS_MAXIMIZE flags don't work together: combining
+	--them makes ShowWindow(SW_RESTORE) have no effect. Instead, when both are
+	--needed, we set WS_MINIMIZE only and then set self.restore_to_maximized.
 	return bit.bor(style,
-		info.state == 'minimized' and WS_MINIMIZE or 0,
-		info.state == 'maximized' and WS_MAXIMIZE or 0)
-end
-
-function Window:__info_style_ex(info)
-	local style_ex = Window.__index.__info_style_ex(self, info)
-	return bit.bor(style_ex, info.topmost and WS_EX_TOPMOST or 0)
+		info.minimized and WS_MINIMIZE or 0,
+		info.maximized and not info.minimized and WS_MAXIMIZE or 0)
 end
 
 function Window:__before_create(info, args)
@@ -131,7 +128,7 @@ function Window:__before_create(info, args)
 
 	local class_args = {}
 	class_args.name = gen_classname()
-	class_args.style = self.__class_style_bitmask:set(class_args.style or 0, info)
+	class_args.style = self.__class_style_bitmask:set(0, info)
 	class_args.proc = MessageRouter.proc
 	class_args.icon = info.icon
 	class_args.small_icon = info.small_icon
@@ -142,6 +139,8 @@ function Window:__before_create(info, args)
 	args.parent = info.owner and info.owner.hwnd
 	args.text = info.title
 
+	--properties affecting the maximized size and position
+	self.remember_maximized_pos = info.remember_maximized_pos
 	self.__state.maximized_pos = info.maximized_pos
 	self.__state.maximized_size = info.maximized_size
 
@@ -149,16 +148,20 @@ function Window:__before_create(info, args)
 	self.__winclass_style = class_args.style --for checking
 end
 
-function Window:__init(info)
-	Window.__index.__init(self, info)
+function Window:__after_create(info, args)
 
 	self:__check_class_style(self.__winclass_style)
 	self.__winclass_style = nil --we're done with this
 
+	--hack instead of setting WS_MAXIMIZED style, when WS_MINIMIZED is present.
+	if info.maximized and info.minimized then
+		self.restore_to_maximized = true
+	end
+
 	self.accelerators = WAItemList(self)
 end
 
---destroying
+--destroying -----------------------------------------------------------------
 
 function Window:close()
 	CloseWindow(self.hwnd)
@@ -166,26 +169,25 @@ end
 
 function Window:WM_NCDESTROY()
 	Window.__index.WM_NCDESTROY(self)
-	if self.menu then self.menu:free() end
+
+	--free the menu bar, if any.
+	if self.menu then
+		self.menu:free()
+	end
+
+	--post a message to unregister the window's class after the window is destroyed.
 	PostMessage(nil, WM_UNREGISTER_CLASS, self.__winclass)
+
+	--post WM_QUIT to stop the message loop, if autoquit is set.
 	if self.autoquit then
 		PostQuitMessage()
 	end
 end
 
---properties
+--properties -----------------------------------------------------------------
 
 Window.get_title = BaseWindow.get_text
 Window.set_title = BaseWindow.set_text
-
-function Window:get_active() return GetActiveWindow() == self.hwnd end
-function Window:activate() SetActiveWindow(self.hwnd) end
-
---this is different than activate() in that the window flashes in the taskbar
---if its thread is not currently the active thread.
-function Window:setforeground()
-	SetForegroundWindow(self.hwnd)
-end
 
 function Window:get_owner()
 	return Windows:find(GetWindowOwner(self.hwnd))
@@ -195,171 +197,16 @@ function Window:set_owner(owner)
 	SetWindowOwner(self.hwnd, owner and owner.hwnd)
 end
 
---maximize size/position constraints
+--activation -----------------------------------------------------------------
 
---clamp with upper limit taking precedence over the lower limit.
-local function clamp(x, min, max)
-	return math.min(math.max(x, min or -math.huge), max or math.huge)
+function Window:get_active() return GetActiveWindow() == self.hwnd end
+function Window:activate() SetActiveWindow(self.hwnd) end
+
+--this is different than activate() in that the window flashes in the taskbar
+--if its thread is not currently the active thread.
+function Window:setforeground()
+	SetForegroundWindow(self.hwnd)
 end
-
-function Window:WM_GETMINMAXINFO(info)
-	if self.maximized_pos then
-		info.ptMaxPosition = self.maximized_pos
-	end
-	if self.maximized_size then
-		info.ptMaxSize = self.maximized_size
-	end
-	return 0
-end
-
-function Window:set_maximized_pos()
-	self:__force_resize()
-end
-Window.set_maximized_size = Window.set_maximized_pos
-
---window state
-
-local window_state_names = { --GetWindowPlacement distills states to these 3
-	[SW_SHOWNORMAL]    = 'normal',
-	[SW_SHOWMAXIMIZED] = 'maximized',
-	[SW_SHOWMINIMIZED] = 'minimized',
-}
-
-function Window:get_state()
-	local wp = GetWindowPlacement(self.hwnd)
-	return window_state_names[wp.showCmd]
-end
-
-function Window:set_state(state, async)
-	if state == 'normal' then
-		self:shownormal(nil, async)
-	elseif state == 'maximized' then
-		self:maximize(nil, async)
-	elseif state == 'minimized' then
-		self:minimize(nil, async)
-	end
-end
-
---maximize and activate (can't maximize without activating; WM_COMMAND SC_MAXIMIZE also activates)
-function Window:maximize(_, async)
-	self:show(SW_SHOWMAXIMIZED, async)
-end
-
---show in normal state and activate or not
-function Window:shownormal(activate, async)
-	self:show(activate == false and SW_SHOWNOACTIVATE or SW_SHOWNORMAL, async)
-end
-
---show in minimized state and deactivate or not
-function Window:minimize(deactivate, async)
-	self:show(deactivate == false and SW_SHOWMINIMIZED or SW_MINIMIZE, async)
-end
-
---restore to last state and activate:
--- 1) if minimized, go to normal or maximized state, based on the value of self.restore_to_maximized
--- 2) if maximized, go to normal state
-function Window:restore(_, async)
-	self:show(SW_RESTORE, async)
-end
-
-function Window:get_minimized()
-	return IsIconic(self.hwnd)
-end
-
---self.minimized = false goes to last state (either maximized or restored, per self.restore_to_maximized)
-function Window:set_minimized(min)
-	if min then
-		self:minimize()
-	elseif self.minimized then
-		self:restore()
-	end
-end
-
-function Window:get_maximized()
-	return IsZoomed(self.hwnd)
-end
-
---self.maximized = false goes to normal state if maximized, or changes the restore_to_maximized flag if minimized.
-function Window:set_maximized(max)
-	if max then
-		self:maximize()
-	elseif self.minimized then
-		self.restore_to_maximized = false
-	else
-		self:shownormal()
-	end
-end
-
---rect of the 'normal' state, regardless of current state
-
-function Window:get_normal_rect()
-	return GetWindowPlacement(self.hwnd).rcNormalPosition
-end
-
-function Window:set_normal_rect(...) --x1,y1,x2,y2 or rect
-	local wp = GetWindowPlacement(self.hwnd)
-	wp.rcNormalPosition = RECT(...)
-	if not self.visible then wp.showCmd = SW_HIDE end --it can be SW_SHOWNORMAL and we don't want that
-	SetWindowPlacement(self.hwnd, wp)
-end
-
---get/set the behavior of the next call to restore() (only works when the window is in minimized state)
-
-function Window:get_restore_to_maximized()
-	local wp = GetWindowPlacement(self.hwnd)
-	if wp.showCmd == SW_SHOWMINIMIZED then
-		return getibt(wp.flags, WPF_RESTORETOMAXIMIZED)
-	end
-end
-
-function Window:set_restore_to_maximized(yes)
-	local wp = GetWindowPlacement(self.hwnd)
-	if wp.showCmd ~= SW_SHOWMINIMIZED then return end
-	wp.flags = yes and
-		bit.bor(wp.flags, WPF_RESTORETOMAXIMIZED) or
-		bit.band(wp.flags, bit.bnot(WPF_RESTORETOMAXIMIZED))
-	SetWindowPlacement(self.hwnd, wp)
-end
-
---menus
-
-function Window:get_menu()
-	return Menus:find(GetMenu(self.hwnd))
-end
-
-function Window:set_menu(menu)
-	if self.menu then self.menu:__set_window(nil) end
-	SetMenu(self.hwnd, menu and menu.hmenu)
-	if menu then menu:__set_window(self) end
-end
-
-function Window:WM_MENUCOMMAND(menu, i)
-	menu = Menus:find(menu)
-	if menu.WM_MENUCOMMAND then menu:WM_MENUCOMMAND(i) end
-end
-
---rendering
-
-function Window:WM_CTLCOLORSTATIC(wParam, lParam)
-	 --TODO: fix group box
-	 do return end
-	 local hBackground = CreateSolidBrush(RGB(0, 0, 0))
-	 local hdc = ffi.cast('HDC', wParam)
-    SetBkMode(hdc, OPAQUE)
-    SetTextColor(hdc, RGB(100, 100, 0))
-	 return tonumber(hBackground)
-end
-
---accelerators
-
-function Window:WM_COMMAND(kind, id, ...)
-	if kind == 'accelerator' then
-		self.accelerators:WM_COMMAND(id) --route message to individual accelerators
-	end
-	Window.__index.WM_COMMAND(self, kind, id, ...)
-end
-
---events: on_activate*() and on_deactivate*() events from WM_ACTIVATE and WM_ACTIVATEAPP
 
 function Window:WM_ACTIVATE(flag, minimized, other_hwnd)
 	if flag == 'active' or flag == 'clickactive' then
@@ -397,7 +244,186 @@ function Window:WM_NCACTIVATE(flag, update_hrgn)
 	end
 end
 
---showcase
+--maximized size and position ------------------------------------------------
+
+function Window:WM_GETMINMAXINFO(info)
+	Window.__index.WM_GETMINMAXINFO(self, info)
+
+	--maximize to last position.
+	if self.__maximized_pos then
+		info.ptMaxPosition = self.__maximized_pos
+	end
+
+	--maximize to user position.
+	if self.maximized_pos then
+		info.ptMaxPosition = self.maximized_pos
+	end
+
+	--maximize to user size.
+	if self.maximized_size then
+		info.ptMaxSize = self.maximized_size
+	end
+end
+
+function Window:WM_WINDOWPOSCHANGED(wp)
+	--NOTE: A maximized window becomes movable if its size is smaller than
+	--the entire screen. A window can have such smaller maximized size if
+	--constrained, for instance (try it!). But when such a window is maximized,
+	--in absence of a programmer-supplied maximized_pos, it always moves to
+	--the top-left corner of the screen, which is lame. A much better option
+	--IMHO is to remember the last maximized position and restore to that
+	--position instead, when maximized again. Which is what we do here.
+	if self.remember_maximized_pos and not getbit(wp.flags, SWP_NOMOVE) then
+		if self.maximized and not self.minimized then
+			self.__maximized_pos = POINT(self.__maximized_pos)
+			self.__maximized_pos.x = wp.x
+			self.__maximized_pos.y = wp.y
+		end
+	end
+end
+
+--window state ---------------------------------------------------------------
+
+--NOTE: minimized state is preserved between hide() and show() calls.
+function Window:get_minimized()
+	return IsIconic(self.hwnd)
+end
+
+--NOTE: when a maximized window is minimized, the maximized flag becomes false,
+--and the restore_to_maximized flag becomes true.
+function Window:get_maximized()
+	return IsZoomed(self.hwnd)
+end
+
+--minimize (or show minimized) and deactivate or not.
+function Window:minimize(deactivate, async)
+	self:show(deactivate == false and SW_SHOWMINIMIZED or SW_MINIMIZE, async)
+end
+
+--maximize (or show maximized) and activate.
+--NOTE: can't maximize without activating; WM_COMMAND/SC_MAXIMIZE also activates.
+function Window:maximize(_, async)
+	self:show(SW_SHOWMAXIMIZED, async)
+end
+
+--restore to normal state (or show in normal state) and activate or not.
+function Window:shownormal(activate, async)
+	self:show(activate == false and SW_SHOWNOACTIVATE or SW_SHOWNORMAL, async)
+end
+
+--restore to last state and activate:
+-- 1) if minimized, restore to normal or maximized state.
+-- 2) if maximized, restore to normal state.
+function Window:restore(_, async)
+	self:show(SW_RESTORE, async)
+end
+
+--normal rectangle -----------------------------------------------------------
+
+--normal_rect is the frame rectangle in normal state.
+--it can be get/set any time without affecting the current state of the window.
+
+function Window:get_normal_rect()
+	return GetWindowPlacement(self.hwnd).rcNormalPosition
+end
+
+function Window:set_normal_rect(...) --x1,y1,x2,y2 or rect
+	local wp = GetWindowPlacement(self.hwnd)
+	wp.rcNormalPosition = RECT(...)
+	if not self.visible then wp.showCmd = SW_HIDE end --don't show it if hidden!
+	SetWindowPlacement(self.hwnd, wp)
+end
+
+--restore state --------------------------------------------------------------
+
+--control the behavior of the next call to restore().
+--NOTE: only works when the window is minimized!
+
+function Window:get_restore_to_maximized()
+	local wp = GetWindowPlacement(self.hwnd)
+	if wp.showCmd == SW_SHOWMINIMIZED then
+		return getibt(wp.flags, WPF_RESTORETOMAXIMIZED)
+	end
+end
+
+function Window:set_restore_to_maximized(yes)
+	local wp = GetWindowPlacement(self.hwnd)
+
+	if wp.showCmd ~= SW_SHOWMINIMIZED then return end
+
+	wp.flags = yes and
+		bit.bor(wp.flags, WPF_RESTORETOMAXIMIZED) or
+		bit.band(wp.flags, bit.bnot(WPF_RESTORETOMAXIMIZED))
+
+	--NOTE: wp.showCmd is SW_SHOWMINIMIZED even when the window is hidden,
+	--so calling SetWindowPlacement() will show the window which we don't want.
+	if not self.visible then
+		wp.showCmd = SW_HIDE
+	end
+
+	SetWindowPlacement(self.hwnd, wp)
+end
+
+--z order --------------------------------------------------------------------
+
+function Window:set_topmost(topmost)
+	SetWindowPos(self.hwnd, topmost and HWND_TOPMOST or HWND_NOTOPMOST,
+		0, 0, 0, 0, SWP_ZORDER_CHANGED_ONLY)
+end
+
+function Window:send_to_back(relto)
+	local topmost = self.topmost
+	local relto_hwnd = relto and relto.hwnd or (self.topmost and HWND_NOTOPMOST or HWND_BOTTOM)
+	SetWindowPos(self.hwnd, relto_hwnd, 0, 0, 0, 0, SWP_ZORDER_CHANGED_ONLY)
+	if topmost then
+		--self.topmost = true
+	end
+end
+
+function Window:bring_to_front(relto)
+	local relto_hwnd = relto and GetPrevSibling(relto.hwnd) or (self.topmost and HWND_TOPMOST or HWND_TOP)
+	SetWindowPos(self.hwnd, relto_hwnd, 0, 0, 0, 0, SWP_ZORDER_CHANGED_ONLY)
+end
+
+--menus ----------------------------------------------------------------------
+
+function Window:get_menu()
+	return Menus:find(GetMenu(self.hwnd))
+end
+
+function Window:set_menu(menu)
+	if self.menu then self.menu:__set_window(nil) end
+	SetMenu(self.hwnd, menu and menu.hmenu)
+	if menu then menu:__set_window(self) end
+end
+
+function Window:WM_MENUCOMMAND(menu, i)
+	menu = Menus:find(menu)
+	if menu.WM_MENUCOMMAND then menu:WM_MENUCOMMAND(i) end
+end
+
+--rendering ------------------------------------------------------------------
+
+function Window:WM_CTLCOLORSTATIC(wParam, lParam)
+	 --TODO: fix group box
+	 do return end
+	 local hBackground = CreateSolidBrush(RGB(0, 0, 0))
+	 local hdc = ffi.cast('HDC', wParam)
+    SetBkMode(hdc, OPAQUE)
+    SetTextColor(hdc, RGB(100, 100, 0))
+	 return tonumber(hBackground)
+end
+
+--accelerators ---------------------------------------------------------------
+
+function Window:WM_COMMAND(kind, id, ...)
+	if kind == 'accelerator' then
+		self.accelerators:WM_COMMAND(id) --route message to individual accelerators
+	end
+	Window.__index.WM_COMMAND(self, kind, id, ...)
+end
+
+--showcase -------------------------------------------------------------------
 
 if not ... then
 require'winapi.icon'
@@ -405,24 +431,24 @@ require'winapi.font'
 
 local c = Window{title = 'Main',
 	border = true, frame = true, window_edge = true, sizeable = true, control_parent = true,
-	help_button = true, maximize_button = false, minimize_button = false, state = 'maximized',
+	help_button = true, maximize_button = false, minimize_button = false, maximized = true,
 	autoquit = true, w = 500, h = 300, visible = false}
 c:show()
 
 c.cursor = LoadCursor(IDC_HAND)
 c.icon = LoadIconFromInstance(IDI_INFORMATION)
 
-print('shown     ', c.visible, c.state)
+print('shown     ', c.visible, c.minimized, c.maximized)
 c:maximize()
-print('maximized ', c.visible, c.state)
+print('maximized ', c.visible, c.minimized, c.maximized)
 c:minimize()
-print('minimized ', c.visible, c.state)
+print('minimized ', c.visible, c.minimized, c.maximized)
 c:show()
-print('shown     ', c.visible, c.state)
+print('shown     ', c.visible, c.minimized, c.maximized)
 c:restore()
-print('restored  ', c.visible, c.state)
+print('restored  ', c.visible, c.minimized, c.maximized)
 c:shownormal()
-print('shownormal', c.visible, c.state)
+print('shownormal', c.visible, c.minimized, c.maximized)
 
 local c3 = Window{topmost = true, title='Topmost', h = 300, w = 300, sizeable = false}
 

@@ -28,12 +28,24 @@ function _M:__newindex(k,v)
 	end
 end
 
---utility to search the name of a constant in the winapi namespace
+--utility to search the name of a constant in the winapi namespace.
 function findname(prefix, value)
 	for k,v in pairs(_M) do
 		if k:match('^'..prefix) and type(v) ~= 'cdata' and type(value) ~= 'cdata' and v == value then return k end
 	end
 	return tonumber(value) ~= nil and string.format('%x', value) or value
+end
+
+--utility to search the names of the bitmasks corresponding to the bits of a value.
+--eg. in a WM_WINDOWPOSCHANGING(wp) message you can print(findbits('SWP_', wp.flags)).
+function findbits(prefix, value)
+	local t = {}
+	for k,v in pairs(_M) do
+		if k:match('^'..prefix) and getbit(value, v) then
+			t[#t+1] = k
+		end
+	end
+	return table.concat(t, ' ')
 end
 
 --print that can be used in expressions and recurses into tables

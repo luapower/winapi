@@ -1088,33 +1088,42 @@ do
 	}
 end
 
+--NOTE: only sent to top-level windows. Not sent initially, so a resize
+--must be forced for the constraints to be applied.
 function WM.WM_GETMINMAXINFO(wParam, lParam)
 	return ffi.cast('MINMAXINFO*', lParam)
 end
 
+--NOTE: sent when the window position or size is about to change, programatically or by user.
 function WM.WM_WINDOWPOSCHANGING(wParam, lParam)
 	return ffi.cast('WINDOWPOS*', lParam)
 end
 
+--NOTE: sent after the window position or size changed, programatically or by user.
 WM.WM_WINDOWPOSCHANGED = WM.WM_WINDOWPOSCHANGING
 
-function WM.WM_MOVING(wParam, lParam)
+function WM.WM_MOVING(wParam, lParam) --RECT (frame rect, not client rect)
 	return ffi.cast('RECT*', lParam)
 end
 
 local sizing_flags = {'left', 'right', 'top', 'topleft', 'topright', 'bottom', 'bottomleft', 'bottomright'}
 
-function WM.WM_SIZING(wParam, lParam) --flag, RECT
+--NOTE: only sent when resizing by user.
+function WM.WM_SIZING(wParam, lParam) --flag, RECT (frame rect, not client rect)
 	return sizing_flags[wParam], ffi.cast('RECT*', lParam)
 end
 
 local size_flags = {[0] = 'restored', 'minimized', 'maximized', 'other_restored', 'other_maximized'}
 
-function WM.WM_SIZE(wParam, lParam) --flag, w, h
+--NOTE: WM_SIZE gives the size of the client rect, not of the frame rect!
+--NOTE: WM_SIZE is sent by the default proc for WM_WINDOWPOSCHANGED.
+function WM.WM_SIZE(wParam, lParam) --flag, cw, ch
 	return size_flags[wParam], splitlong(lParam)
 end
 
-function WM.WM_MOVE(wParam, lParam) --x, y
+--NOTE: WM_MOVE gives the coordinates of the client rect, not of the frame rect!
+--NOTE: WM_MOVE is sent by the default proc for WM_WINDOWPOSCHANGED.
+function WM.WM_MOVE(wParam, lParam) --cx, cy
 	return splitlong(lParam)
 end
 

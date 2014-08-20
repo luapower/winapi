@@ -8,7 +8,7 @@ require'winapi.keyboard'
 require'winapi.mouse'
 require'winapi.monitor'
 
---window tracker
+--window tracker -------------------------------------------------------------
 
 Windows = class(HandleList) --track window objects by their hwnd
 
@@ -26,50 +26,37 @@ function Windows:get_foreground_window()
 	return self:find(GetForegroundWindow())
 end
 
+--get window under POINT
 function Windows:window_at(p)
 	return self:find(WindowFromPoint(p))
 end
 
+--screen POINT -> client POINT
 function Windows:map_point(to_window, ...) --x,y or point
 	return MapWindowPoint(nil, to_window.hwnd, ...)
 end
 
+--screen RECT -> client RECT
 function Windows:map_rect(to_window, ...) --x1,y1,x2,y2 or rect
 	return MapWindowRect(nil, to_window.hwnd, ...)
 end
 
+--get current mouse position in screen or client coordinates.
+--NOTE: gets the current mouse position, outside of the event stream.
 function Windows:get_cursor_pos(in_window)
 	local p = GetCursorPos()
 	return in_window and self:map_point(in_window, p) or p
 end
 
-function Windows:client_to_frame(info, ...) --x1,y1,x2,y2 or rect
-	local rect = RECT(...)
-	local style = Window:__info_style(info)
-	local style_ex = Window:__info_style_ex(info)
-	local has_menu = info.menu ~= nil
-	return AdjustWindowRect(rect, style, style_ex, has_menu)
-end
-
-function Windows:frame_to_client(info, ...) --x1,y1,x2,y2 or rect
-	local r = RECT(...)
-	local x1, y1, w1, h1 = self:client_to_frame(info, 0, 0, 200, 200)
-	local dr = RECT()
-	dr.x = r.x - x1
-	dr.y = r.y - y1
-	dr.w = r.w - w1 - x1 - 200
-	dr.h = r.h - h1 - y1 - 200
-	return dr
-end
-
 Windows = Windows'hwnd' --singleton
 
---message router
+--message router -------------------------------------------------------------
 
---by assigning your window's WNDPROC to MessageRouter.proc (either via SetWindowLong(GWL_WNDPROC) or
---via RegisterClass(), and adding your window object to the window tracker via Windows:add(window),
---your window's __handle_message() method will be called for each message destined to your window.
---This way only one ffi callback object is wasted for all windows.
+--By assigning your window's WNDPROC to MessageRouter.proc (either via
+--SetWindowLong(GWL_WNDPROC) or via RegisterClass(), and adding your window
+--object to the window tracker via Windows:add(window), your window's
+--__handle_message() method will be called for each message destined to your
+--window. This way only one ffi callback object is wasted for all windows.
 
 MessageRouter = class(Object)
 
@@ -90,18 +77,25 @@ end
 
 MessageRouter = MessageRouter() --singleton
 
---message loop
+--message loop ---------------------------------------------------------------
 
+--standard recipe message dispatcher based on the Window tracker.
 function ProcessMessage(msg)
 	local window = Windows.active_window
 	if window then
 		if window.accelerators and window.accelerators.haccel then
-			if TranslateAccelerator(window.hwnd, window.accelerators.haccel, msg) then --make hotkeys work
+			--make hotkeys work
+			if TranslateAccelerator(window.hwnd,
+				window.accelerators.haccel, msg)
+			then
 				return
 			end
 		end
 		if not window.__wantallkeys then
-			if IsDialogMessage(window.hwnd, msg) then --make tab and arrow keys work with controls
+			--make tab and arrow keys work with controls.
+			--for windows with no focusable controls, set __wantallkeys,
+			--which skips this step so that no WM_CHAR messages are filtered.
+			if IsDialogMessage(window.hwnd, msg) then
 				return
 			end
 		end
@@ -109,12 +103,14 @@ function ProcessMessage(msg)
 	TranslateMessage(msg) --make keyboard work
 	DispatchMessage(msg) --make everything else work
 
+	--posted by Window objects to unregister their WNDCLASS after they're gone.
 	if msg.message == WM_UNREGISTER_CLASS then
 		UnregisterClass(msg.wParam)
 	end
 end
 
-function MessageLoop(after_process) --you can do os.exit(MessageLoop())
+--TIP: can call the message loop like this: os.exit(MessageLoop()).
+function MessageLoop(after_process)
 	local msg = types.MSG()
 	while true do
 		local ret = GetMessage(nil, 0, 0, msg)
@@ -124,9 +120,10 @@ function MessageLoop(after_process) --you can do os.exit(MessageLoop())
 			after_process(msg)
 		end
 	end
-	return msg.signed_wParam --WM_QUIT returns 0 and an int exit code in wParam
+	return msg.signed_wParam --WM_QUIT sends an int exit code in wParam
 end
 
+--process all pending message from the queue (if any) and return.
 function ProcessMessages(after_process)
 	while true do
 		local ok, msg = PeekMessage(nil, 0, 0, PM_REMOVE)
@@ -138,20 +135,20 @@ function ProcessMessages(after_process)
 	end
 end
 
---base window class
+--base window class ----------------------------------------------------------
 
 BaseWindow = {
-	__class_style_bitmask = bitmask{}, --windows who own their class add class style bits that are relevant to them
-	__style_bitmask = bitmask{},       --subclasses add style bits that are relevant to them
-	__style_ex_bitmask = bitmask{},    --subclasses add extended style bits that are relevant to them
+	__class_style_bitmask = bitmask{}, --for windows that own their WNDCLASS
+	__style_bitmask = bitmask{},       --style bits
+	__style_ex_bitmask = bitmask{},    --extended style bits
 	__defaults = {
 		visible = true,
 		enabled = true,
 		x = 0,
 		y = 0,
 	},
-	__init_properties = {},            --subclasses add after-create properties that are relevant to them
-	__wm_handler_names = index{        --subclasses add messages that are relevant to them
+	__init_properties = {},     --properties to be set after window creation
+	__wm_handler_names = index{ --message name -> handler name mapping
 		--lifetime
 		on_destroy = WM_DESTROY,
 		on_destroyed = WM_NCDESTROY,
@@ -164,6 +161,7 @@ BaseWindow = {
 		on_resized = WM_SIZE,
 		on_begin_sizemove = WM_ENTERSIZEMOVE,
 		on_end_sizemove = WM_EXITSIZEMOVE,
+		on_get_minmax_info = WM_GETMINMAXINFO,
 		on_focus = WM_SETFOCUS,
 		on_blur = WM_KILLFOCUS,
 		on_enable = WM_ENABLE,
@@ -173,8 +171,8 @@ BaseWindow = {
 		on_set_cursor = WM_SETCURSOR,
 		--mouse events
 		on_mouse_move = WM_MOUSEMOVE,
-		on_mouse_over = WM_MOUSEHOVER,  --call TrackMouseEvent after the first WM_MOUSEMOVE to receive this
-		on_mouse_leave = WM_MOUSELEAVE, --call TrackMouseEvent to receive this
+		on_mouse_over = WM_MOUSEHOVER,  --call TrackMouseEvent() to receive this
+		on_mouse_leave = WM_MOUSELEAVE, --call TrackMouseEvent() to receive this
 		on_lbutton_double_click = WM_LBUTTONDBLCLK,
 		on_lbutton_down = WM_LBUTTONDOWN,
 		on_lbutton_up = WM_LBUTTONUP,
@@ -204,14 +202,20 @@ BaseWindow = {
 		on_raw_input = WM_INPUT,
 		on_device_change = WM_INPUT_DEVICE_CHANGE,
 	},
-	__wm_syscommand_handler_names = {}, --subclasses add WM_SYSCOMMAND commands that are relevant to them
-	__wm_command_handler_names = {}, --subclasses add WM_COMMAND commands that are relevant to them
-	__wm_notify_handler_names = {}, --subclasses add WM_NOTIFY codes that are relevant to them
+	__wm_syscommand_handler_names = {}, --WM_SYSCOMMAND code -> handler name map
+	__wm_command_handler_names = {},    --WM_COMMAND code -> handler name map
+	__wm_notify_handler_names = {},     --WM_NOTIFY code -> handler name map
 }
 
 BaseWindow = subclass(BaseWindow, VObject)
 
---subclassing (generate virtual properties for style bits and inherit settings from the superclass)
+--subclassing ----------------------------------------------------------------
+
+--Subclassing from BaseWindow via subclass() allows the subclass to define
+--style bits, WM -> handler name mappings, etc. that are relevant to the
+--subclass. When subclassing, virtual properites will be generated for
+--getting and setting style bits individually, and other tables like
+--__defaults or __wm_handler_names will be inherited from the superclass.
 
 function BaseWindow:__get_class_style_bit(k)
 	return self.__class_style_bitmask:getbit(GetClassStyle(self.hwnd), k)
@@ -226,36 +230,45 @@ function BaseWindow:__get_style_ex_bit(k)
 end
 
 function BaseWindow:__set_class_style_bit(k,v)
-	SetClassStyle(self.hwnd, self.__class_style_bitmask:setbit(GetClassStyle(self.hwnd), k, v))
+	SetClassStyle(self.hwnd,
+		self.__class_style_bitmask:setbit(GetClassStyle(self.hwnd), k, v))
 	SetWindowPos(self.hwnd, nil, 0, 0, 0, 0, SWP_FRAMECHANGED_ONLY)
 end
 
 function BaseWindow:__set_style_bit(k,v)
-	SetWindowStyle(self.hwnd, self.__style_bitmask:setbit(GetWindowStyle(self.hwnd), k, v))
+	SetWindowStyle(self.hwnd,
+		self.__style_bitmask:setbit(GetWindowStyle(self.hwnd), k, v))
 	SetWindowPos(self.hwnd, nil, 0, 0, 0, 0, SWP_FRAMECHANGED_ONLY)
 end
 
 function BaseWindow:__set_style_ex_bit(k,v)
-	SetWindowExStyle(self.hwnd, self.__style_ex_bitmask:set(GetWindowExStyle(self.hwnd), k, v))
+	SetWindowExStyle(self.hwnd,
+		self.__style_ex_bitmask:set(GetWindowExStyle(self.hwnd), k, v))
 	SetWindowPos(self.hwnd, nil, 0, 0, 0, 0, SWP_FRAMECHANGED_ONLY)
 end
 
 function BaseWindow:__subclass(class)
 	BaseWindow.__index.__subclass(self, class)
-	--generate style virtual properties from additional style bitmask fileds, if any, and inherit super's bitmask fields
+
+	--generate style virtual properties from additional style bitmask fields,
+	--if any, and inherit the bitmask fields of the superclass.
 	if rawget(class, '__class_style_bitmask') then
-		class:__gen_vproperties(class.__class_style_bitmask.fields, class.__get_class_style_bit, class.__set_class_style_bit)
+		class:__gen_vproperties(class.__class_style_bitmask.fields,
+			class.__get_class_style_bit, class.__set_class_style_bit)
 		update(class.__class_style_bitmask.fields, self.__class_style_bitmask.fields)
 	end
 	if rawget(class, '__style_bitmask') then
-		class:__gen_vproperties(class.__style_bitmask.fields, class.__get_style_bit, class.__set_style_bit)
+		class:__gen_vproperties(class.__style_bitmask.fields,
+			class.__get_style_bit, class.__set_style_bit)
 		update(class.__style_bitmask.fields, self.__style_bitmask.fields)
 	end
 	if rawget(class, '__style_ex_bitmask') then
-		class:__gen_vproperties(class.__style_ex_bitmask.fields, class.__get_style_ex_bit, class.__set_style_ex_bit)
+		class:__gen_vproperties(class.__style_ex_bitmask.fields,
+			class.__get_style_ex_bit, class.__set_style_ex_bit)
 		update(class.__style_ex_bitmask.fields, self.__style_ex_bitmask.fields)
 	end
-	--inherit settings from the super class
+
+	--inherit settings from the super class.
 	if rawget(class, '__defaults') then
 		inherit(class.__defaults, self.__defaults)
 	end
@@ -276,11 +289,14 @@ function BaseWindow:__subclass(class)
 	end
 end
 
---instantiating
+--instantiating --------------------------------------------------------------
 
 function BaseWindow:__before_create(info, args) end --stub
 function BaseWindow:__after_create(info, args) end --stub
 
+--Windows will ignore style bits that are contradictory, so we check our
+--wanted style attributes to what was actually set and raise an error if
+--any of our attributes were ignored.
 function BaseWindow:__check_bitmask(name, mask, wanted, actual)
 	if wanted == actual then return end
 	local pp = require'pp'
@@ -290,32 +306,37 @@ function BaseWindow:__check_bitmask(name, mask, wanted, actual)
 end
 
 function BaseWindow:__check_class_style(wanted)
-	self:__check_bitmask('class style', self.__class_style_bitmask, wanted, GetClassStyle(self.hwnd))
+	self:__check_bitmask('class style', self.__class_style_bitmask, wanted,
+		GetClassStyle(self.hwnd))
 end
 
 function BaseWindow:__check_style(wanted)
-	self:__check_bitmask('style', self.__style_bitmask, wanted, GetWindowStyle(self.hwnd))
+	self:__check_bitmask('style', self.__style_bitmask, wanted,
+		GetWindowStyle(self.hwnd))
 end
 
 function BaseWindow:__check_style_ex(wanted)
-	self:__check_bitmask('ex style', self.__style_ex_bitmask, wanted, GetWindowExStyle(self.hwnd))
+	self:__check_bitmask('ex style', self.__style_ex_bitmask, wanted,
+		GetWindowExStyle(self.hwnd))
 end
 
---abstract class method
+--class method: convert info attributes to style bits.
+--subclasses override this to customize style bits based on info attributes.
 function BaseWindow:__info_style(info)
 	local style = self.__style_bitmask:set(0, info)
 	local style = bit.bor(style, info.enabled and 0 or WS_DISABLED)
 	return style
 end
 
---abstract class method
+--class method: convert info attributes to extended style bits.
+--subclasses override this to customize style bits based on info attributes.
 function BaseWindow:__info_style_ex(info)
 	return self.__style_ex_bitmask:set(0, info)
 end
 
 function BaseWindow:__init(info)
 
-	--given a window handle, wrap it up in a window object, in which case we ignore info completely
+	--given a window handle, wrap it in a window object, ignoring info completely.
 	if info.hwnd then
 		self.hwnd = info.hwnd
 		Windows:add(self)
@@ -325,30 +346,23 @@ function BaseWindow:__init(info)
 	info = inherit(info or {}, self.__defaults)
 
 	self.__state = {}
-	self.__state.min_w = info.min_w
-	self.__state.min_h = info.min_h
-	self.__state.max_w = info.max_w
-	self.__state.max_h = info.max_h
-	self.__state.min_cw = info.min_cw
-	self.__state.min_ch = info.min_ch
-	self.__state.max_cw = info.max_cw
-	self.__state.max_ch = info.max_ch
+
+	--size constraints: they don't apply to the initial size!
+	--force a resize to apply, i.e. self:resize(self.w, self.h).
+	self.min_w = info.min_w
+	self.min_h = info.min_h
+	self.max_w = info.max_w
+	self.max_h = info.max_h
+	self.min_cw = info.min_cw
+	self.min_ch = info.min_ch
+	self.max_cw = info.max_cw
+	self.max_ch = info.max_ch
 
 	local args = {}
 	args.x = info.x
 	args.y = info.y
 	args.w = info.w
 	args.h = info.h
-
-	--if there are constraints on the client rect, we need to find the frame
-	--thickness to be able to apply the constraints.
-	local dw, dh
-	if self.min_cw or self.min_ch or self.max_cw or self.max_ch then
-		local r = Windows:client_to_frame(info, 0, 0, 200, 200)
-		dw = r.w - 200
-		dh = r.h - 200
-	end
-	self:__apply_constraints(args, dw, dh)
 
 	args.style = self:__info_style(info)
 	args.style_ex = self:__info_style_ex(info)
@@ -357,19 +371,21 @@ function BaseWindow:__init(info)
 
 	self.hwnd = CreateWindow(args)
 
-	--style bits WS_BORDER and WS_DLGFRAME are always set on creation, so we reset them now if we have to
+	--style bits WS_BORDER and WS_DLGFRAME are always set on creation,
+	--so we clear them now if we have to.
 	if GetWindowStyle(self.hwnd) ~= args.style then
 		SetWindowStyle(self.hwnd, args.style)
-		SetWindowPos(self.hwnd, nil, 0, 0, 0, 0, SWP_FRAMECHANGED_ONLY) --events are not yet routed
+		SetWindowPos(self.hwnd, nil, 0, 0, 0, 0, SWP_FRAMECHANGED_ONLY) --events not yet routed.
 	end
 
-	--style bit WS_EX_WINDOWEDGE is always set on creation, so we reset it now if we have to
+	--style bit WS_EX_WINDOWEDGE is always set on creation,
+	--so we clear it now if we have to.
 	if GetWindowExStyle(self.hwnd) ~= args.style_ex then
 		SetWindowExStyle(self.hwnd, args.style_ex)
-		SetWindowPos(self.hwnd, nil, 0, 0, 0, 0, SWP_FRAMECHANGED_ONLY) --events are not yet routed
+		SetWindowPos(self.hwnd, nil, 0, 0, 0, 0, SWP_FRAMECHANGED_ONLY) --events not yet routed.
 	end
 
-	--make sure the style bits are consistent (windows will switch the inconsistent ones)
+	--check that style bits are consistent and reject them if they're not.
 	self:__check_style(args.style)
 	self:__check_style_ex(args.style_ex)
 
@@ -377,23 +393,25 @@ function BaseWindow:__init(info)
 
 	self.font = info.font or GetStockObject(DEFAULT_GUI_FONT)
 
-	--initialize properties that are extra to CreateWindow() in the prescribed order
+	--initialize post-creation properties in the prescribed order.
 	for _,name in ipairs(self.__init_properties) do
 		if info[name] then
-			self[name] = info[name] --events are not yet routed
+			self[name] = info[name] --events are not yet routed.
 		end
 	end
 
-	--register the window so we can find it by hwnd and route messages back to it via MessageRouter
+	--register the window so that MessageRouter can track it.
+	--hooking WNDPROC to MessageRouter is done in subclasses.
 	Windows:add(self)
 
-	--show the window (it is created without WS_VISIBLE to allow us to set up event routing first)
+	--show the window, which was intentionally created without WS_VISIBLE
+	--to allow us to set up event routing first.
 	if info.visible and not self.visible then
 		self.visible = true
 	end
 end
 
---destroing
+--destroying -----------------------------------------------------------------
 
 function BaseWindow:free()
 	if not self.hwnd then return end
@@ -408,7 +426,103 @@ end
 
 function BaseWindow:get_dead() return self.hwnd == nil end
 
---class properties
+--message routing ------------------------------------------------------------
+
+function BaseWindow:__handle_message(WM, wParam, lParam)
+	--print(WM_NAMES[WM], wParam, lParam)
+
+	--look for a low-level handler self:WM_*()
+	local handler = self[WM_NAMES[WM]]
+	if handler then
+		local ret = handler(self, DecodeMessage(WM, wParam, lParam))
+		if ret ~= nil then return ret end
+	end
+
+	--look for a hi-level handler self:on_*()
+	local handler = self[self.__wm_handler_names[WM]]
+	if handler then
+		local ret = handler(self, DecodeMessage(WM, wParam, lParam))
+		if ret ~= nil then return ret end
+	end
+
+	return self:__default_proc(WM, wParam, lParam)
+end
+
+--NOTE: controls override this and call CallWindowProc() instead.
+function BaseWindow:__default_proc(WM, wParam, lParam)
+	return DefWindowProc(self.hwnd, WM, wParam, lParam)
+end
+
+--WM_SYSCOMMAND routing ------------------------------------------------------
+
+function BaseWindow:WM_SYSCOMMAND(SC, ...)
+	local handler = self[self.__wm_syscommand_handler_names[SC]]
+	if handler then return handler(self, ...) end
+end
+
+--WM_COMMAND routing ---------------------------------------------------------
+
+function BaseWindow:WM_COMMAND(kind, id, command, hwnd)
+	if kind == 'control' then
+		local window = Windows:find(hwnd)
+		--some controls (eg. combobox) create their own child windows which we
+		--don't know about, so the window might not always be found.
+		if window then
+			local handler = window[window.__wm_command_handler_names[command]]
+			if handler then return handler(window) end
+		end
+	elseif kind == 'menu' then
+		--nothing to do there: our Menu class uses MNS_NOTIFYBYPOS so we get
+		--WM_MENUCOMMAND instead of WM_COMMAND.
+	elseif kind == 'accelerator' then
+		--nothing to do here: top-level windows handle accelerators.
+	end
+end
+
+--WM_NOTIFY routing ----------------------------------------------------------
+
+function BaseWindow:WM_NOTIFY(hwnd, code, ...)
+
+	--find the target windotw.
+	local window = Windows:find(hwnd)
+	if window == nil then return end
+
+	--look for a low-level handler self:*N_*()
+	local handler = window[WM_NOTIFY_NAMES[code]]
+	if handler then
+		local ret = handler(window, ...)
+		if ret ~= nil then return ret end
+	end
+
+	--look for a hi-level handler self:on_*()
+	local handler = window[window.__wm_notify_handler_names[code]]
+	if handler then
+		local ret = handler(window, ...)
+		if ret ~= nil then return ret end
+	end
+end
+
+--WM_COMPAREITEM routing -----------------------------------------------------
+
+function BaseWindow:WM_COMPAREITEM(hwnd, ci)
+	local window = Windows:find(hwnd)
+	if window and window.on_compare_items then
+		return window:on_compare_items(ci.i1, ci.i2)
+	end
+end
+
+--WM_NOTIFYICON routing ------------------------------------------------------
+
+function BaseWindow:WM_NOTIFYICON(id, WM)
+	local notify_icon = NotifyIcons:find(id)
+	if notify_icon then
+		notify_icon:WM_NOTIFYICON(WM)
+	end
+end
+
+--class properties -----------------------------------------------------------
+
+--NOTE: these will affect all instances that share the same WNDCLASS!
 
 function BaseWindow:get_background() return GetClassBackground(self.hwnd) end
 function BaseWindow:set_background(bg) SetClassBackground(self.hwnd, bg) end
@@ -422,7 +536,7 @@ function BaseWindow:set_icon(icon) SetClassIcon(self.hwnd, icon) end
 function BaseWindow:get_small_icon() GetClassSmallIcon(self.hwnd) end
 function BaseWindow:set_small_icon(icon) SetClassSmallIcon(self.hwnd, icon) end
 
---properties
+--properties -----------------------------------------------------------------
 
 function BaseWindow:get_text() return GetWindowText(self.hwnd) end
 function BaseWindow:set_text(text) SetWindowText(self.hwnd, text) end
@@ -451,7 +565,11 @@ function BaseWindow:get_cursor_pos()
 	return Windows:get_cursor_pos(self)
 end
 
---visibility
+function BaseWindow:get_monitor()
+	return MonitorFromWindow(self.hwnd, MONITOR_DEFAULTTONEAREST)
+end
+
+--visibility -----------------------------------------------------------------
 
 --show(true|nil) = show in current state.
 --show(false) = show show in current state but don't activate.
@@ -459,12 +577,12 @@ function BaseWindow:show(SW, async)
 	SW = flags((SW == nil or SW == true) and SW_SHOW or SW == false and SW_SHOWNA or SW)
 	local ShowWindow = async and ShowWindowAsync or ShowWindow
 	ShowWindow(self.hwnd, SW)
-	if SW ~= SW_HIDE then
-		if not self.visible then
-			--first ShowWindow(SW_SHOW) is ignored on the first window (SW_RESTORE is not)
-			ShowWindow(self.hwnd, SW)
-			UpdateWindow(self.hwnd)
-		end
+	--NOTE: The SW arg is ignored the first time an app calls ShowWindow()
+	--_on a top-level window_ (msdn is not accurate about this detail).
+	--Instead, the SW flag in STARTUPINFO is used (which for luajit.exe is SW_HIDE).
+	--So unless SW_SHOWDEFAULT is explicitly requested, ShowWindow() is called again.
+	if SW ~= SW_HIDE and SW ~= SW_SHOWDEFAULT and not self.visible then
+		ShowWindow(self.hwnd, SW)
 	end
 end
 
@@ -484,150 +602,44 @@ function BaseWindow:set_visible(visible)
 	if visible then self:show() else self:hide() end
 end
 
---size constraints & parent resizing event
+--size and position ----------------------------------------------------------
 
---custom event: on_parent_resizing()
-function BaseWindow:__parent_resizing(wp)
-	if self.on_parent_resizing then
-		self:on_parent_resizing(wp)
-	end
+function BaseWindow:move(x, y)
+	local flags = bit.bor(SWP_NOZORDER, SWP_NOOWNERZORDER, SWP_NOACTIVATE, SWP_NOSIZE)
+	SetWindowPos(self.hwnd, nil, x, y, 0, 0, flags)
 end
 
---clamp with upper limit taking precedence over the lower limit.
-local function clamp(x, min, max)
-	return math.min(math.max(x, min or -math.huge), max or math.huge)
+function BaseWindow:resize(w, h)
+	local flags = bit.bor(SWP_NOZORDER, SWP_NOOWNERZORDER, SWP_NOACTIVATE, SWP_NOMOVE)
+	SetWindowPos(self.hwnd, nil, 0, 0, w, h, flags)
 end
 
-function BaseWindow:__apply_constraints(t, dw, dh)
-	--constrain client size.
-	if self.min_cw or self.max_cw then
-		dw = dw or self.w - self.client_w
-		local cw = t.w - dw
-		cw = clamp(cw, self.min_cw, self.max_cw)
-		t.w = cw + dw
-	end
-	if self.min_ch or self.max_ch then
-		dh = dh or self.h - self.client_h
-		local ch = t.h - dh
-		ch = clamp(ch, self.min_ch, self.max_ch)
-		t.h = ch + dh
-	end
-	--constrain frame size.
-	t.w = clamp(t.w, self.min_w, self.max_w)
-	t.h = clamp(t.h, self.min_h, self.max_h)
-end
-
---restrict size by min/max constraints and resize children.
-function BaseWindow:WM_WINDOWPOSCHANGING(wp)
-	if not getbit(wp.flags, SWP_NOSIZE) then
-
-		--apply size constraints.
-		self:__apply_constraints(wp)
-
-		--children can resize the parent by modifying wp.
-		for child in self:children() do
-			child:__parent_resizing(wp)
-		end
-
-		if self.on_pos_changing then
-			self:on_pos_changing(wp)
-		end
-		return 0
-	end
-end
-
-function BaseWindow:__force_resize() --force move + resize events
-	local r = self.rect
+function BaseWindow:set_rect(...) --x1,y1,x2,y2 or rect
+	local r = RECT(...)
 	local flags = bit.bor(SWP_NOZORDER, SWP_NOOWNERZORDER, SWP_NOACTIVATE)
 	SetWindowPos(self.hwnd, nil, r.x, r.y, r.w, r.h, flags)
 end
 
-local function set_minmax(self)
-	self:__force_resize()
-end
-
-BaseWindow.set_min_w = set_minmax
-BaseWindow.set_min_h = set_minmax
-BaseWindow.set_max_w = set_minmax
-BaseWindow.set_max_h = set_minmax
-
-BaseWindow.set_min_cw = set_minmax
-BaseWindow.set_min_ch = set_minmax
-BaseWindow.set_max_cw = set_minmax
-BaseWindow.set_max_ch = set_minmax
-
---set many constraints at once but trigger a single resize event.
---a false value indicates clearing the constraint.
-function BaseWindow:setminmax(t)
-
-	local function set(name)
-		if t[name] == false then
-			self.__state[name] = nil
-		elseif t[name] then
-			self.__state[name] = t[name]
-		end
-	end
-
-	set'min_w' set'min_h'
-	set'max_w' set'max_h'
-
-	set'min_cw' set'min_ch'
-	set'max_cw' set'max_ch'
-
-	self:__force_resize()
-end
-
---moving and resizing
-
-function BaseWindow:move(x, y, w, h) --use nil to assume current value
-	local r = self.rect
-	x = x or r.x
-	y = y or r.y
-	w = w or r.w
-	h = h or r.h
-	local move = x ~= r.x or y ~= r.y
-	local resize = w ~= r.w or h ~= r.h
-	if not move and not resize then return end
-	local flags = bit.bor(SWP_NOZORDER, SWP_NOOWNERZORDER, SWP_NOACTIVATE,
-								move and 0 or SWP_NOMOVE,
-								resize and 0 or SWP_NOSIZE)
-	SetWindowPos(self.hwnd, nil, x, y, w, h, flags)
-end
-
-function BaseWindow:resize(w, h)
-	self:move(nil, nil, w, h)
+--frame rect in client coordinates of parent (or screen coordinates if no parent).
+function BaseWindow:get_rect(r)
+	return MapWindowRect(nil, GetParent(self.hwnd), GetWindowRect(self.hwnd, r))
 end
 
 function BaseWindow:get_x() return self.rect.x end
 function BaseWindow:get_y() return self.rect.y end
 function BaseWindow:get_w() return self.rect.w end
 function BaseWindow:get_h() return self.rect.h end
-function BaseWindow:set_x(x) self:move(x) end
-function BaseWindow:set_y(y) self:move(nil,y) end
-function BaseWindow:set_w(w) self:resize(w) end
-function BaseWindow:set_h(h) self:resize(nil,h) end
+function BaseWindow:set_x(x) self:move(x, self.rect.y) end
+function BaseWindow:set_y(y) self:move(self.rect.y, y) end
+function BaseWindow:set_w(w) self:resize(w, self.rect.h) end
+function BaseWindow:set_h(h) self:resize(self.rect.h, h) end
 
---rect, screen rect, client rect
-
-function BaseWindow:get_rect(r)
-	return MapWindowRect(nil, GetParent(self.hwnd), GetWindowRect(self.hwnd, r))
-end
-
-function BaseWindow:set_rect(...) --x1,y1,x2,y2 or rect
-	local r = RECT(...)
-	self:move(r.x, r.y, r.w, r.h)
-end
-
+--frame rect in screen coordinates.
 function BaseWindow:get_screen_rect(r)
 	return GetWindowRect(self.hwnd, r)
 end
 
-function BaseWindow:set_screen_rect(...) --x1,y1,x2,y2 or rect
-	local r = RECT(...)
-	MapWindowRect(nil, GetParent(self.hwnd), r)
-	self:move(r.x, r.y, r.w, r.h)
-end
-
+--client rectangle, relative to itself i.e. it's top-left corner is (0,0).
 function BaseWindow:get_client_rect(r)
 	return GetClientRect(self.hwnd, r)
 end
@@ -640,92 +652,102 @@ function BaseWindow:get_client_h()
 	return GetClientRect(self.hwnd).y2
 end
 
---message routing
+--client POINT -> client POINT of other window
+function BaseWindow:map_point(to_window, ...) --x,y or point
+	return MapWindowPoint(self.hwnd, to_window and to_window.hwnd, ...)
+end
 
-function BaseWindow:__handle_message(WM, wParam, lParam)
-	--look for a procedural-level handler self:WM_*()
-	--print(WM_NAMES[WM], wParam, lParam)
-	local handler = self[WM_NAMES[WM]]
-	if handler then
-		local ret = handler(self, DecodeMessage(WM, wParam, lParam))
-		if ret ~= nil then return ret end
+--client RECT -> client RECT of other window
+function BaseWindow:map_rect(to_window, ...) --x1,y1,x2,y2 or rect
+	return MapWindowRect(self.hwnd, to_window and to_window.hwnd, ...)
+end
+
+--frame-rect - client-rect relationship --------------------------------------
+
+--class method: screen RECT of client area -> screen RECT of window frame.
+--info should contain window attributes specific to how the frame should look.
+--used as instance method if info is nil.
+function BaseWindow:client_to_frame(info, ...) --x1,y1,x2,y2 or rect
+	local rect = RECT(...)
+	local style, style_ex, has_menu
+	if info then
+		info = glue.update({}, self.__defaults, info)
+		style = self:__info_style(info)
+		style_ex = self:__info_style_ex(info)
+		has_menu = info.menu ~= nil
+	else
+		style = GetWindowStyle(self.hwnd)
+		style_ex = GetWindowExStyle(self.hwnd)
+		has_menu = self.menu ~= nil
 	end
-	--look for a hi-level handler self:on_*()
-	--print(WM_NAMES[WM], self.__wm_handler_names[WM] or '')
-	handler = self[self.__wm_handler_names[WM]]
-	if handler then
-		local ret = handler(self, DecodeMessage(WM, wParam, lParam))
-		if ret ~= nil then return ret end
+	return AdjustWindowRect(rect, style, style_ex, has_menu)
+end
+
+--class method: screen RECT of window frame -> screen RECT of client area.
+--info should contain window attributes specific to how the frame should look.
+--used as instance method if info is nil.
+function BaseWindow:frame_to_client(info, ...) --x1,y1,x2,y2 or rect
+	local r = RECT(...)
+	local x1, y1, w1, h1 = self:client_to_frame(info, 0, 0, 200, 200)
+	local dr = RECT()
+	dr.x = r.x - x1
+	dr.y = r.y - y1
+	dr.w = r.w - w1 - x1 - 200
+	dr.h = r.h - h1 - y1 - 200
+	return dr
+end
+
+--size constraints -----------------------------------------------------------
+
+local function optmax(x, y) return x and y and math.max(x, y) or x or y end
+local function optmin(x, y) return x and y and math.min(x, y) or x or y end
+
+function BaseWindow:WM_GETMINMAXINFO(info)
+
+	--get frame rect constraints.
+	local min_w = self.min_w
+	local min_h = self.min_h
+	local max_w = self.max_w
+	local max_h = self.max_h
+
+	--mix them with client rect constraints.
+	if self.min_cw or self.min_ch or self.max_cw or self.max_ch then
+		local dr = self:client_to_frame(nil, 0, 0, 200, 200)
+		local dw = dr.w - 200
+		local dh = dr.h - 200
+		min_w = optmax(min_w, self.min_cw and self.min_cw + dw)
+		min_h = optmax(min_h, self.min_ch and self.min_ch + dh)
+		max_w = optmin(max_w, self.max_cw and self.max_cw + dw)
+		max_h = optmin(max_h, self.max_ch and self.max_ch + dh)
 	end
-	return self:__default_proc(WM, wParam, lParam)
+
+	--set the final constraints.
+	if min_w then info.ptMinTrackSize.w = min_w end
+	if min_h then info.ptMinTrackSize.h = min_h end
+	if max_w then info.ptMaxTrackSize.w = max_w end
+	if max_h then info.ptMaxTrackSize.h = max_h end
 end
 
-function BaseWindow:__default_proc(WM, wParam, lParam) --controls override this and call CallWindowProc instead
-	return DefWindowProc(self.hwnd, WM, wParam, lParam)
+--parent resizing event ------------------------------------------------------
+
+--called on all direct children of a window to give them an opportunity
+--to adjust the rect of the parent when the parent is resized.
+function BaseWindow:__parent_resizing(wp)
+	if self.on_parent_resizing then
+		self:on_parent_resizing(wp)
+	end
 end
 
---WM_SYSCOMMAND routing
-
-function BaseWindow:WM_SYSCOMMAND(SC, ...)
-	local handler = self[self.__wm_syscommand_handler_names[SC]]
-	if handler then return handler(self, ...) end
-end
-
---WM_COMMAND routing
-
-function BaseWindow:WM_COMMAND(kind, id, command, hwnd)
-	if kind == 'control' then
-		local window = Windows:find(hwnd)
-		if window then --some controls (eg. combobox) create their own child windows which we don't know about)
-			local handler = window[window.__wm_command_handler_names[command]]
-			if handler then return handler(window) end
+function BaseWindow:WM_WINDOWPOSCHANGING(wp)
+	if not getbit(wp.flags, SWP_NOSIZE) then
+		--children can resize the parent by modifying wp.
+		for child in self:children() do
+			child:__parent_resizing(wp)
 		end
-	elseif kind == 'menu' then
-		--do nothing: our menu class has MNS_NOTIFYBYPOS so we get WM_MENUCOMMAND instead
-	elseif kind == 'accelerator' then
-		--do nothing: top-level windows handle accelerators
 	end
 end
 
---WM_NOTIFY routing
-
-function BaseWindow:WM_NOTIFY(hwnd, code, ...)
-	local window = Windows:find(hwnd)
-	if window == nil then return end --TODO: find out which window is sending these notifications (listview's header maybe)
-	local handler = window[WM_NOTIFY_NAMES[code]]
-	--look for a procedural-level handler self:*N_*()
-	if handler then
-		local ret = handler(window, ...)
-		if ret ~= nil then return ret end
-	end
-	--look for a hi-level handler self:on_*()
-	handler = window[window.__wm_notify_handler_names[code]]
-	if handler then
-		local ret = handler(window, ...)
-		if ret ~= nil then return ret end
-	end
-end
-
---WM_COMPAREITEM routing
-
-function BaseWindow:WM_COMPAREITEM(hwnd, ci)
-	print'WM_COMPAREITEM' --TODO: see this message
-	local window = Windows:find(hwnd)
-	if window and window.on_compare_items then
-		return window:on_compare_items(ci.i1, ci.i2)
-	end
-end
-
---WM_NOTIFYICON routing
-
-function BaseWindow:WM_NOTIFYICON(id, WM)
-	local notify_icon = NotifyIcons:find(id)
-	if notify_icon then
-		notify_icon:WM_NOTIFYICON(WM)
-	end
-end
-
---hit testing
+--hit testing ----------------------------------------------------------------
 
 function BaseWindow:child_at(...) --x,y or point
 	return Windows:find(ChildWindowFromPoint(self.hwnd, ...))
@@ -751,55 +773,29 @@ function BaseWindow:real_child_at_recursive(...) --x,y or point
 	return self:real_child_at(...)
 end
 
-function BaseWindow:map_point(to_window, ...) --x,y or point
-	return MapWindowPoint(self.hwnd, to_window and to_window.hwnd, ...)
-end
-
-function BaseWindow:map_rect(to_window, ...) --x1,y1,x2,y2 or rect
-	return MapWindowRect(self.hwnd, to_window and to_window.hwnd, ...)
-end
-
---z-order
-
-function BaseWindow:get_topmost()
-	return getbit(GetWindowExStyle(self.hwnd), WS_EX_TOPMOST)
-end
-
-function BaseWindow:set_topmost(topmost)
-	SetWindowPos(self.hwnd, topmost and HWND_TOPMOST or HWND_NOTOPMOST,
-		0, 0, 0, 0, SWP_ZORDER_CHANGED_ONLY)
-end
+--z order --------------------------------------------------------------------
 
 function BaseWindow:send_to_back(relto)
-	local topmost = self.topmost
-	local relto_hwnd = relto and relto.hwnd or (self.topmost and HWND_NOTOPMOST or HWND_BOTTOM)
+	local relto_hwnd = relto and relto.hwnd or HWND_BOTTOM
 	SetWindowPos(self.hwnd, relto_hwnd, 0, 0, 0, 0, SWP_ZORDER_CHANGED_ONLY)
-	if topmost then
-		--self.topmost = true
-	end
 end
 
 function BaseWindow:bring_to_front(relto)
-	local relto_hwnd = relto and GetPrevSibling(relto.hwnd) or (self.topmost and HWND_TOPMOST or HWND_TOP)
+	local relto_hwnd = relto and GetPrevSibling(relto.hwnd) or HWND_TOP
 	SetWindowPos(self.hwnd, relto_hwnd, 0, 0, 0, 0, SWP_ZORDER_CHANGED_ONLY)
 end
 
---monitor
-
-function BaseWindow:get_monitor()
-	return MonitorFromWindow(self.hwnd, MONITOR_DEFAULTTONEAREST)
-end
-
---rendering
+--rendering ------------------------------------------------------------------
 
 function BaseWindow:set_updating(updating)
 	if not self.visible then return end
 	SetRedraw(self.hwnd, not updating)
 end
 
-function BaseWindow:batch_update(f, ...) --can't change self.updating inside f
+function BaseWindow:batch_update(f, ...)
 	if not self.visible or self.updating then
-		f(...)
+		f(...) --calling batch_update() inside batch_update()
+		return
 	end
 	self.updating = true
 	local ok,err = pcall(f,...)
@@ -809,11 +805,12 @@ function BaseWindow:batch_update(f, ...) --can't change self.updating inside f
 end
 
 function BaseWindow:redraw()
-	RedrawWindow(self.hwnd, nil, bit.bor(RDW_ERASE, RDW_FRAME, RDW_INVALIDATE, RDW_ALLCHILDREN))
+	RedrawWindow(self.hwnd, nil,
+		bit.bor(RDW_ERASE, RDW_FRAME, RDW_INVALIDATE, RDW_ALLCHILDREN))
 end
 
-function BaseWindow:invalidate()
-	InvalidateRect(self.hwnd, nil, true)
+function BaseWindow:invalidate(r, erase_background)
+	InvalidateRect(self.hwnd, r, erase_background ~= false)
 end
 
 function BaseWindow:WM_PAINT()
@@ -826,13 +823,13 @@ function BaseWindow:WM_PAINT()
 	end
 end
 
---drag/drop
+--drag & drop ----------------------------------------------------------------
 
 function BaseWindow:dragging(...)
 	return DragDetect(self.hwnd, POINT(...))
 end
 
---timer setting & routing
+--timers ---------------------------------------------------------------------
 
 function BaseWindow:settimer(timeout_ms, handler, id)
 	id = SetTimer(self.hwnd, id or 1, timeout_ms)

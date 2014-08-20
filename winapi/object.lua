@@ -2,11 +2,14 @@
 setfenv(1, require'winapi')
 require'winapi.class'
 
+--subclassing and instantiation ----------------------------------------------
+
 Object = class()
 
 Object.__meta = {}
 
-function Object:__subclass(c) --class constructor
+--class constructor (subclassing).
+function Object:__subclass(c)
 	c.__meta = c.__meta or {}
 	c.__meta.__index = c --dynamically inherit class fields
 	c.__meta.__class = c --for introspection
@@ -17,7 +20,9 @@ function Object:__subclass(c) --class constructor
 	setmetatable(c, c) --class metamethods are class methods
 end
 
-function Object:__init(...) end --object constructor, assumed empty
+--object constructor (instantiation).
+--assumed a stub by subclasses, so they don't use callsuper().
+function Object:__init(...) end
 
 function Object:__call(...) --don't override this, override __init instead.
 	local o = setmetatable({}, self.__meta)
@@ -27,7 +32,7 @@ end
 
 setmetatable(Object, Object)
 
---introspection
+--introspection --------------------------------------------------------------
 
 function Object:__super() --must work for both instances and classes
 	return getmetatable(self).__class or self.__index
