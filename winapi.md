@@ -12,7 +12,7 @@ OpenGL and cairo integration.
 ## Features
 
   * accepting and returning UTF8 Lua strings (also accepting wide char buffers)
-  * out-of-band error signaling with Lua errors
+  * all winapi calls are error-checked so you don't have to
   * automatic memory management (ownership management, allocation of in/out buffers)
   * flags can be passed as `'FLAG1 FLAG2'`
   * counting from 1 everywhere

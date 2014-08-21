@@ -20,7 +20,9 @@ function main:init()
 	panel.parent = self
 	panel.visible = true
 	self.visible = true
-	panel:settimer(1/60, panel.invalidate)
+	panel:settimer(1/60, function()
+		panel:invalidate()
+	end)
 end
 
 local function axes(w)

@@ -635,7 +635,7 @@ function BaseWindow:get_h() return self.rect.h end
 function BaseWindow:set_x(x) self:move(x, self.rect.y) end
 function BaseWindow:set_y(y) self:move(self.rect.y, y) end
 function BaseWindow:set_w(w) self:resize(w, self.rect.h) end
-function BaseWindow:set_h(h) self:resize(self.rect.h, h) end
+function BaseWindow:set_h(h) self:resize(self.rect.w, h) end
 
 --frame rect in screen coordinates.
 function BaseWindow:get_screen_rect(r)
