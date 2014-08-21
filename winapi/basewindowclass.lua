@@ -161,7 +161,6 @@ BaseWindow = {
 		on_resized = WM_SIZE,
 		on_begin_sizemove = WM_ENTERSIZEMOVE,
 		on_end_sizemove = WM_EXITSIZEMOVE,
-		on_get_minmax_info = WM_GETMINMAXINFO,
 		on_focus = WM_SETFOCUS,
 		on_blur = WM_KILLFOCUS,
 		on_enable = WM_ENABLE,
@@ -568,8 +567,8 @@ function BaseWindow:get_cursor_pos()
 	return Windows:get_cursor_pos(self)
 end
 
-function BaseWindow:get_monitor()
-	return MonitorFromWindow(self.hwnd, MONITOR_DEFAULTTONEAREST)
+function BaseWindow:get_monitor(flag)
+	return MonitorFromWindow(self.hwnd, flag)
 end
 
 --visibility -----------------------------------------------------------------

@@ -46,15 +46,15 @@ MONITORINFOEX = struct{ctype = 'MONITORINFOEXW', size = 'cbSize',
 }
 
 function MonitorFromPoint(pt, mflags)
-	return checkh(C.MonitorFromPoint(POINT(pt), flags(mflags)))
+	return ptr(C.MonitorFromPoint(POINT(pt), flags(mflags)))
 end
 
 function MonitorFromRect(rect, mflags)
-	return checkh(C.MonitorFromRect(RECT(rect), flags(mflags)))
+	return ptr(C.MonitorFromRect(RECT(rect), flags(mflags)))
 end
 
 function MonitorFromWindow(hwnd, mflags)
-	return checkh(C.MonitorFromWindow(hwnd, flags(mflags)))
+	return ptr(C.MonitorFromWindow(hwnd, flags(mflags)))
 end
 
 function GetMonitorInfo(hmonitor, info)

@@ -85,6 +85,7 @@ Window = subclass({
 	__wm_handler_names = index{
 		on_close = WM_CLOSE,
 		on_unminimizing = WM_QUERYOPEN, --return false to prevent.
+		on_get_minmax_info = WM_GETMINMAXINFO,
 		--system changes
 		on_query_end_session = WM_QUERYENDSESSION,
 		on_end_session = WM_ENDSESSION,

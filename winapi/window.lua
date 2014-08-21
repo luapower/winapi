@@ -87,6 +87,7 @@ WS_EX_PALETTEWINDOW    = bit.bor(WS_EX_WINDOWEDGE, WS_EX_TOOLWINDOW, WS_EX_TOPMO
 
 CW_USEDEFAULT = 0x80000000 --if used for x, then y must be a SW_* flag
 
+--NOTE: Only windows without the WS_SIZEBOX style can be created off-screen.
 function CreateWindow(info)
 	local class = wcs(MAKEINTRESOURCE(info.class))
 	local text = wcs(info.text)
@@ -197,6 +198,7 @@ SWP_FRAMECHANGED_ONLY = bit.bor(SWP_NOZORDER, SWP_NOOWNERZORDER, SWP_NOACTIVATE,
 											SWP_NOSIZE, SWP_NOMOVE, SWP_FRAMECHANGED)
 SWP_ZORDER_CHANGED_ONLY = bit.bor(SWP_NOMOVE, SWP_NOSIZE, SWP_NOACTIVATE)
 
+--NOTE: Windows can't be moved off-screen with this function.
 function SetWindowPos(hwnd, back_hwnd, x, y, cx, cy, SWP)
 	checknz(C.SetWindowPos(hwnd, back_hwnd, x, y, cx, cy, flags(SWP)))
 end
