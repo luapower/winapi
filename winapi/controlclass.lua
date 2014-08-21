@@ -57,7 +57,29 @@ function Control:set_parent(parent)
 	if parent then ChangeUIState(parent.hwnd, UIS_INITIALIZE, bit.bor(UISF_HIDEACCEL, UISF_HIDEFOCUS)) end
 end
 
---delphi-style anchors: resize when parent is resized based on anchors spec
+--size constraints -----------------------------------------------------------
+
+--clamp x to min..max range, where min and/or max can be nil.
+local function clamp(x, min, max)
+	return math.min(math.max(x, min or -1/0), max or 1/0)
+end
+
+--apply constraints to the movable sides of a rectangle.
+function Control:__apply_constraints(r, left, top, right, bottom)
+	local min_w, min_h, max_w, max_h = self:__constraints()
+
+	local w1 = clamp(r.w, min_w, max_w)
+	local h1 = clamp(r.h, min_h, max_h)
+
+	if top    then r.y, r.h = r.y + r.h - h1, h1 end
+	if bottom then r.h = h1 end
+	if left   then r.x, r.w = r.x + r.w - w1, w1 end
+	if right  then r.w = w1 end
+
+	return r
+end
+
+--delphi-style anchors -------------------------------------------------------
 
 local function anchor_dim(self, left, right, enlargement, x, w, adjustment)
 	local xofs, wofs
@@ -73,15 +95,29 @@ local function anchor_dim(self, left, right, enlargement, x, w, adjustment)
 	return x,w
 end
 
+--resize when parent is resized based on anchors.
 function Control:__parent_resizing(wp)
 	Control.__index.__parent_resizing(self, wp)
+
 	local pr, r = self.parent.screen_rect, self.rect
+
 	local x, w = anchor_dim(self, self.anchors.left, self.anchors.right,
 									pr.x1 + wp.w - pr.x2, r.x1, r.w, self.__anchor_w)
 	local y, h = anchor_dim(self, self.anchors.top,  self.anchors.bottom,
 									pr.y1 + wp.h - pr.y2, r.y1, r.h, self.__anchor_h)
-	self:move(x, y, w, h)
-	--real size might end up different than wanted size in which case we store the difference
+
+	--override rect with the changed sides.
+	if x then r.x = x end
+	if y then r.y = y end
+	if w then r.w = w end
+	if h then r.h = h end
+
+	--apply constraints only on the changed (thus movable) sides of rect.
+	self.rect = self:__apply_constraints(r, x, y, w, h)
+
+	--real size might end up different than wanted size in which case we store
+	--the difference, so that the original alignment to the parent is preserved
+	--on the next resize.
 	local rw, rh = self.w, self.h
 	if w and rw ~= w then self.__anchor_w = w - rw else self.__anchor_w = nil end
 	if h and rh ~= h then self.__anchor_h = h - rh else self.__anchor_h = nil end

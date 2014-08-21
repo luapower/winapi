@@ -690,22 +690,23 @@ end
 --info should contain window attributes specific to how the frame should look.
 --used as instance method if info is nil.
 function BaseWindow:frame_to_client(info, ...) --x1,y1,x2,y2 or rect
-	local r = RECT(...)
-	local x1, y1, w1, h1 = self:client_to_frame(info, 0, 0, 200, 200)
-	local dr = RECT()
-	dr.x = r.x - x1
-	dr.y = r.y - y1
-	dr.w = r.w - w1 - x1 - 200
-	dr.h = r.h - h1 - y1 - 200
-	return dr
+	local cr = RECT(...)
+	local dr = self:client_to_frame(info, 0, 0, 200, 200)
+	cr.x = cr.x - dr.x
+	cr.y = cr.y - dr.y
+	cr.w = cr.w - (dr.w - 200) - dr.x
+	cr.h = cr.h - (dr.h - 200) - dr.y
+	return cr
 end
 
 --size constraints -----------------------------------------------------------
 
+--min and max where x and/or y can be nil.
 local function optmax(x, y) return x and y and math.max(x, y) or x or y end
 local function optmin(x, y) return x and y and math.min(x, y) or x or y end
 
-function BaseWindow:WM_GETMINMAXINFO(info)
+--compute frame rect constraints based on frame rect and client rect constraints.
+function BaseWindow:__constraints()
 
 	--get frame rect constraints.
 	local min_w = self.min_w
@@ -724,17 +725,13 @@ function BaseWindow:WM_GETMINMAXINFO(info)
 		max_h = optmin(max_h, self.max_ch and self.max_ch + dh)
 	end
 
-	--set the final constraints.
-	if min_w then info.ptMinTrackSize.w = min_w end
-	if min_h then info.ptMinTrackSize.h = min_h end
-	if max_w then info.ptMaxTrackSize.w = max_w end
-	if max_h then info.ptMaxTrackSize.h = max_h end
+	return min_w, min_h, max_w, max_h
 end
 
 --parent resizing event ------------------------------------------------------
 
 --called on all direct children of a window to give them an opportunity
---to adjust the rect of the parent when the parent is resized.
+--to adjust their rect or the rect of the parent when the parent is resized.
 function BaseWindow:__parent_resizing(wp)
 	if self.on_parent_resizing then
 		self:on_parent_resizing(wp)
@@ -743,7 +740,7 @@ end
 
 function BaseWindow:WM_WINDOWPOSCHANGING(wp)
 	if not getbit(wp.flags, SWP_NOSIZE) then
-		--children can resize the parent by modifying wp.
+		--enable anchors and constraints in child windows.
 		for child in self:children() do
 			child:__parent_resizing(wp)
 		end

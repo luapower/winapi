@@ -245,10 +245,17 @@ function Window:WM_NCACTIVATE(flag, update_hrgn)
 	end
 end
 
---maximized size and position ------------------------------------------------
+--constraints & maximized size and position ----------------------------------
 
 function Window:WM_GETMINMAXINFO(info)
-	Window.__index.WM_GETMINMAXINFO(self, info)
+
+	--compute and apply any size constraints.
+	local min_w, min_h, max_w, max_h = self:__constraints()
+
+	if min_w then info.ptMinTrackSize.w = min_w end
+	if min_h then info.ptMinTrackSize.h = min_h end
+	if max_w then info.ptMaxTrackSize.w = max_w end
+	if max_h then info.ptMaxTrackSize.h = max_h end
 
 	--maximize to last position.
 	if self.__maximized_pos then

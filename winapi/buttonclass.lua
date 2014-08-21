@@ -63,7 +63,7 @@ function Button:get_pushed() return Button_GetState(self.hwnd) end
 if not ... then
 require'winapi.showcase'
 require'winapi.icon'
-local window = ShowcaseWindow{w=300,h=300}
+local window = ShowcaseWindow{w=300, h=300, max_cw=600, max_ch=600}
 local b1 = Button{parent = window, default = true}
 b1:focus()
 function b1:on_click() print'b1 clicked' end
@@ -82,10 +82,16 @@ b3 = Button{parent = window, y = 90, w = 100, h = 100, autosize = true, text_mar
 b3.icon = LoadIconFromInstance(IDI_INFORMATION)
 b3:click()
 
-b4 = Button{parent = window, y = 200, flat = true}
+b4 = Button{parent = window, y = 200, flat = true,
+				anchors = {top=false, left=true, right=true, bottom=true},
+				min_w = 100,
+				}
 b5 = Button{parent = window, x = 110, h = 70, w = 120,
+				anchors = {top=true, left=true, right=true, bottom=true},
+				min_w = 80, min_h = 24,
 				text = 'I live in a society where pizza gets to my house before the police',
 				word_wrap = true, autosize = false}
+
 b5.word_wrap = true
 
 MessageLoop()
