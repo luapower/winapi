@@ -5,13 +5,13 @@ require'winapi.memory'
 -- Predefined Clipboard Formats
 CF_NAMES = constants{
 	CF_TEXT              = 1,
-	CF_BITMAP            = 2,
+	CF_BITMAP            = 2, --only for DDBs, doesn't work with DIBs!
 	CF_METAFILEPICT      = 3,
 	CF_SYLK              = 4,
 	CF_DIF               = 5,
 	CF_TIFF              = 6,
 	CF_OEMTEXT           = 7,
-	CF_DIB               = 8,
+	CF_DIB               = 8, --DIB without alpha
 	CF_PALETTE           = 9,
 	CF_PENDATA           = 10,
 	CF_RIFF              = 11,
@@ -20,7 +20,7 @@ CF_NAMES = constants{
 	CF_ENHMETAFILE       = 14,
 	CF_HDROP             = 15,
 	CF_LOCALE            = 16,
-	CF_DIBV5             = 17,
+	CF_DIBV5             = 17, --DIB with alpha
 	CF_OWNERDISPLAY      = 0x0080,
 	CF_DSPTEXT           = 0x0081,
 	CF_DSPBITMAP         = 0x0082,
@@ -45,34 +45,35 @@ BOOL   EmptyClipboard(void);
 HANDLE SetClipboardData(UINT uFormat, HANDLE hMem);
 UINT   EnumClipboardFormats(UINT format);
 int    GetClipboardFormatNameW(UINT format, LPWSTR lpszFormatName, int cchMaxCount);
+UINT   RegisterClipboardFormatW(LPWSTR lpszFormat);
 ]]
 
 function OpenClipboard(hwnd)
-	return ffi.C.OpenClipboard(hwnd) ~= 0
+	return C.OpenClipboard(hwnd) ~= 0
 end
 
 function CloseClipboard(hwnd)
-	return checknz(ffi.C.CloseClipboard())
+	return checknz(C.CloseClipboard())
 end
 
 function IsClipboardFormatAvailable(format)
-	return ffi.C.IsClipboardFormatAvailable(flags(format)) ~= 0
+	return C.IsClipboardFormatAvailable(flags(format)) ~= 0
 end
 
 function CountClipboardFormats()
-	return callnz2(ffi.C.CountClipboardFormats)
+	return callnz2(C.CountClipboardFormats)
 end
 
 function GetClipboardData(uFormat)
-	return checkh(ffi.C.GetClipboardData(flags(uFormat)))
+	return checkh(C.GetClipboardData(flags(uFormat)))
 end
 
 function EmptyClipboard()
-	checknz(ffi.C.EmptyClipboard())
+	checknz(C.EmptyClipboard())
 end
 
 function SetClipboardData(format, hmem)
-	return checkh(ffi.C.SetClipboardData(flags(format), hmem))
+	return checkh(C.SetClipboardData(flags(format), hmem))
 end
 
 function EnumClipboardFormats(last_format)
@@ -84,6 +85,10 @@ function GetClipboardFormatName(format, buf, sz)
 	if not buf then buf, sz = WCS(sz) end
 	sz = checknz(C.GetClipboardFormatNameW(format, buf, sz))
 	return buf, sz
+end
+
+function RegisterClipboardFormat(name)
+	return checknz(C.RegisterClipboardFormatW(wcs(name)))
 end
 
 --hi-level API: get/set data from/to clipboard.
@@ -125,23 +130,33 @@ function GetClipboardDataBuffer(format, copy)
 	if not IsClipboardFormatAvailable(format) then
 		return
 	end
-	local h = GetClipboardData(format)
-	local buf = GlobalLock(h)
-	local sz = GlobalSize(h)
-	return glue.fcall(function()
+	return glue.fcall(function(finally)
+		local h = GetClipboardData(format)
+		local buf = GlobalLock(h)
+		if not buf then return end
+		finally(function() GlobalUnlock(h) end)
+		local sz = GlobalSize(h)
 		return copy(buf, sz)
-	end, function() GlobalUnlock(h) end)
+	end)
 end
 
 --set the clipboard data for a specific format from a buffer or string.
-function SetClipboardDataBuffer(format, buf, sz)
-	sz = sz or #buf
+--you can pass a buffer and a size, or just the size and a copy function.
+function SetClipboardDataBuffer(format, srcbuf, sz, copy)
 	--windows will own this memory, no need to free it.
-	local h = GlobalAlloc(bit.bor(GMEM_MOVEABLE, GMEM_ZEROINIT, GMEM_SHARE), sz)
-	local destbuf = GlobalLock(h)
-	ffi.copy(destbuf, buf, sz)
-	GlobalUnlock(h)
-	SetClipboardData(format, h)
+	glue.fcall(function(finally, onerror)
+		sz = sz or #buf
+		local h = GlobalAlloc(bit.bor(GMEM_MOVEABLE, GMEM_ZEROINIT, GMEM_SHARE), sz)
+		onerror(function() GlobalFree(h) end)
+		local buf = GlobalLock(h)
+		finally(function() GlobalUnlock(h) end)
+		if copy then
+			copy(buf, sz)
+		else
+			ffi.copy(buf, srcbuf, sz)
+		end
+		SetClipboardData(format, h)
+	end)
 end
 
 --get utf8 text out of the clipboard.
@@ -183,12 +198,22 @@ if not ... then
 	print''
 	print'clipboard as found:'
 	print''
-	for i,format in ipairs(GetClipboardFormatNames()) do
-		print('>' .. (CF_NAMES[format] or format))
+	for i,format in ipairs(GetClipboardFormats()) do
+		local name
+		if CF_NAMES[format] then
+			name = CF_NAMES[format]
+		else
+			name = mbs(GetClipboardFormatName(format))
+		end
+		print('>' .. name)
 		if format == CF_UNICODETEXT then
 			print(GetClipboardText())
 		elseif format == CF_HDROP then
 			require'pp'(GetClipboardFiles())
+		else
+			GetClipboardDataBuffer(format, function(buf, sz)
+				print(buf, sz, name)
+			end)
 		end
 	end
 
@@ -202,6 +227,7 @@ if not ... then
 	assert(#GetClipboardFormatNames() == 1)
 	assert(GetClipboardFormatNames()[1] == CF_UNICODETEXT)
 	assert(GetClipboardText() == s)
+	print(GetClipboardText())
 
 	print''
 	print'list of files:'
