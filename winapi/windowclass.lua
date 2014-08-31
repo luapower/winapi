@@ -24,6 +24,7 @@ Window = subclass({
 		hscroll = WS_HSCROLL,
 		clip_children = WS_CLIPCHILDREN,
 		clip_siblings = WS_CLIPSIBLINGS,
+		child = WS_CHILD, --needed for windows with WS_EX_TOOLWINDOW + WS_EX_NOACTIVATE!
 	},
 	__style_ex_bitmask = bitmask{
 		topmost = WS_EX_TOPMOST,
@@ -34,7 +35,7 @@ Window = subclass({
 		transparent = WS_EX_TRANSPARENT, --not really, better use layered and UpdateLayeredWindow()
 		layered = WS_EX_LAYERED, --setting this makes a completely frameless window regardless of other styles
 		control_parent = WS_EX_CONTROLPARENT, --recurse when looking for the next control with WS_TABSTOP
-		activatable = negate(WS_EX_NOACTIVATE), --don't activate and don't show on taskbar (weird semantics)
+		activable = negate(WS_EX_NOACTIVATE), --don't activate and don't show on taskbar (but see notes in window.lua!)
 		taskbar_button = WS_EX_APPWINDOW, --force showing a button on taskbar for this window
 	},
 	__defaults = {
@@ -47,7 +48,7 @@ Window = subclass({
 		frame = true,
 		minimize_button = true,
 		maximize_button = true,
-		sizeable = true,
+		sizeable = true, --...and has a 3px resizing border
 		sysmenu = true,
 		vscroll = false,
 		hscroll = false,
@@ -336,9 +337,28 @@ function Window:get_normal_rect()
 	return GetWindowPlacement(self.hwnd).rcNormalPosition
 end
 
+--clamp with optional min and max, where min takes precedence over max.
+local function clamp(x, min, max)
+	if max and min and max < min then max = min end
+	if min then x = math.max(x, min) end
+	if max then x = math.min(x, max) end
+	return x
+end
+
 function Window:set_normal_rect(...) --x1,y1,x2,y2 or rect
 	local wp = GetWindowPlacement(self.hwnd)
-	wp.rcNormalPosition = RECT(...)
+	local r = RECT(...)
+
+	--must apply constraints manually if maximized.
+	if self.maximized then
+		local minw, minh, maxw, maxh = self:__constraints()
+		if minw or minh or maxw or maxh then
+			r.w = clamp(r.w, minw, maxw)
+			r.h = clamp(r.h, minh, maxh)
+		end
+	end
+
+	wp.rcNormalPosition = r
 	if not self.visible then wp.showCmd = SW_HIDE end --don't show it if hidden!
 	SetWindowPlacement(self.hwnd, wp)
 end
