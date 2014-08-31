@@ -1,5 +1,5 @@
 --proc/gdi/devcaps: get device capabilities (submodule required by gdi)
-setfenv(1, require'winapi.namespace')
+setfenv(1, require'winapi')
 
 -- Device Parameters for GetDeviceCaps()
 DRIVERVERSION  = 0      -- Device driver version
