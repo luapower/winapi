@@ -151,7 +151,7 @@ BaseWindow = {
 	__wm_handler_names = index{ --message name -> handler name mapping
 		--lifetime
 		on_destroy = WM_DESTROY,
-		on_destroyed = WM_NCDESTROY,
+		--on_destroyed = WM_NCDESTROY, --manually triggered
 		--movement
 		on_pos_changing = WM_WINDOWPOSCHANGING,
 		on_pos_changed = WM_WINDOWPOSCHANGED,
@@ -346,8 +346,7 @@ function BaseWindow:__init(info)
 
 	self.__state = {}
 
-	--size constraints: they don't apply to the initial size!
-	--force a resize to apply, i.e. self:resize(self.w, self.h).
+	--size constraints
 	self.min_w = info.min_w
 	self.min_h = info.min_h
 	self.max_w = info.max_w
@@ -421,6 +420,10 @@ function BaseWindow:free()
 end
 
 function BaseWindow:WM_NCDESTROY() --after children are destroyed
+	--trigger this manually
+	if self.on_destroyed then
+		self:on_destroyed()
+	end
 	Windows:remove(self)
 	disown(self.hwnd) --prevent the __gc on hwnd calling DestroyWindow again
 	self.hwnd = nil
@@ -700,9 +703,10 @@ end
 
 --size constraints -----------------------------------------------------------
 
---min and max where x and/or y can be nil.
-local function optmax(x, y) return x and y and math.max(x, y) or x or y end
-local function optmin(x, y) return x and y and math.min(x, y) or x or y end
+--operation with optional operands
+local function optop(op, x, y)
+	return x and y and op(x, y) or x or y
+end
 
 --compute frame rect constraints based on frame rect and client rect constraints.
 function BaseWindow:__constraints()
@@ -718,10 +722,10 @@ function BaseWindow:__constraints()
 		local dr = self:client_to_frame(nil, 0, 0, 200, 200)
 		local dw = dr.w - 200
 		local dh = dr.h - 200
-		min_w = optmax(min_w, self.min_cw and self.min_cw + dw)
-		min_h = optmax(min_h, self.min_ch and self.min_ch + dh)
-		max_w = optmin(max_w, self.max_cw and self.max_cw + dw)
-		max_h = optmin(max_h, self.max_ch and self.max_ch + dh)
+		min_w = optop(math.max, min_w, self.min_cw and self.min_cw + dw)
+		min_h = optop(math.max, min_h, self.min_ch and self.min_ch + dh)
+		max_w = optop(math.min, max_w, self.max_cw and self.max_cw + dw)
+		max_h = optop(math.min, max_h, self.max_ch and self.max_ch + dh)
 	end
 
 	return min_w, min_h, max_w, max_h
