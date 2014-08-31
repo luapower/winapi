@@ -79,6 +79,13 @@ WS_EX_LAYERED         = 0x00080000
 WS_EX_NOINHERITLAYOUT = 0x00100000
 WS_EX_LAYOUTRTL       = 0x00400000
 WS_EX_COMPOSITED      = 0x02000000
+
+--NOTE: WS_EX_NOACTIVATE only works if there's only a single window in the app,
+--otherwise it only works for windows with WS_EX_TOOLWINDOW + WS_CHILD + WS_THICKFRAME.
+--there's also a bug: "show window contents while dragging" doesn't work,
+--so SetWindowPos() must be called in WM_MOVING and WM_SIZING too.
+--Also, you must set WS_CHILD **after** the window is created, otherwise
+--your toolboxes will be clipped by the parent window, just like controls!
 WS_EX_NOACTIVATE      = 0x08000000
 
 WS_POPUPWINDOW         = bit.bor(WS_POPUP, WS_BORDER, WS_SYSMENU)
