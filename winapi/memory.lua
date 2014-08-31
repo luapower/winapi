@@ -27,6 +27,7 @@ LPVOID GlobalLock(HGLOBAL hMem);
 BOOL  GlobalUnlock(HGLOBAL hMem);
 SIZE_T GlobalSize(HGLOBAL hMem);
 HGLOBAL GlobalAlloc(UINT uFlags, SIZE_T dwBytes);
+HGLOBAL GlobalFree(HGLOBAL hMem);
 
 LPVOID VirtualAlloc(LPVOID lpAddress, SIZE_T dwSize, DWORD flAllocationType, DWORD flProtect);
 BOOL VirtualProtect(LPVOID lpAddress, SIZE_T dwSize, DWORD flNewProtect, PDWORD lpflOldProtect);
@@ -41,7 +42,9 @@ BOOL HeapFree(HANDLE hHeap, DWORD dwFlags, LPVOID lpMem);
 BOOL HeapValidate(HANDLE hHeap, DWORD dwFlags, LPCVOID lpMem);
 ]]
 
-GlobalLock = ffi.C.GlobalLock
+function GlobalLock(hmem)
+	return ptr(ffi.C.GlobalLock(hmem))
+end
 
 function GlobalUnlock(hmem)
 	return callnz2(ffi.C.GlobalUnlock, hmem)
@@ -51,8 +54,12 @@ function GlobalSize(hmem)
 	return checknz(ffi.C.GlobalSize(hmem))
 end
 
-function GlobalAlloc(fl, sz)
-	return checkh(ffi.C.GlobalAlloc(flags(fl), sz))
+function GlobalAlloc(GMEM, sz)
+	return checkh(ffi.C.GlobalAlloc(flags(GMEM), sz))
+end
+
+function GlobalFree(h)
+	return checknz(ffi.C.GlobalFree(h) == nil and 1 or 0)
 end
 
 PAGE_NOACCESS           = 0x01
