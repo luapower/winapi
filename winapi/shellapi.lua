@@ -5,7 +5,7 @@ require'winapi.winnt'
 
 shell32 = ffi.load'Shell32'
 
---file info
+--file info ------------------------------------------------------------------
 
 ffi.cdef[[
 typedef struct _SHFILEINFOW {
@@ -49,7 +49,7 @@ function SHGetFileInfo(path, fileattr, SHGFI, fileinfo)
 		ffi.sizeof'SHFILEINFOW', flags(SHGFI)), fileinfo
 end
 
---notify icons (WinXP/Win2K+)
+--notify icons ---------------------------------------------------------------
 
 ffi.cdef[[
 typedef struct _NOTIFYICONDATAW {
@@ -151,7 +151,7 @@ function Shell_NotifyIcon(msg, data)
 	checknz(shell32.Shell_NotifyIconW(msg, data))
 end
 
---drag/drop files
+--drag & drop files ----------------------------------------------------------
 
 ffi.cdef[[
 struct HDROP__ { int unused; };
@@ -171,6 +171,9 @@ typedef struct DROPFILESW_VLS {        // don't look this up in msdn.
 } DROPFILESW_VLS;
 
 UINT DragQueryFileW(HDROP hDrop, UINT iFile, LPWSTR lpszFile, UINT cch);
+BOOL DragQueryPoint(HDROP hDrop, POINT *lppt);
+VOID DragAcceptFiles(HWND hWnd, BOOL fAccept);
+VOID DragFinish(HDROP hDrop);
 ]]
 
 --special constructor for a Lua list of utf-8 (or wcs) filenames.
@@ -213,5 +216,18 @@ function DragQueryFiles(hdrop)
 		t[#t+1] = mbs(DragQueryFile(hdrop, i, buf, sz))
 	end
 	return t
+end
+
+function DragQueryPoint(hdrop, p)
+	p = POINT(p)
+	local in_client_area = shell32.DragQueryPoint(hdrop, p) ~= 0
+	return p, in_client_area
+end
+
+DragAcceptFiles = shell32.DragAcceptFiles
+DragFinish = shell32.DragFinish
+
+function WM.WM_DROPFILES(wParam, lParam)
+	return ffi.cast('HDROP', wParam)
 end
 
