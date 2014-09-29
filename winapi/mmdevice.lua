@@ -12,11 +12,7 @@ typedef struct IMMDeviceCollection IMMDeviceCollection;
 typedef struct IMMEndpoint IMMEndpoint;
 typedef struct IMMDeviceEnumerator IMMDeviceEnumerator;
 typedef struct IMMDeviceActivator IMMDeviceActivator;
-
-
-typedef struct MMDeviceEnumerator MMDeviceEnumerator;
 ]]
-
 
 --[[
 #define E_NOTFOUND HRESULT_FROM_WIN32(ERROR_NOT_FOUND)
@@ -30,16 +26,6 @@ static const int DEVICE_STATE_NOTPRESENT = 0x00000004;
 static const int DEVICE_STATE_UNPLUGGED  = 0x00000008;
 static const int DEVICE_STATEMASK_ALL    = 0x0000000f;
 ]]
-
-
-
---[[
-#ifdef INITGUID
-#define DEFINE_PROPERTYKEY(name, l, w1, w2, b1, b2, b3, b4, b5, b6, b7, b8, pid) EXTERN_C const PROPERTYKEY name = { { l, w1, w2, { b1, b2,  b3,  b4,  b5,  b6,  b7,  b8 } }, pid }
-#else
-#define DEFINE_PROPERTYKEY(name, l, w1, w2, b1, b2, b3, b4, b5, b6, b7, b8, pid) EXTERN_C const PROPERTYKEY name
-#endif // INITGUID
---]]
 
 function DEFINE_PROPERTYKEY(name, l, w1, w2, b1, b2, b3, b4, b5, b6, b7, b8, pid)
     local pkey = ffi.new("PROPERTYKEY", { { l, w1, w2, { b1, b2,  b3,  b4,  b5,  b6,  b7,  b8 } }, pid })
@@ -116,21 +102,6 @@ typedef  enum
 ]]
 --#define HDMI     DigitalAudioDisplayDevice
 
-
---[[
--- Used by all COM Interfaces that descend from IUnknown
-#define IMMEndpoint_QueryInterface(This,riid,ppvObject) \
-    ( (This)->lpVtbl -> QueryInterface(This,riid,ppvObject) )
-
-#define IMMEndpoint_AddRef(This)    \
-    ( (This)->lpVtbl -> AddRef(This) )
-
-#define IMMEndpoint_Release(This)   \
-    ( (This)->lpVtbl -> Release(This) )
---]]
-
-
-
 ffi.cdef[[
     typedef struct IMMNotificationClientVtbl
     {
@@ -187,31 +158,6 @@ ffi.cdef[[
         const struct IMMNotificationClientVtbl *lpVtbl;
     } IMMNotificationClient;
 ]]
-
---[[
-
-
-#define IMMNotificationClient_OnDeviceStateChanged(This,pwstrDeviceId,dwNewState)	\
-    ( (This)->lpVtbl -> OnDeviceStateChanged(This,pwstrDeviceId,dwNewState) )
-
-#define IMMNotificationClient_OnDeviceAdded(This,pwstrDeviceId)	\
-    ( (This)->lpVtbl -> OnDeviceAdded(This,pwstrDeviceId) )
-
-#define IMMNotificationClient_OnDeviceRemoved(This,pwstrDeviceId)	\
-    ( (This)->lpVtbl -> OnDeviceRemoved(This,pwstrDeviceId) )
-
-#define IMMNotificationClient_OnDefaultDeviceChanged(This,flow,role,pwstrDefaultDeviceId)	\
-    ( (This)->lpVtbl -> OnDefaultDeviceChanged(This,flow,role,pwstrDefaultDeviceId) )
-
-#define IMMNotificationClient_OnPropertyValueChanged(This,pwstrDeviceId,key)	\
-    ( (This)->lpVtbl -> OnPropertyValueChanged(This,pwstrDeviceId,key) )
-
---]]
-
-
-
-
-
 
 ffi.cdef[[
     typedef struct IMMDeviceVtbl
@@ -277,10 +223,6 @@ local IMMDevice_mt = {
 }
 ffi.metatype(IMMDevice, IMMDevice_mt)
 
-
-
-
-
 ffi.cdef[[
 
     typedef struct IMMDeviceCollectionVtbl
@@ -325,10 +267,6 @@ IMMDeviceCollection_mt = {
 }
 ffi.metatype(IMMDeviceCollection, IMMDeviceCollection_mt)
 
-
-
-
-
 ffi.cdef[[
     typedef struct IMMEndpointVtbl
     {
@@ -363,11 +301,6 @@ local IMMEndpoint_mt = {
         end,
     },
 }
-
-
-
-
-
 
 ffi.cdef[[
     typedef struct IMMDeviceEnumeratorVtbl
@@ -414,7 +347,7 @@ ffi.cdef[[
     typedef struct IMMDeviceEnumerator
     {
         const struct IMMDeviceEnumeratorVtbl *lpVtbl;
-    }IMMDeviceEnumerator;
+    } IMMDeviceEnumerator;
 ]]
 
 local IMMDeviceEnumerator = ffi.typeof("struct IMMDeviceEnumerator")
@@ -431,23 +364,6 @@ local IMMDeviceEnumerator_mt = {
     },
 }
 ffi.metatype(IMMDeviceEnumerator, IMMDeviceEnumerator_mt)
-
---[[
-
-#define IMMDeviceEnumerator_GetDefaultAudioEndpoint(This,dataFlow,role,ppEndpoint)	\
-    ( (This)->lpVtbl -> GetDefaultAudioEndpoint(This,dataFlow,role,ppEndpoint) )
-
-#define IMMDeviceEnumerator_GetDevice(This,pwstrId,ppDevice)	\
-    ( (This)->lpVtbl -> GetDevice(This,pwstrId,ppDevice) )
-
-#define IMMDeviceEnumerator_RegisterEndpointNotificationCallback(This,pClient)	\
-    ( (This)->lpVtbl -> RegisterEndpointNotificationCallback(This,pClient) )
-
-#define IMMDeviceEnumerator_UnregisterEndpointNotificationCallback(This,pClient)	\
-    ( (This)->lpVtbl -> UnregisterEndpointNotificationCallback(This,pClient) )
---]]
-
-
 
 ffi.cdef[[
     typedef struct IMMDeviceActivatorVtbl
@@ -478,14 +394,6 @@ ffi.cdef[[
         const struct IMMDeviceActivatorVtbl *lpVtbl;
     }IMMDeviceActivator;
 ]]
-
-
-
---[[
-#define IMMDeviceActivator_Activate(This,iid,pDevice,pActivationParams,ppInterface)	\
-    ( (This)->lpVtbl -> Activate(This,iid,pDevice,pActivationParams,ppInterface) )
---]]
-
 
 CLSID_MMDeviceEnumerator = UuidFromString("BCDE0395-E52F-467C-8E3D-C4579291692E")
 
