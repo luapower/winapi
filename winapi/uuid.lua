@@ -5,8 +5,6 @@ require'winapi.rpc'
 ffi.cdef[[
 RPC_STATUS UuidCreate (UUID* Uuid);
 RPC_STATUS UuidCreateSequential (UUID* Uuid);
-RPC_STATUS UuidToStringA (const UUID* Uuid, RPC_WSTR* StringUuid);
-RPC_STATUS UuidFromStringA (RPC_WSTR StringUuid, UUID* Uuid);
 RPC_STATUS UuidToStringW (const UUID* Uuid, RPC_WSTR* StringUuid);
 RPC_STATUS UuidFromStringW (RPC_WSTR StringUuid, UUID* Uuid);
 signed int UuidCompare (UUID* Uuid1, UUID* Uuid2, RPC_STATUS* Status);

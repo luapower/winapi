@@ -1,6 +1,7 @@
 --proc/ole/dragdrop: drag & drop OLE API
 setfenv(1, require'winapi')
 require'winapi.ole'
+require'winapi.idataobject'
 
 DRAGDROP_S_FIRST               = 0x00040100
 DRAGDROP_S_LAST                = 0x0004010F
@@ -27,14 +28,8 @@ TYMED_ENHMF     = 64
 TYMED_NULL      = 0
 
 ffi.cdef([[
-typedef struct IEnumFORMATETC IEnumFORMATETC;
 typedef struct IDropTarget IDropTarget;
-typedef struct IDataObject IDataObject;
-typedef struct IDropSource IDropSource;
-
 typedef IDropTarget *LPDROPTARGET;
-typedef IDataObject *LPDATAOBJECT;
-typedef IDropSource *LPDROPSOURCE;
 
 typedef struct IDropTargetVtbl {
 
@@ -79,145 +74,8 @@ struct IDropTarget {
 	int refcount;
 };
 
-typedef WORD CLIPFORMAT;
-
-typedef struct tagDVTARGETDEVICE {
-	DWORD tdSize;
-	WORD tdDriverNameOffset;
-	WORD tdDeviceNameOffset;
-	WORD tdPortNameOffset;
-	WORD tdExtDevmodeOffset;
-	BYTE tdData[1];
-} DVTARGETDEVICE;
-
-typedef struct tagFORMATETC {
-	CLIPFORMAT cfFormat;
-	DVTARGETDEVICE *ptd;
-	DWORD dwAspect;
-	LONG lindex;
-	DWORD tymed;
-} FORMATETC;
-
-typedef struct tagFORMATETC *LPFORMATETC;
-
-typedef struct IEnumFORMATETCVtbl {
-
-  HRESULT ( __stdcall *QueryInterface )(
-		IEnumFORMATETC * This,
-		REFIID riid,
-		void **ppvObject);
-
-  ULONG ( __stdcall *AddRef )(
-		IEnumFORMATETC * This);
-
-  ULONG ( __stdcall *Release )(
-		IEnumFORMATETC * This);
-
-  HRESULT ( __stdcall *Next )(
-		IEnumFORMATETC * This,
-		ULONG celt,
-		FORMATETC *rgelt,
-		ULONG *pceltFetched);
-
-  HRESULT ( __stdcall *Skip )(
-		IEnumFORMATETC * This,
-		ULONG celt);
-
-  HRESULT ( __stdcall *Reset )(
-		IEnumFORMATETC * This);
-
-  HRESULT ( __stdcall *Clone )(
-		IEnumFORMATETC * This,
-		IEnumFORMATETC **ppenum);
-
-} IEnumFORMATETCVtbl;
-
-struct IEnumFORMATETC {
-	struct IEnumFORMATETCVtbl *lpVtbl;
-};
-
-typedef void *HMETAFILEPICT;
-
-typedef struct tagSTGMEDIUM {
-	DWORD tymed;
-	union {
-		HBITMAP hBitmap;
-		HMETAFILEPICT hMetaFilePict;
-		HENHMETAFILE hEnhMetaFile;
-		HGLOBAL hGlobal;
-		LPOLESTR lpszFileName;
-		IStream *pstm;
-		IStorage *pstg;
-	};
-	IUnknown *pUnkForRelease;
-} uSTGMEDIUM;
-
-typedef uSTGMEDIUM STGMEDIUM;
-typedef STGMEDIUM* LPSTGMEDIUM;
-
-typedef struct IDataObjectVtbl {
-
-	HRESULT ( __stdcall *QueryInterface )(
-		IDataObject * This,
-		REFIID riid,
-		void **ppvObject);
-
-	ULONG ( __stdcall *AddRef )(
-		IDataObject * This);
-
-	ULONG ( __stdcall *Release )(
-		IDataObject * This);
-
-	HRESULT ( __stdcall *GetData )(
-		IDataObject * This,
-		FORMATETC *pformatetcIn,
-		STGMEDIUM *pmedium);
-
-	HRESULT ( __stdcall *GetDataHere )(
-		IDataObject * This,
-		FORMATETC *pformatetc,
-		STGMEDIUM *pmedium);
-
-	HRESULT ( __stdcall *QueryGetData )(
-		IDataObject * This,
-		FORMATETC *pformatetc);
-
-	HRESULT ( __stdcall *GetCanonicalFormatEtc )(
-		IDataObject * This,
-		FORMATETC *pformatectIn,
-		FORMATETC *pformatetcOut);
-
-	HRESULT ( __stdcall *SetData )(
-		IDataObject * This,
-		FORMATETC *pformatetc,
-		STGMEDIUM *pmedium,
-		BOOL fRelease);
-
-	HRESULT ( __stdcall *EnumFormatEtc )(
-		IDataObject * This,
-		DWORD dwDirection,
-		IEnumFORMATETC **ppenumFormatEtc);
-
-	HRESULT ( __stdcall *DAdvise )(
-		IDataObject * This,
-		FORMATETC *pformatetc,
-		DWORD advf,
-		IAdviseSink *pAdvSink,
-		DWORD *pdwConnection);
-
-	HRESULT ( __stdcall *DUnadvise )(
-		IDataObject * This,
-		DWORD dwConnection);
-
-	HRESULT ( __stdcall *EnumDAdvise )(
-		IDataObject * This,
-		IEnumSTATDATA **ppenumAdvise);
-
-} IDataObjectVtbl;
-
-struct IDataObject {
-	struct IDataObjectVtbl *lpVtbl;
-};
+typedef struct IDropSource IDropSource;
+typedef IDropSource *LPDROPSOURCE;
 
 typedef struct IDropSourceVtbl {
 
@@ -253,7 +111,6 @@ HRESULT DoDragDrop(LPDATAOBJECT pDataObj, LPDROPSOURCE pDropSource,
             DWORD dwOKEffects, LPDWORD pdwEffect);
 
 void ReleaseStgMedium(LPSTGMEDIUM);
-
 ]])
 
 function RegisterDragDrop(...) return checkz(ole32.RegisterDragDrop(...)) end
@@ -261,3 +118,4 @@ function RevokeDragDrop(...) return checkz(ole32.RevokeDragDrop(...)) end
 function DoDragDrop(...) return checkz(ole32.DoDragDrop(...)) end
 
 ReleaseStgMedium = ole32.ReleaseStgMedium
+

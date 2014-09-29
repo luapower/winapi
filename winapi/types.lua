@@ -25,6 +25,7 @@ typedef int             BOOL;
 typedef unsigned char   BYTE;
 typedef unsigned short  WORD;
 typedef float           FLOAT;
+typedef double          DOUBLE;
 typedef FLOAT           *PFLOAT;
 typedef BOOL            *PBOOL;
 typedef BOOL            *LPBOOL;
@@ -176,8 +177,12 @@ typedef CLSID *LPCLSID;
 typedef GUID FMTID;
 typedef FMTID *LPFMTID;
 typedef IID* REFIID;
-
 typedef GUID UUID;
+typedef const GUID *LPCGUID;
+typedef const GUID *REFGUID;
+typedef GUID CLSID;
+typedef CLSID *LPCLSID;
+typedef const GUID *REFCLSID;
 
 typedef UINT_PTR WPARAM;
 typedef LONG_PTR LPARAM;
