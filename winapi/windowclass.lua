@@ -1,4 +1,7 @@
+
 --oo/window: overlapping (aka top-level) windows.
+--Written by Cosmin Apreutesei. Public Domain.
+
 setfenv(1, require'winapi')
 require'winapi.basewindowclass'
 require'winapi.menuclass'

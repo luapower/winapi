@@ -1,4 +1,7 @@
+
 --proc/comboboxex: standard (new, from comctl32) combobox control.
+--Written by Cosmin Apreutesei. Public Domain.
+
 setfenv(1, require'winapi')
 require'winapi.combobox'
 require'winapi.comctl'

@@ -1,4 +1,7 @@
+
 --ffi/util: filters and conversion functions for winapi args and return-values.
+--Written by Cosmin Apreutesei. Public Domain.
+
 setfenv(1, require'winapi.namespace')
 require'winapi.types'
 

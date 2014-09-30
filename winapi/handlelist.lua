@@ -1,4 +1,7 @@
+
 --oo/handlelist: track objects by their corresponding 32bit pointer handle
+--Written by Cosmin Apreutesei. Public Domain.
+
 setfenv(1, require'winapi')
 require'winapi.vobject'
 

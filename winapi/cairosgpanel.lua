@@ -1,4 +1,7 @@
+
 --oo/cairosgpanel: cairo scene graph panel.
+--Written by Cosmin Apreutesei. Public Domain.
+
 --call self.scene_graph:render(scene) on on_render() to render a cairo scene graph.
 local winapi = require'winapi'
 local CairoPanel = require'winapi.cairopanel'

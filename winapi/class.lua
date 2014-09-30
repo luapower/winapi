@@ -1,4 +1,7 @@
+
 --oo/class: single inheritance object model.
+--Written by Cosmin Apreutesei. Public Domain.
+
 --subclassing defined by super:__subclass(derived).
 --introspection is in terms of class:__super().
 setfenv(1, require'winapi')

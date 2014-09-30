@@ -1,4 +1,7 @@
+
 --proc/toolbar: standard toolbar control.
+--Written by Cosmin Apreutesei. Public Domain.
+
 setfenv(1, require'winapi')
 require'winapi.window'
 require'winapi.comctl'

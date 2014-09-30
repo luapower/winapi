@@ -1,4 +1,7 @@
+
 --oo/imagelist: image list class.
+--Written by Cosmin Apreutesei. Public Domain.
+
 setfenv(1, require'winapi')
 require'winapi.itemlist'
 require'winapi.handlelist'

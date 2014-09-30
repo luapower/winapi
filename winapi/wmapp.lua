@@ -1,4 +1,7 @@
+
 --proc/window/wmapp: management of user-defined window messages.
+--Written by Cosmin Apreutesei. Public Domain.
+
 --this module is loaded by `winapi.window` module.
 --WM_APP messages are shared resources. this module keeps track of them
 --and allows you to acquire and release them as needed.

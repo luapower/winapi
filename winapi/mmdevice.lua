@@ -1,4 +1,7 @@
+
 --proc/mmdevice: Windows Multimedia Device API.
+--Written by William Adams. Public Domain.
+
 setfenv(1, require'winapi')
 require'winapi.ole'
 require'winapi.propsys'

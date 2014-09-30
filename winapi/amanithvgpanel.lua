@@ -1,4 +1,7 @@
+
 --oo/amanithvgpanel: opengl + openvg-enabled panel using AmanithVG GLE implementation.
+--Written by Cosmin Apreutesei. Public Domain.
+
 setfenv(1, require'winapi')
 require'winapi.wglpanel'
 local C = require'amanithvg'

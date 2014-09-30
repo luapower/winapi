@@ -1,4 +1,7 @@
+
 --ffi/wcs: utf8 to wide character string and back.
+--Written by Cosmin Apreutesei. Public Domain.
+
 setfenv(1, require'winapi.namespace')
 require'winapi.types'
 require'winapi.util'

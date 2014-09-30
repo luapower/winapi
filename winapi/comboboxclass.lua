@@ -1,4 +1,7 @@
+
 --oo/combobox: standard combobox control based on ComboBoxEx32 control.
+--Written by Cosmin Apreutesei. Public Domain.
+
 setfenv(1, require'winapi')
 require'winapi.controlclass'
 require'winapi.comboboxex'

@@ -1,4 +1,7 @@
+
 --proc/ole/dragdrop: drag & drop OLE API
+--Written by Cosmin Apreutesei. Public Domain.
+
 setfenv(1, require'winapi')
 require'winapi.ole'
 require'winapi.idataobject'

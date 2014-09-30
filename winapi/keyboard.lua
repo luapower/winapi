@@ -1,4 +1,7 @@
+
 --proc/keyboard: keyboard input handling and keyboard layouts
+--Written by Cosmin Apreutesei. Public Domain.
+
 setfenv(1, require'winapi')
 
 --NOTE: can't distinguish between cursor keys and numpad cursor keys with GetKeyState(), but you can on WM_KEYDOWN et al.

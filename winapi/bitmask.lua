@@ -1,4 +1,7 @@
+
 --ffi/bitmask: bitmask encoding and decoding.
+--Written by Cosmin Apreutesei. Public Domain.
+
 setfenv(1, require'winapi.namespace')
 require'winapi.util'
 

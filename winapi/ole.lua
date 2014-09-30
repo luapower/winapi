@@ -1,4 +1,7 @@
+
 --proc/ole: OLE API.
+--Written by Cosmin Apreutesei. Public Domain.
+
 setfenv(1, require'winapi')
 
 ole32 = ffi.load'ole32'

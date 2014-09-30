@@ -1,4 +1,7 @@
+
 --proc/winnt: don't know the scope of this yet.
+--Written by Cosmin Apreutesei. Public Domain.
+
 setfenv(1, require'winapi')
 
 FILE_ATTRIBUTE_READONLY             = 0x00000001

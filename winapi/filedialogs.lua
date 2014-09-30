@@ -1,4 +1,7 @@
+
 --proc/filedialogs: standard open and save file dialogs.
+--Written by Cosmin Apreutesei. Public Domain.
+
 setfenv(1, require'winapi')
 require'winapi.comdlg'
 

@@ -1,4 +1,7 @@
+
 --proc/logfonttype: LOGFONTW type (separated from winapi.font because it's needed by cairo_win32_h.lua)
+--Written by Cosmin Apreutesei. Public Domain.
+
 local ffi = require'ffi'
 ffi.cdef[[
 typedef struct tagLOGFONTW

@@ -1,4 +1,7 @@
+
 --proc/tooltip: standard tooltip control.
+--Written by Cosmin Apreutesei. Public Domain.
+
 setfenv(1, require'winapi')
 
 -- ToolTip Icons (Set with TTM_SETTITLE)

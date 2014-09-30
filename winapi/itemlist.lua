@@ -1,4 +1,7 @@
+
 --oo/itemlist: class template for lists of structured items.
+--Written by Cosmin Apreutesei. Public Domain.
+
 setfenv(1, require'winapi')
 require'winapi.vobject'
 

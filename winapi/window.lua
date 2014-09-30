@@ -1,4 +1,7 @@
+
 --proc/window: common API for windows and standard controls.
+--Written by Cosmin Apreutesei. Public Domain.
+
 setfenv(1, require'winapi')
 require'winapi.winuser'
 require'winapi.windowclasses'

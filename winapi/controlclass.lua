@@ -1,4 +1,7 @@
+
 --oo/control: base class for standard controls.
+--Written by Cosmin Apreutesei. Public Domain.
+
 setfenv(1, require'winapi')
 require'winapi.basewindowclass'
 require'winapi.comctl'

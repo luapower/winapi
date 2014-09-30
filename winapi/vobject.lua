@@ -1,4 +1,7 @@
+
 --oo/vobject: object class with virtual properties.
+--Written by Cosmin Apreutesei. Public Domain.
+
 --indexing attribute <name> returns the result of class:get_<name>().
 --setting <value> on attribute <name> calls class:set_<name>(value).
 --if there's a setter but no getter, <value> gets stored in table

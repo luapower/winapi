@@ -1,4 +1,7 @@
+
 --oo/cairopanel: provides on_render(surface) event to draw on a cairo pixman surface.
+--Written by Cosmin Apreutesei. Public Domain.
+
 local ffi = require'ffi'
 local bit = require'bit'
 local winapi = require'winapi'

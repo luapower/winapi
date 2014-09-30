@@ -1,4 +1,7 @@
+
 --oo/basebutton: base class for push-buttons, checkboxes, radio buttons.
+--Written by Cosmin Apreutesei. Public Domain.
+
 setfenv(1, require'winapi')
 require'winapi.controlclass'
 require'winapi.button'

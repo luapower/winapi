@@ -1,4 +1,7 @@
+
 --oo/object: base object class
+--Written by Cosmin Apreutesei. Public Domain.
+
 setfenv(1, require'winapi')
 require'winapi.class'
 

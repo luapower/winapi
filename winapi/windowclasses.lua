@@ -1,4 +1,7 @@
+
 --proc/window/class: window classes (see msdn for what a window class means)
+--Written by Cosmin Apreutesei. Public Domain.
+
 setfenv(1, require'winapi')
 require'winapi.winuser'
 

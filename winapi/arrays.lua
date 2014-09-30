@@ -1,4 +1,7 @@
+
 --ffi/array: variable length array (VLA) wrapper/memoizer
+--Written by Cosmin Apreutesei. Public Domain.
+
 setfenv(1, require'winapi.namespace')
 require'winapi.ffi'
 

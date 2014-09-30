@@ -1,4 +1,7 @@
+
 --core/namespace: create and return the only namespace for the entire API.
+--Written by Cosmin Apreutesei. Public Domain.
+
 --additional sub-namespaces are published here too.
 
 local _M = {__index = _G}

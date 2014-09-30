@@ -1,4 +1,7 @@
+
 --proc/mouse: mouse functions
+--Written by Cosmin Apreutesei. Public Domain.
+
 setfenv(1, require'winapi')
 
 TME_HOVER       = 0x00000001

@@ -1,4 +1,7 @@
+
 --test/showcase: showcase window for the showcase part of modules.
+--Written by Cosmin Apreutesei. Public Domain.
+
 setfenv(1, require'winapi')
 require'winapi.windowclass'
 require'winapi.comctl'

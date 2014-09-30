@@ -1,4 +1,7 @@
+
 --proc/gdi/bitmap: windows bitmap API (submodule required by gdi).
+--Written by Cosmin Apreutesei. Public Domain.
+
 setfenv(1, require'winapi')
 
 --constants for the biCompression field
