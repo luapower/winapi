@@ -158,9 +158,9 @@ knowledge. Also, oo modules have a small runnable demo at the bottom of the
 file which showcases the module's functionality. Run the module as a
 standalone script to check it out.
 
-[tech doc]:     winapi_design.html
-[dev doc]:      winapi_binding.html
-[history]:      winapi_history.html
+[tech doc]:     [winapi_design]
+[dev doc]:      [winapi_binding]
+[history]:      [winapi_history]
 
 [winapi.accelerator]: https://github.com/luapower/winapi/blob/master/winapi/accelerator.lua
 [winapi.amanithvgpanel]: https://github.com/luapower/winapi/blob/master/winapi/amanithvgpanel.lua
