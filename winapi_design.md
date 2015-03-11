@@ -86,6 +86,6 @@ less-used arguments optional, and so on. Struct fields are sometimes renamed
 from the crazy hungarian notation, etc.
 
 The procedural API is implemented with the aid of a set of utilities dealing
-with bitmasks, utf-8 conversion, etc. See the [dev doc] for more on that.
+with bitmasks, utf-8 conversion, etc. See the [dev doc][winapi_binding]
+for more on that.
 
-[dev doc]:  winapi_binding.html
