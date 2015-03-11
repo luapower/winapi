@@ -73,12 +73,14 @@ typedef enum tagCOINIT {
 
 ]]
 
+local checkokfalse = checkwith(function(ret) return ret == 0 or ret == 1 end)
+
 function OleInitialize()
-	checkz(ole32.OleInitialize(nil))
+	checkokfalse(ole32.OleInitialize(nil))
 end
 
 function CoInitialize()
-	checkz(ole32.CoInitialize(nil))
+	checkokfalse(ole32.CoInitialize(nil))
 end
 
 OleUninitialize = ole32.OleUninitialize
@@ -91,6 +93,7 @@ end
 --enable Clipboard, Drag and Drop, OLE, In-place activation.
 OleInitialize()
 
+--uninitialize when the module is unloaded.
 _ole32 = ffi.new'char*'
 ffi.gc(_ole32, OleUninitialize)
 
