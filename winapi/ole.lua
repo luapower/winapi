@@ -91,6 +91,6 @@ end
 --enable Clipboard, Drag and Drop, OLE, In-place activation.
 OleInitialize()
 
-_ole32 = ffi.new'char'
+_ole32 = ffi.new'char*'
 ffi.gc(_ole32, OleUninitialize)
 
