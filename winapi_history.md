@@ -86,4 +86,4 @@ huge API, but there's an infrastructure of utilities and conventions and code
 organization in place (which is outlined in the [dev doc]) that makes further
 work on the library relatively painless and opens it up for collaboration.
 
-[dev doc]: winapi_binding.html
+[dev doc]: winapi_binding
