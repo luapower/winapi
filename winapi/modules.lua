@@ -1,15 +1,15 @@
 
---list modules and their metadata.
---note: you can also use `head -2 -q *.lua | grep '\-\-' | sort`
+--list winapi modules and their metadata.
+--note: you can also use `head -2 -q *.lua | grep '\-\-' | sort` in the winapi directory.
 
 local lfs = require'lfs'
 
 local function modules()
 	local t = {}
-	for f in lfs.dir'.' do
-		local name = f:match'^([^_][^%.]+)%.lua$'
+	for f in lfs.dir'winapi' do
+		local name = f:match'^(.-)%.lua$'
 		if name then
-			f = io.open(f, 'r')
+			f = io.open('winapi/'..f, 'r')
 			local s0 = f:read'*l'
 			local s1 = f:read'*l'
 			local s2 = f:read'*l'
