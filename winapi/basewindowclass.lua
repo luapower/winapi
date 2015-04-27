@@ -300,11 +300,13 @@ function BaseWindow:__after_create(info, args) end --stub
 --wanted style attributes to what was actually set and raise an error if
 --any of our attributes were ignored.
 function BaseWindow:__check_bitmask(name, mask, wanted, actual)
-	if wanted == actual then return end
-	local pp = require'pp'
-	error(string.format('inconsistent %s bits\nwanted: 0x%08x %s\nactual: 0x%08x %s', name,
-		wanted, pp.format(mask:get(wanted), '   '),
-		actual, pp.format(mask:get(actual), '   ')))
+	if bit.tobit(wanted) == bit.tobit(actual) then return end
+	local wanted_fmt = ok and pp.format(mask:get(wanted), '   ') or ''
+	local actual_fmt = ok and pp.format(mask:get(actual), '   ') or ''
+	error(string.format(
+		'inconsistent %s bits\nwanted: 0x%08x %s\nactual: 0x%08x %s', name,
+			wanted, wanted_fmt,
+			actual, actual_fmt))
 end
 
 function BaseWindow:__check_class_style(wanted)
