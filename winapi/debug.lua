@@ -22,12 +22,20 @@ function _M:__index(k)
 end
 
 function _M:__newindex(k,v)
-	local w = getinfo(2, 'S').what
-	if w == 'main' or w == 'C' or declared[k] then
-		declared[k] = true
+	if declared[k] then
 		rawset(self, k, v)
 	else
-		error(string.format('Assignment to undeclared winapi global %s', k), 2)
+		--NOTE: linedefined is always 0 for stripped bytecode, which makes
+		--strict mode innefective if winapi is compiled and loaded as bytecode.
+		--The reason we don't check for `what == 'main'` like strict.lua does,
+		--is because LuaJIT sets `what` to "Lua" on stripped bytecode, while
+		--Lua sets it to "main".
+		local info = getinfo(2, 'S')
+		if info and info.linedefined > 0 then
+			error(string.format('Assignment to undeclared winapi global %s', k), 2)
+		end
+		declared[k] = true
+		rawset(self, k, v)
 	end
 end
 
