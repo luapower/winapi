@@ -101,7 +101,7 @@ function GetClassLong(hwnd, GCL) return GetClassLongW(hwnd, flags(GCL)) end
 
 -- Get/SetClassLong wrappers (don't look them up in the docs)
 
-function GetClassStyle(hwnd) return GetClassLong(hwnd, GCL_STYLE) end
+function GetClassStyle(hwnd) return tonumber(GetClassLong(hwnd, GCL_STYLE)) end
 function SetClassStyle(hwnd, style) SetClassLong(hwnd, GCL_STYLE, flags(style)) end
 
 function GetClassIcon(hwnd) return ptr(ffi.cast('HICON', GetClassLong(hwnd, GCL_HICON))) end

@@ -478,7 +478,7 @@ end
 
 --Get/SetWindowLong wrappers (don't look them up in the docs)
 
-function GetWindowStyle(hwnd) return GetWindowLong(hwnd, GWL_STYLE) end
+function GetWindowStyle(hwnd) return tonumber(GetWindowLong(hwnd, GWL_STYLE)) end
 function SetWindowStyle(hwnd, style) SetWindowLong(hwnd, GWL_STYLE, flags(style)) end
 
 function GetWindowExStyle(hwnd) return GetWindowLong(hwnd, GWL_EXSTYLE) end
