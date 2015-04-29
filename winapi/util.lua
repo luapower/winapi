@@ -70,19 +70,36 @@ end
 
 local NULL = ffi.new'void*'
 
---given a validator, create a checker function for checking the return value of winapi calls.
---you should pass all winapi calls that signal errors by special return value through a checker.
---this moves error signaling from in-band (return values - C) to out-of-band (exceptions - Lua).
-function checkwith(valid)
+--given a validator, create a checker function for checking the return value
+--of winapi calls. you should pass all winapi calls that signal errors
+--by special return value through a checker. this moves error signaling
+--from in-band (return values - C) to out-of-band (secondary return values
+--or exceptions - Lua).
+
+function retwith(valid) --nil,err-returning variant
 	return function(ret)
-		if type(ret) == 'cdata' and ret == NULL then ret = nil end --discard NULL pointers
+		if type(ret) == 'cdata' and ret == NULL then
+			--discard NULL pointers
+			ret = nil
+		end
 		local valid, err = valid(ret)
 		if not valid then
 			local code = GetLastError()
 			if code ~= 0 then
 				err = get_error_message(code)
 			end
-			error(err,2)
+			return nil, err, code
+		end
+		return ret
+	end
+end
+
+function checkwith(valid) --error raising variant
+	local retfunc = retwith(valid)
+	return function(ret)
+		local ret, err = retfunc(ret)
+		if err then
+			error(err, 2)
 		end
 		return ret
 	end
@@ -94,7 +111,14 @@ local function validtrue(ret) return ret == 1, '1 (TRUE) expected, got 0 (FALSE)
 local function validh(ret) return ret ~= nil, 'non NULL value expected, got NULL' end
 local function validpoz(ret) return ret >= 0, 'positive number expected, got negative' end
 
---common return-value checkers.
+--common return-value nil,err-returning checkers.
+retz    = retwith(validz)     --a not-zero is an error
+retnz   = retwith(validnz)    --a zero is an error
+rettrue = retwith(validtrue)  --non-TRUE is an error
+reth    = retwith(validh)     --a null pointer is an error (also converts NULL->nil)
+retpoz  = retwith(validpoz)   --a (strictly) negative number is an error
+
+--common return-value error-raising checkers.
 checkz    = checkwith(validz)     --a not-zero is an error
 checknz   = checkwith(validnz)    --a zero is an error
 checktrue = checkwith(validtrue)  --non-TRUE is an error
@@ -222,6 +246,15 @@ function splitsigned(n)
 	if x >= 0x8000 then x = x-0xffff end
 	if y >= 0x8000 then y = y-0xffff end
 	return x, y
+end
+
+function split_uint64(x)
+	if not x or x == 0 then
+		return 0, 0
+	end
+	local m = ffi.new'ULARGE_INTEGER'
+	m.QuadPart = x
+	return m.HighPart, m.LowPart
 end
 
 --bitmask utils --------------------------------------------------------------
