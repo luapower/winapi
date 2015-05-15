@@ -49,6 +49,7 @@ end
 function CairoPanel:on_paint(window_hdc)
 	local w, h = self.client_w, self.client_h
 	if not self.__pixman_surface then
+		--TODO: the following line crashes on a bundled executable!
 		self.__window_surface = cairo.cairo_win32_surface_create(window_hdc)
 		self.__window_cr = self.__window_surface:create_context()
 		self.__pixman_surface = cairo.cairo_image_surface_create(cairo.CAIRO_FORMAT_RGB24, w, h)

@@ -8,6 +8,7 @@ local ffi = require'ffi'
 local bit = require'bit'
 local cairo = require'cairo'
 local winapi = require'winapi'
+require'winapi.bitmap'
 require'winapi.panelclass'
 
 CairoPanel = winapi.class(winapi.Panel)
@@ -52,14 +53,14 @@ function CairoPanel:_create_surface()
 
 	self.pixman_surface = cairo.cairo_image_surface_create_for_data(self.bmp_bits,
 									cairo.CAIRO_FORMAT_ARGB32, w, h, w * 4)
-	self.pixman_cr = self.pixman_surface:create_context()
+	self:__create_surface(self.pixman_surface)
 end
 
 function CairoPanel:_free_surface()
 	if not self.bmp then return end
+	self:__destroy_surface(self.pixman_surface)
 	local w, h = self.client_w, self.client_h
 	if self.bmp_size.w == w and self.bmp_size.h == h then return end
-	self.pixman_cr:free()
 	self.pixman_surface:free()
 	winapi.SelectObject(self.bmp_hdc, self.old_bmp)
 	winapi.DeleteObject(self.bmp)
@@ -71,9 +72,11 @@ function CairoPanel:_repaint_surface()
 	self:_create_surface()
 	if not self.bmp then return end
 	winapi.GdiFlush()
-	self:on_render(self.pixman_cr)
+	self:on_render(self.pixman_surface)
 end
 
+function CairoPanel:__create_surface(surface) end --stub
+function CairoPanel:__destroy_surface(surface) end --stub
 function CairoPanel:on_render(cr) end --stub
 
 function CairoPanel:on_resized()
@@ -81,3 +84,4 @@ function CairoPanel:on_resized()
 	self:invalidate()
 end
 
+return CairoPanel
