@@ -3,7 +3,7 @@
 --Written by Cosmin Apreutesei. Public Domain.
 
 setfenv(1, require'winapi')
-require'winnt'
+require'winapi.winnt'
 
 -- Global Memory Flags
 GMEM_FIXED           = 0x0000
