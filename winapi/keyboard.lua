@@ -327,7 +327,7 @@ local function key_flags(lParam)
 end
 
 function WM.WM_KEYDOWN(wParam, lParam)
-	return wParam, key_flags(lParam) --VK_*, flags
+	return tonumber(wParam), key_flags(lParam) --VK_*, flags
 end
 
 WM.WM_KEYUP = WM.WM_KEYDOWN

@@ -216,20 +216,19 @@ local band, bor, bnot, rshift = bit.band, bit.bor, bit.bnot, bit.rshift --cache
 
 local flags_cache = setmetatable({}, {__mode = 'kv'})
 
---compute bit OR'ing of a list flags 'flag1 flag2'. flags are uppercased,
---optionally prefixed, and looked up in the winapi namespace. anything
---that's not a letter, digit or underscore is a separator. nil turns to 0.
+--compute bit OR'ing of a list flags 'flag1 flag2'. flags are uppercased
+--and looked up in the winapi namespace. anything that's not a letter,
+--digit or underscore is a separator. nil turns to 0.
 --you should pass all flag args through this function.
-function flags(s, prefix)
+function flags(s)
 	if s == nil or s == '' then return 0 end
 	if type(s) ~= 'string' then return s end
 	local x = flags_cache[s]
 	if x then return x end
 	local x = 0
-	prefix = prefix and prefix:upper()
 	for flag in s:gmatch'[_%w]+' do --any separator works.
 		flag = flag:upper()
-		flag = assert(_M[flag] or prefix and _M[prefix..flag], 'invalid flag %s', flag)
+		flag = assert(_M[flag], 'invalid flag %s', flag)
 		x = bor(x, flag)
 	end
 	flags_cache[s] = x

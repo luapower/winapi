@@ -112,6 +112,7 @@ end
 function Struct:setall(cdata, t)
 	if not t then return end
 	for field, value in pairs(t) do
+		print(field, value)
 		cdata[field] = value
 	end
 end
