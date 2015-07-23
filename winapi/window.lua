@@ -562,20 +562,35 @@ ULW_EX_NORESIZE         = 0x00000008
 
 ffi.cdef[[
 BOOL UpdateLayeredWindow(
-  HWND hwnd,
-  HDC hdcDst,
-  POINT *pptDst,
-  SIZE *psize,
-  HDC hdcSrc,
-  POINT *pptSrc,
-  COLORREF crKey,
-  BLENDFUNCTION *pblend,
-  DWORD dwFlags
+	HWND hwnd,
+	HDC hdcDst,
+	POINT *pptDst,
+	SIZE *psize,
+	HDC hdcSrc,
+	POINT *pptSrc,
+	COLORREF crKey,
+	BLENDFUNCTION *pblend,
+	DWORD dwFlags
+);
+
+BOOL SetLayeredWindowAttributes(
+	HWND     hwnd,
+	COLORREF crKey,
+	BYTE     bAlpha,
+	DWORD    dwFlags
 );
 ]]
 
-function UpdateLayeredWindow(hwnd, dst_hdc, dst_ppt, psize, src_hdc, src_ppt, key, pblend, dwflags)
-	checknz(C.UpdateLayeredWindow(hwnd, dst_hdc, dst_ppt, psize, src_hdc, src_ppt, key, pblend, flags(dwflags)))
+--NOTE: this fails under Remote Desktop and doesn't set an error in GetLastError().
+function UpdateLayeredWindow(hwnd, dst_hdc, dst_ppt, psize, src_hdc, src_ppt, key, pblend, ULW)
+	return C.UpdateLayeredWindow(hwnd, dst_hdc, dst_ppt, psize, src_hdc, src_ppt, key, pblend, flags(ULW)) == 1
+end
+
+LWA_COLORKEY = 1
+LWA_ALPHA    = 2
+
+function SetLayeredWindowAttributes(hwnd, key_color, alpha, LWA)
+	return C.SetLayeredWindowAttributes(hwnd, key_color, alpha, flags(LWA)) == 1
 end
 
 -- timers

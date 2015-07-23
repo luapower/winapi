@@ -15,7 +15,7 @@ end
 gl = setmetatable({}, {
 	__index = function(t,k)
 		t[k] = checksym(opengl32, k) or
-					ptr(ffi.cast(string.format('PFN%sPROC', k:upper()), wglGetProcAddress(k)))
+			ptr(ffi.cast(string.format('PFN%sPROC', k:upper()), wglGetProcAddress(k)))
 		return rawget(t,k)
 	end
 })
