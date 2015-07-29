@@ -582,7 +582,7 @@ end
 --visibility -----------------------------------------------------------------
 
 --show(true|nil) = show in current state.
---show(false) = show show in current state but don't activate.
+--show(false) = show in current state but don't activate.
 function BaseWindow:show(SW, async)
 	SW = flags((SW == nil or SW == true) and SW_SHOW or SW == false and SW_SHOWNA or SW)
 	local ShowWindow = async and ShowWindowAsync or ShowWindow

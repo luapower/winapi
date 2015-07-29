@@ -159,7 +159,7 @@ function Window:__after_create(info, args)
 	self:__check_class_style(self.__winclass_style)
 	self.__winclass_style = nil --we're done with this
 
-	--hack instead of setting WS_MAXIMIZED style, when WS_MINIMIZED is present.
+	--when WS_MINIMIZED is present we don't want to set WS_MAXIMIZED.
 	if info.maximized and info.minimized then
 		self.restore_to_maximized = true
 	end
@@ -308,12 +308,12 @@ function Window:get_maximized()
 	return IsZoomed(self.hwnd)
 end
 
---minimize (or show minimized) and deactivate or not.
+--minimize (or show minimized if hidden) and deactivate or not.
 function Window:minimize(deactivate, async)
 	self:show(deactivate == false and SW_SHOWMINIMIZED or SW_MINIMIZE, async)
 end
 
---maximize (or show maximized) and activate.
+--maximize (or show maximized if hidden) and activate.
 --NOTE: can't maximize without activating; WM_COMMAND/SC_MAXIMIZE also activates.
 function Window:maximize(_, async)
 	self:show(SW_SHOWMAXIMIZED, async)

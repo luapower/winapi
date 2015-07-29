@@ -10,7 +10,6 @@ ULONGLONG GetTickCount64();
 BOOL QueryPerformanceCounter(LARGE_INTEGER *lpPerformanceCount);
 BOOL QueryPerformanceFrequency(LARGE_INTEGER *lpFrequency);
 BOOL QueryUnbiasedInterruptTime(PULONGLONG UnbiasedTime);
-
 ]]
 
 GetTickCount = C.GetTickCount --NOTE: wraps around after 49 days of system runtime

@@ -1145,7 +1145,7 @@ local size_flags = {[0] = 'restored', 'minimized', 'maximized', 'other_restored'
 --NOTE: WM_SIZE gives the size of the client rect, not of the frame rect!
 --NOTE: WM_SIZE is sent by the default proc for WM_WINDOWPOSCHANGED.
 function WM.WM_SIZE(wParam, lParam) --flag, cw, ch
-	return size_flags[wParam], splitlong(lParam)
+	return size_flags[tonumber(wParam)], splitlong(lParam)
 end
 
 --NOTE: WM_MOVE gives the coordinates of the client rect, not of the frame rect!
