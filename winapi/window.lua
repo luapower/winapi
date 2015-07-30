@@ -608,6 +608,7 @@ BOOL KillTimer(
      UINT_PTR uIDEvent);
 ]]
 
+--NOTE: calling error() in callback is not supported!
 function SetTimer(hwnd, id, timeout, callback)
 	return checknz(C.SetTimer(hwnd, id, timeout, callback))
 end

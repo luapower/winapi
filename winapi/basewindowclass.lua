@@ -88,9 +88,7 @@ function ProcessMessage(msg)
 	if window then
 		if window.accelerators and window.accelerators.haccel then
 			--make hotkeys work
-			if TranslateAccelerator(window.hwnd,
-				window.accelerators.haccel, msg)
-			then
+			if TranslateAccelerator(window.hwnd, window.accelerators.haccel, msg) then
 				return
 			end
 		end
@@ -112,7 +110,7 @@ function ProcessMessage(msg)
 	end
 end
 
---TIP: can call the message loop like this: os.exit(MessageLoop()).
+--tip: you can call the message loop like this: os.exit(MessageLoop()).
 function MessageLoop(after_process)
 	local msg = types.MSG()
 	while true do
@@ -128,8 +126,9 @@ end
 
 --process all pending message from the queue (if any) and return.
 function ProcessMessages(after_process)
+	local msg = types.MSG()
 	while true do
-		local ok, msg = PeekMessage(nil, 0, 0, PM_REMOVE)
+		local ok = PeekMessage(nil, 0, 0, PM_REMOVE, msg)
 		if not ok then return end
 		ProcessMessage(msg)
 		if after_process then
@@ -839,20 +838,29 @@ end
 
 --timers ---------------------------------------------------------------------
 
-function BaseWindow:settimer(timeout_ms, handler, id)
-	id = SetTimer(self.hwnd, id or 1, timeout_ms)
-	if not self.__timers then self.__timers = {} end
+--NOTE: passing an existing id replaces that timer.
+function BaseWindow:settimer(seconds, handler, id)
+	self.__timers = self.__timers or {}
+	id = id or #self.__timers + 1
+	assert(id > 0) --id 0 only works if passing a callback to SetTimer()
+	SetTimer(self.hwnd, id, seconds * 1000)
 	self.__timers[id] = handler
 	return id
 end
 
 function BaseWindow:stoptimer(id)
-	KillTimer(self.hwnd, id or 1)
+	id = tonumber(id)
+	KillTimer(self.hwnd, id)
 	self.__timers[id] = nil
 end
 
 function BaseWindow:WM_TIMER(id)
+	id = tonumber(id)
 	local callback = self.__timers and self.__timers[id]
-	if callback then callback(self, id) end
+	if callback then
+		if callback(self, id) == false then --returning false kills the timer
+			self:stoptimer(id)
+		end
+	end
 end
 
