@@ -110,7 +110,7 @@ function ProcessMessage(msg)
 	end
 end
 
---tip: you can call the message loop like this: os.exit(MessageLoop()).
+--NOTE: you can call the message loop like this: os.exit(MessageLoop()).
 function MessageLoop(after_process)
 	local msg = types.MSG()
 	while true do
@@ -126,9 +126,8 @@ end
 
 --process all pending message from the queue (if any) and return.
 function ProcessMessages(after_process)
-	local msg = types.MSG()
 	while true do
-		local ok = PeekMessage(nil, 0, 0, PM_REMOVE, msg)
+		local ok, msg = PeekMessage(nil, 0, 0, PM_REMOVE)
 		if not ok then return end
 		ProcessMessage(msg)
 		if after_process then
