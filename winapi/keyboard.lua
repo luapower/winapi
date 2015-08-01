@@ -8,7 +8,7 @@ setfenv(1, require'winapi')
 --NOTE: pressing both shift keys and then depressing one of them doesn't trigger WM_KEYUP, but does trigger WM_INPUT.
 --NOTE: flags.prev_key_state is a single flag for both left and right ctrl/alt/shift, not for each physical key.
 --NOTE: AltGr is LCTRL followed by RALT with the same message timestamp (which we can use to distinguish from CTRL+ALT).
---NOTE: To distinguish Ctrl+Break from Ctrl+ScrollLock, and Break from Ctrl+NumLock check RI_KEY_E1 and RI_KEY_E0 on WM_INPUT.
+--NOTE: To distinguish Ctrl+Break from Ctrl+ScrollLock and Break from Ctrl+NumLock, check RI_KEY_E1 and RI_KEY_E0 on WM_INPUT.
 --NOTE: Ctrl+NumLock doesn't change the NumLock state, unlike other keys + NumLock (same with Ctrl+ScrollLock).
 
 VK_LBUTTON        = 0x01

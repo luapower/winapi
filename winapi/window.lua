@@ -1046,9 +1046,9 @@ SW_OTHERZOOM      = 2 --The window is being covered by another window that has b
 SW_PARENTCLOSING  = 1 --The window's owner window is being minimized.
 SW_PARENTOPENING  = 3 --The window's owner window is being restored.
 
-local show_status = {'minimized', 'other_maximized', 'restored', 'other_restored'}
+local show_status = {'owner_minimized', 'other_maximized', 'owner_restored', 'other_restored'}
 
-function WM.WM_SHOWWINDOW(wParam, lParam) --shown/hidden, show_status
+function WM.WM_SHOWWINDOW(wParam, lParam) --shown/hidden, show_status (nil if ShowWindow was called)
 	return wParam == 1, show_status[lParam]
 end
 
