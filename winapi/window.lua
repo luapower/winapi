@@ -1178,7 +1178,7 @@ function WM.WM_COMMAND(wParam, lParam)
 end
 
 function WM.WM_MENUCOMMAND(wParam, lParam)
-	return checkh(ffi.cast('HMENU', lParam)), countfrom1(wParam)
+	return checkh(ffi.cast('HMENU', lParam)), countfrom1(tonumber(wParam))
 end
 
 SC_SIZE          = 0xF000
