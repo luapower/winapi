@@ -625,7 +625,7 @@ typedef struct tagMSG {
 	 UINT        message;
 	 union {
 		WPARAM      wParam;
-		int         signed_wParam;
+		LPARAM      signed_wParam;
 	 };
 	 LPARAM      lParam;
 	 DWORD       time;
@@ -712,22 +712,22 @@ function PostQuitMessage(exitcode)
 	C.PostQuitMessage(exitcode or 0)
 end
 
-function SendMessage(hwnd, WM, wparam, lparam)
-	if wparam == nil then wparam = 0 end
-	if type(lparam) == 'nil' then lparam = 0 end
+function SendMessage(hwnd, WM, wParam, lParam)
+	if wParam == nil then wParam = 0 end
+	if type(lParam) == 'nil' then lParam = 0 end
 	return C.SendMessageW(hwnd, flags(WM),
-		ffi.cast('WPARAM', wparam),
-		ffi.cast('LPARAM', lparam))
+		ffi.cast('WPARAM', wParam),
+		ffi.cast('LPARAM', lParam))
 end
 
 SNDMSG = SendMessage --less typing on those tedious macros
 
-function PostMessage(hwnd, WM, wparam, lparam)
-	if wparam == nil then wparam = 0 end
-	if lparam == nil then lparam = 0 end
+function PostMessage(hwnd, WM, wParam, lParam)
+	if wParam == nil then wParam = 0 end
+	if lParam == nil then lParam = 0 end
 	return C.PostMessageW(hwnd, WM,
-		ffi.cast('WPARAM', wparam),
-		ffi.cast('LPARAM', lparam))
+		ffi.cast('WPARAM', wParam),
+		ffi.cast('LPARAM', lParam))
 end
 
 GetMessageTime = C.GetMessageTime
@@ -1049,7 +1049,7 @@ SW_PARENTOPENING  = 3 --The window's owner window is being restored.
 local show_status = {'owner_minimized', 'other_maximized', 'owner_restored', 'other_restored'}
 
 function WM.WM_SHOWWINDOW(wParam, lParam) --shown/hidden, show_status (nil if ShowWindow was called)
-	return wParam == 1, show_status[lParam]
+	return wParam == 1, show_status[tonumber(lParam)]
 end
 
 -- window activation
@@ -1062,11 +1062,11 @@ function WM.WM_ACTIVATE(wParam, lParam)
 end
 
 function WM.WM_ACTIVATEAPP(wParam, lParam)
-	return activate_flags[wParam], lParam --flag, other_thread_id
+	return activate_flags[tonumber(wParam)], tonumber(lParam) --flag, other_thread_id
 end
 
 function WM.WM_NCACTIVATE(wParam, lParam)
-	return activate_flags[wParam], lParam --flag, update_hrgn
+	return activate_flags[tonumber(wParam)], tonumber(lParam) --flag, update_hrgn
 end
 
 -- window sizing
@@ -1138,7 +1138,7 @@ local sizing_flags = {'left', 'right', 'top', 'topleft', 'topright', 'bottom', '
 
 --NOTE: only sent when resizing by user.
 function WM.WM_SIZING(wParam, lParam) --flag, RECT (frame rect, not client rect)
-	return sizing_flags[wParam], ffi.cast('RECT*', lParam)
+	return sizing_flags[tonumber(wParam)], ffi.cast('RECT*', lParam)
 end
 
 local size_flags = {[0] = 'restored', 'minimized', 'maximized', 'other_restored', 'other_maximized'}
@@ -1207,7 +1207,7 @@ SCF_ISSECURE     = 0x00000001
 function WM.WM_SYSCOMMAND(wParam, lParam)
 	local SC = bit.band(wParam, 0xfff0)
 	if SC == SC_KEYMENU then
-		return SC, lParam --SC, char_code
+		return SC, tonumber(lParam) --SC, char_code
 	else
 		return SC, splitsigned(lParam) --SC, x, y
 	end

@@ -237,14 +237,16 @@ end
 
 --integer splitter -----------------------------------------------------------
 
---return the low and the high word of a signed long (usually LPARAM or LRESULT).
+--return the low and the high word of a signed long (usually WPARAM, LPARAM or LRESULT).
 function splitlong(n)
+	n = tonumber(n) --because lParam is uint64 in x64
 	return band(n, 0xffff), rshift(n, 16)
 end
 
---use this instead of splitlong to extract signed integers out of a 32bit quantity
---this is good for extracting coordinate values which can be negative.
+--use this instead of splitlong to extract signed integers out of a signed long
+--(usually LPARAM). this is good for extracting coordinate values which can be negative.
 function splitsigned(n)
+	n = tonumber(n) --because lParam is int64 in x64
 	local x, y = band(n, 0xffff), rshift(n, 16)
 	if x >= 0x8000 then x = x-0xffff end
 	if y >= 0x8000 then y = y-0xffff end
