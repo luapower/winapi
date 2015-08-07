@@ -175,11 +175,8 @@ VK_OEM_AX         = 0xE1  --  'AX' key on Japanese AX kbd
 VK_OEM_102        = 0xE2  --  "<>" or "\|" on RT 102-key kbd.
 VK_ICO_HELP       = 0xE3  --  Help key on ICO
 VK_ICO_00         = 0xE4  --  00 key on ICO
-
 VK_PROCESSKEY     = 0xE5
-
 VK_ICO_CLEAR      = 0xE6
-
 VK_PACKET         = 0xE7
 
 -- Nokia/Ericsson definitions
@@ -338,7 +335,6 @@ function WM.WM_CHAR(wParam, lParam)
 	return mbs(ffi.new('WCHAR[?]', 2, wParam, 0)), key_flags(lParam)
 end
 
-WM.WM_UNICHAR = WM.WM_CHAR --TODO: support characters outside the BMP
 WM.WM_SYSCHAR = WM.WM_CHAR
 WM.WM_DEADCHAR = WM.WM_CHAR
 WM.WM_SYSDEADCHAR = WM.WM_CHAR

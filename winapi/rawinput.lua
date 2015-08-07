@@ -246,7 +246,8 @@ local sz  = ffi.new'UINT[1]'
 local buf, pbuf
 local bufsz = 0
 
-function WM.WM_INPUT(wParam, lParam) --NOTE: must not return a value, so that DefWindowProc can be called.
+--NOTE: the handler must not return a value so that DefWindowProc can be called.
+function WM.WM_INPUT(wParam, lParam)
 	local hraw = ffi.cast('HRAWINPUT', lParam)
 	GetRawInputData(hraw, RID_INPUT, nil, sz, hsz) --get sz
 	if sz[0] > bufsz then --grow the buffer
@@ -255,7 +256,7 @@ function WM.WM_INPUT(wParam, lParam) --NOTE: must not return a value, so that De
 		pbuf = ffi.cast('PRAWINPUT', buf)
 	end
 	local szz = GetRawInputData(hraw, RID_INPUT, buf, sz, hsz)
-	assert(szz == sz[0], szz..'/'..sz[0])
+	assert(szz == sz[0])
 	return pbuf
 end
 
