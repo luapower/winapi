@@ -10,6 +10,7 @@ require'winapi.gdi'
 require'winapi.keyboard'
 require'winapi.mouse'
 require'winapi.monitor'
+require'winapi.dpiaware'
 
 --window tracker -------------------------------------------------------------
 
@@ -196,11 +197,12 @@ BaseWindow = {
 		on_syskey_down_char = WM_SYSCHAR,
 		on_dead_key_up_char = WM_DEADCHAR,
 		on_dead_syskey_down_char = WM_SYSDEADCHAR,
-		--system events
-		on_timer = WM_TIMER,
 		--raw input
 		on_raw_input = WM_INPUT,
 		on_device_change = WM_INPUT_DEVICE_CHANGE,
+		--system events
+		on_timer = WM_TIMER,
+		on_dpi_changed = WM_DPICHANGED,
 	},
 	__wm_syscommand_handler_names = {}, --WM_SYSCOMMAND code -> handler name map
 	__wm_command_handler_names = {},    --WM_COMMAND code -> handler name map

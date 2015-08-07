@@ -1000,6 +1000,7 @@ WM_NAMES = constants{
 	WM_NCMOUSEHOVER                  = 0x02A0,
 	WM_NCMOUSELEAVE                  = 0x02A2,
 	WM_WTSSESSION_CHANGE             = 0x02B1,
+	WM_DPICHANGED                    = 0x02E0, --Win8.1+
 	WM_CUT                           = 0x0300,
 	WM_COPY                          = 0x0301,
 	WM_PASTE                         = 0x0302,
