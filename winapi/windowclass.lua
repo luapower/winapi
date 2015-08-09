@@ -206,6 +206,7 @@ end
 --activation -----------------------------------------------------------------
 
 function Window:get_active() return GetActiveWindow() == self.hwnd end
+function Window:get_foreground() return GetForegroundWindow() == self.hwnd end
 function Window:activate() SetActiveWindow(self.hwnd) end
 
 --this is different than activate() in that the window flashes in the taskbar
