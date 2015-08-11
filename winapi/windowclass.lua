@@ -501,11 +501,6 @@ local c4 = Window{x = 400, y = 400, w = 400, h = 200,
 						owner = c,
 						}
 
-function c:WM_GETDLGCODE()
-	return 0
-	--return bit.bor(DLGC_WANTALLKEYS, DLGC_WANTCHARS, DLGC_WANTMESSAGE)
-end
-
 function c:on_key_down(vk, flags)
 	print('WM_KEYDOWN', vk, flags)
 end
