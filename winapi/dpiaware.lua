@@ -15,8 +15,8 @@ function SetProcessDPIAware()
 	return checknz(C.SetProcessDPIAware())
 end
 
---NOTE: always returns 1 on Win7 even if SetProcessDPIAware() is not called,
---unless DPI Settings are changed in Control Panel.
+--NOTE: At scaling levels below 150% this function always returns 1
+--because DPI Virtualization is disabled at low scaling levels.
 function IsProcessDPIAware()
 	return C.IsProcessDPIAware() == 1
 end

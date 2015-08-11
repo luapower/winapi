@@ -591,7 +591,8 @@ function BaseWindow:show(SW, async)
 	--_on a top-level window_ (msdn is not accurate about this detail).
 	--Instead, the SW flag in STARTUPINFO is used (which for luajit.exe is SW_HIDE).
 	--So unless SW_SHOWDEFAULT is explicitly requested, ShowWindow() is called again.
-	if SW ~= SW_HIDE and SW ~= SW_SHOWDEFAULT and not self.visible then
+	--NOTE: if async is used, ShowWindow() is not called twice, call it yourself then!
+	if not async and SW ~= SW_HIDE and SW ~= SW_SHOWDEFAULT and not self.visible then
 		ShowWindow(self.hwnd, SW)
 	end
 end

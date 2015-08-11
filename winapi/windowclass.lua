@@ -328,6 +328,7 @@ end
 --restore to last state and activate:
 -- 1) if minimized, restore to normal or maximized state.
 -- 2) if maximized, restore to normal state.
+--NOTE: retore-to-maximized doesn't work with async=true.
 function Window:restore(_, async)
 	self:show(SW_RESTORE, async)
 end
