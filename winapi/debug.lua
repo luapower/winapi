@@ -1,5 +1,5 @@
 
---core/debug: strict mode and some debug tools. entirely optional module.
+--core/debug: strict mode and debug tools (optional module).
 --Written by Cosmin Apreutesei. Public Domain.
 
 setfenv(1, require'winapi.namespace')

@@ -1,2 +1,2 @@
---this is so that you can load winapi with the standard package.path setting.
+--loader for winapi.init
 return require'winapi.init'

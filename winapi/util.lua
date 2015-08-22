@@ -1,5 +1,5 @@
 
---ffi/util: filters and conversion functions for winapi args and return-values.
+--ffi/util: binding utilities.
 --Written by Cosmin Apreutesei. Public Domain.
 
 setfenv(1, require'winapi.namespace')

@@ -1,5 +1,5 @@
 
---oo/basewindow: base class for both overlapping windows and controls.
+--oo/basewindow: base class for top-level windows and controls.
 --Written by Cosmin Apreutesei. Public Domain.
 
 setfenv(1, require'winapi')

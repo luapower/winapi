@@ -1,5 +1,5 @@
 
---proc/window/class: window classes (see msdn for what a window class means)
+--proc/window/class: WNDCLASSEX API
 --Written by Cosmin Apreutesei. Public Domain.
 
 setfenv(1, require'winapi')

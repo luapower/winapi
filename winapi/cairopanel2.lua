@@ -1,5 +1,5 @@
 
---oo/cairopanel2: provides on_render(surface) event to draw on a cairo pixman surface.
+--oo/cairopanel2: cairo pixman surface control.
 --Written by Cosmin Apreutesei. Public Domain.
 
 --NOTE: this implementation doesn't rely on cairo's win32 extensions.

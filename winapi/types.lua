@@ -1,5 +1,5 @@
 
---ffi/types: basic windows types and macros from multiple headers.
+--ffi/types: windows types and macros from multiple headers.
 --Written by Cosmin Apreutesei. Public Domain.
 
 --NOTE: Don't define time_t because it's 64bit in windows but 32bit in mingw: use explicit types!

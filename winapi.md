@@ -11,16 +11,16 @@ OpenGL and cairo integration.
 
 ## Features
 
-  * accepting and returning UTF8 Lua strings (also accepting wide char buffers)
-  * all winapi calls are error-checked so you don't have to
-  * automatic memory management (ownership management, allocation of in/out buffers)
+  * UTF8 Lua strings everywhere (also works with wide char buffers)
+  * all calls are error-checked so you don't have to
+  * automatic memory management (ownership management and allocation of in/out buffers)
   * flags can be passed as `'FLAG1 FLAG2'`
   * counting from 1 everywhere
   * object system with virtual properties (eg. `window.w = 500` changes a window's width)
   * Delphi-style anchor-based layout model for all controls
   * [binding infrastructure][winapi_binding] tailored to winapi conventions,
   facilitating the binding of more APIs
-  * cairo, OpenGL and OpenVG panel widgets.
+  * cairo and OpenGL panel widgets.
 
 ## Modules
 
@@ -251,3 +251,9 @@ standalone script to check it out.
 [winapi.gdi]: https://github.com/luapower/winapi/blob/master/winapi/gdi.lua
 [winapi.winnt]: https://github.com/luapower/winapi/blob/master/winapi/winnt.lua
 [winapi.winuser]: https://github.com/luapower/winapi/blob/master/winapi/winuser.lua
+
+
+## Automatic Module list
+
+{{module_list}}
+
