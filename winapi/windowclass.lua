@@ -45,6 +45,7 @@ Window = subclass({
 		--class style bits
 		noclose = false,
 		dropshadow = false,
+		own_dc = false,
 		receive_double_clicks = true,
 		--window style bits
 		border = true,
@@ -57,6 +58,7 @@ Window = subclass({
 		hscroll = false,
 		clip_children = true,
 		clip_siblings = true,
+		child = false,
 		--window ex style bits
 		topmost = false,
 		window_edge = true,
@@ -66,7 +68,7 @@ Window = subclass({
 		transparent = false,
 		layered = false,
 		control_parent = true,
-		activatable = true,
+		activable = true,
 		taskbar_button = false,
 		--class properties
 		background = COLOR_WINDOW,

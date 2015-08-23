@@ -1,5 +1,4 @@
 ---
-project: winapi
 tagline: win32 windows & controls
 platforms: mingw32, mingw64
 ---
