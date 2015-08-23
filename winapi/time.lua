@@ -1,5 +1,5 @@
 
---proc/time: time functions
+--proc/system/time: time functions
 --Written by Cosmin Apreutesei. Public Domain.
 
 setfenv(1, require'winapi')

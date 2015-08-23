@@ -1,5 +1,5 @@
 
---proc/ole: OLE API.
+--proc/system/ole: OLE API.
 --Written by Cosmin Apreutesei. Public Domain.
 
 setfenv(1, require'winapi')

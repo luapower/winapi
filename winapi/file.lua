@@ -1,5 +1,5 @@
 
---proc/file: file I/O
+--proc/system/file: file I/O
 --Written by Cosmin Apreutesei. Public Domain.
 
 setfenv(1, require'winapi')

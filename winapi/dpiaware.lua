@@ -1,4 +1,6 @@
---proc/dpiaware: DPI-awareness API
+
+--proc/windows/dpiaware: DPI-awareness API
+
 setfenv(1, require'winapi')
 require'winapi.monitor'
 
