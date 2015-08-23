@@ -100,7 +100,7 @@ accelerators									list of accelerators (a WAItemList)
 
 <div class=small>
 -------------------------------- ----------------------------------------------- ---------------------
-__handler__								__description__											__winapi flag__
+__handler__								__description__											__winapi message__
 on_close()								was closed													WM_CLOSE
 on_activate()							was activated												WM_ACTIVATE
 on_deactivate()						was deactivated											WM_ACTIVATE
