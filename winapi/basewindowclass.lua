@@ -1,5 +1,5 @@
 
---oo/abstract/basewindow: base class for top-level windows and controls.
+--oo/abstract/basewindow: base class for top-level windows and controls
 --Written by Cosmin Apreutesei. Public Domain.
 
 setfenv(1, require'winapi')

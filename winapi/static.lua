@@ -1,5 +1,5 @@
 
---proc/controls/static: standard label control.
+--proc/controls/static: standard label control
 --Written by Cosmin Apreutesei. Public Domain.
 
 setfenv(1, require'winapi')

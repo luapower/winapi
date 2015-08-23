@@ -1,5 +1,5 @@
 
---oo/controls/panel: custom frameless child window.
+--oo/controls/panel: custom frameless child windows
 --Written by Cosmin Apreutesei. Public Domain.
 
 setfenv(1, require'winapi')

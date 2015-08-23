@@ -1,5 +1,5 @@
 
---oo/abstract/handlelist: Windows handle to Lua object mapping
+--oo/abstract/handlelist: handle to Lua object mapping
 --Written by Cosmin Apreutesei. Public Domain.
 
 setfenv(1, require'winapi')

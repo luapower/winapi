@@ -1,5 +1,5 @@
 
---oo/controls/cairopanel2: cairo pixman surface control.
+--oo/controls/cairopanel2: cairo pixman surface control
 --Written by Cosmin Apreutesei. Public Domain.
 
 --NOTE: unlike cairopanel, this implementation doesn't rely on cairo's win32

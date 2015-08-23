@@ -1,5 +1,5 @@
 
---proc/controls/tooltip: standard tooltip control.
+--proc/controls/tooltip: standard tooltip control
 --Written by Cosmin Apreutesei. Public Domain.
 
 setfenv(1, require'winapi')

@@ -1,5 +1,5 @@
 
---test/showcase: testing utilities.
+--test/showcase: testing utilities
 --Written by Cosmin Apreutesei. Public Domain.
 
 setfenv(1, require'winapi')

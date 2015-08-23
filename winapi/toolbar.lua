@@ -1,5 +1,5 @@
 
---proc/controls/toolbar: standard toolbar control.
+--proc/controls/toolbar: standard toolbar control
 --Written by Cosmin Apreutesei. Public Domain.
 
 setfenv(1, require'winapi')

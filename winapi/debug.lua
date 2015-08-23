@@ -1,5 +1,5 @@
 
---binding/debug: strict mode and debug tools (optional module).
+--binding/debug: strict mode and debug tools (optional module)
 --Written by Cosmin Apreutesei. Public Domain.
 
 setfenv(1, require'winapi.namespace')

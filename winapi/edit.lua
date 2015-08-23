@@ -1,5 +1,5 @@
 
---proc/controls/edit: standard edit control.
+--proc/controls/edit: standard edit control
 --Written by Cosmin Apreutesei. Public Domain.
 
 setfenv(1, require'winapi')

@@ -1,5 +1,5 @@
 
---proc/system/monitor: multi-monitor API
+--proc/system/monitor: Monitor API
 --Written by Cosmin Apreutesei. Public Domain.
 
 setfenv(1, require'winapi')

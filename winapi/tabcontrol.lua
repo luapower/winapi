@@ -1,5 +1,5 @@
 
---proc/controls/tabcontrol: standard tab control.
+--proc/controls/tabcontrol: standard tab control
 --Written by Cosmin Apreutesei. Public Domain.
 
 setfenv(1, require'winapi')

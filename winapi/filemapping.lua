@@ -1,5 +1,5 @@
 
---proc/system/filemapping: memory mapping of files
+--proc/system/filemapping: memory mapped files
 --Written by Cosmin Apreutesei. Public Domain.
 
 setfenv(1, require'winapi')

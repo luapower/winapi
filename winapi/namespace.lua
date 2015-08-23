@@ -1,5 +1,5 @@
 
---binding/namespace: namespace module and utils.
+--binding/namespace: namespace module and utils
 --Written by Cosmin Apreutesei. Public Domain.
 
 --additional sub-namespaces are published here too.

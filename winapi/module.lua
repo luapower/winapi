@@ -1,5 +1,5 @@
 
---proc/system/module: dll loading.
+--proc/system/module: LoadLibrary API
 --Written by Cosmin Apreutesei. Public Domain.
 
 setfenv(1, require'winapi')

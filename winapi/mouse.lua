@@ -1,5 +1,5 @@
 
---proc/input/mouse: mouse functions
+--proc/input/mouse: Mouse API
 --Written by Cosmin Apreutesei. Public Domain.
 
 setfenv(1, require'winapi')

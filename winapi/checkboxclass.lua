@@ -1,5 +1,5 @@
 
---oo/controls/checkbox: checkbox control.
+--oo/controls/checkbox: checkbox control
 --Written by Cosmin Apreutesei. Public Domain.
 
 setfenv(1, require'winapi')

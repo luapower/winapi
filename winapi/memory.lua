@@ -1,5 +1,5 @@
 
---proc/system/memory: memory management
+--proc/system/memory: Memory Management API
 --Written by Cosmin Apreutesei. Public Domain.
 
 setfenv(1, require'winapi')

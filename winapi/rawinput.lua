@@ -1,5 +1,5 @@
 
---proc/input/rawinput: raw input API
+--proc/input/rawinput: Raw Input API
 --Written by Cosmin Apreutesei. Public Domain.
 
 setfenv(1, require'winapi')
