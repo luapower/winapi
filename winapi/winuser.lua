@@ -1,5 +1,5 @@
 
---types/winuser: winuser types and macros from multiple headers.
+--types/winuser: winuser types and macros from multiple headers
 --Written by Cosmin Apreutesei. Public Domain.
 
 setfenv(1, require'winapi')

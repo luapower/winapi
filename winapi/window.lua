@@ -1,5 +1,5 @@
 
---proc/windows/window: common API for windows and standard controls.
+--proc/windows/window: Windows (as in HWND) API
 --Written by Cosmin Apreutesei. Public Domain.
 
 setfenv(1, require'winapi')
