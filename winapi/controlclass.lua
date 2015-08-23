@@ -1,5 +1,5 @@
 
---oo/control: base class for standard controls.
+--oo/controls/control: base class for standard controls.
 --Written by Cosmin Apreutesei. Public Domain.
 
 setfenv(1, require'winapi')

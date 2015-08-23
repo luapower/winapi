@@ -1,5 +1,5 @@
 
---proc/imagelist: image list resources.
+--proc/resources/imagelist: image list resources.
 --Written by Cosmin Apreutesei. Public Domain.
 
 setfenv(1, require'winapi')

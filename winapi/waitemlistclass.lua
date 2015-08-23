@@ -1,5 +1,5 @@
 
---oo/window/waitemlist: accelerator item list.
+--oo/controls/waitemlist: accelerator item list.
 --Written by Cosmin Apreutesei. Public Domain.
 
 setfenv(1, require'winapi')

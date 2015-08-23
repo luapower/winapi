@@ -1,5 +1,5 @@
 
---proc/gl: opengl dynamic namespace.
+--proc/opengl/gl: opengl dynamic namespace.
 --Written by Cosmin Apreutesei. Public Domain.
 
 --instead of loading this module, you should require gl11, gl21, wglext etc. as needed.

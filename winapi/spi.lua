@@ -1,5 +1,5 @@
 
---proc/spi: system parameters info API.
+--proc/system/spi: system parameters info API.
 --Written by Cosmin Apreutesei. Public Domain.
 
 setfenv(1, require'winapi')

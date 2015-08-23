@@ -1,5 +1,5 @@
 
---proc/winnt: don't know the scope of this yet.
+--proc/system/winnt: don't know the scope of this yet.
 --Written by Cosmin Apreutesei. Public Domain.
 
 setfenv(1, require'winapi')

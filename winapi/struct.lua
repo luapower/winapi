@@ -1,5 +1,5 @@
 
---ffi/struct: struct ctype wrapper
+--binding/struct: struct ctype wrapper
 --Written by Cosmin Apreutesei. Public Domain.
 
 

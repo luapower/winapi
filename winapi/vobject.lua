@@ -1,5 +1,5 @@
 
---oo/vobject: object class with virtual properties.
+--oo/oo-system/vobject: object class with virtual properties.
 --Written by Cosmin Apreutesei. Public Domain.
 
 --indexing attribute <name> returns the result of class:get_<name>().

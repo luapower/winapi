@@ -1,5 +1,5 @@
 
---proc/resource: part of winuser dealing with resources.
+--proc/resources/resource: part of winuser dealing with resources.
 --Written by Cosmin Apreutesei. Public Domain.
 
 setfenv(1, require'winapi')

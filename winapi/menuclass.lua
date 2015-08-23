@@ -1,5 +1,5 @@
 
---oo/menu: standard menu control.
+--oo/controls/menu: standard menu control.
 --Written by Cosmin Apreutesei. Public Domain.
 
 setfenv(1, require'winapi')

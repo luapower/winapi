@@ -1,5 +1,5 @@
 
---oo/combobox: ComboBoxEx32 control.
+--oo/controls/combobox: ComboBoxEx32 control.
 --Written by Cosmin Apreutesei. Public Domain.
 
 setfenv(1, require'winapi')

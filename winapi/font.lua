@@ -1,5 +1,5 @@
 
---proc/font: font resources.
+--proc/resources/font: font resources.
 --Written by Cosmin Apreutesei. Public Domain.
 
 setfenv(1, require'winapi')

@@ -1,5 +1,5 @@
 
---oo/imagelist: image list class.
+--oo/resources/imagelist: image list class.
 --Written by Cosmin Apreutesei. Public Domain.
 
 setfenv(1, require'winapi')

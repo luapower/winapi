@@ -1,5 +1,5 @@
 
---proc/sysinfo: system info API
+--proc/system/sysinfo: system info API
 --Written by Cosmin Apreutesei. Public Domain.
 
 setfenv(1, require'winapi')

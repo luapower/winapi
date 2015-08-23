@@ -1,5 +1,5 @@
 
---core/winapi: main winapi module.
+--binding/winapi: main winapi module.
 --Written by Cosmin Apreutesei. Public Domain.
 
 setfenv(1, require'winapi.namespace')

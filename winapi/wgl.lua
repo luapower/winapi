@@ -1,5 +1,5 @@
 
---proc/wgl: opengl32 ffi module and WGL API from wingdi.h.
+--proc/opengl/wgl: opengl32 ffi module and WGL API from wingdi.h.
 --Written by Cosmin Apreutesei. Public Domain.
 
 --used for managing opengl contexts and loading actual opengl API functions.

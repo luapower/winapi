@@ -1,5 +1,5 @@
 
---proc/keyboard: keyboard input handling and keyboard layouts
+--proc/input/keyboard: keyboard input handling and keyboard layouts
 --Written by Cosmin Apreutesei. Public Domain.
 
 setfenv(1, require'winapi')

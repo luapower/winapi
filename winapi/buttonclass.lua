@@ -1,5 +1,5 @@
 
---oo/button: push-button control.
+--oo/controls/button: push-button control.
 --Written by Cosmin Apreutesei. Public Domain.
 
 setfenv(1, require'winapi')

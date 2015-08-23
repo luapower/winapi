@@ -1,5 +1,5 @@
 
---proc/cursor: cursor resources.
+--proc/resources/cursor: cursor resources.
 --Written by Cosmin Apreutesei. Public Domain.
 
 setfenv(1, require'winapi')

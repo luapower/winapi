@@ -1,5 +1,5 @@
 
---proc/icon: icon resources.
+--proc/resources/icon: icon resources.
 --Written by Cosmin Apreutesei. Public Domain.
 
 setfenv(1, require'winapi')

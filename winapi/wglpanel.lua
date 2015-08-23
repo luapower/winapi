@@ -1,5 +1,5 @@
 
---oo/wglpanel: opengl-enabled panel.
+--oo/opengl/wglpanel: opengl-enabled panel.
 --Written by Cosmin Apreutesei. Public Domain.
 
 setfenv(1, require'winapi')

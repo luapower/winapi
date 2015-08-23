@@ -1,5 +1,5 @@
 
---ffi/util: binding utilities.
+--binding/util: binding utilities.
 --Written by Cosmin Apreutesei. Public Domain.
 
 setfenv(1, require'winapi.namespace')

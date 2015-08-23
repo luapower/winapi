@@ -1,5 +1,5 @@
 
---oo/radiobutton: radio button control.
+--oo/controls/radiobutton: radio button control.
 --Written by Cosmin Apreutesei. Public Domain.
 
 setfenv(1, require'winapi')

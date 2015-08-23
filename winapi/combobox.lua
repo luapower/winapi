@@ -1,5 +1,5 @@
 
---proc/combobox: old combobox control.
+--proc/controls/combobox: old combobox control.
 --Written by Cosmin Apreutesei. Public Domain.
 
 setfenv(1, require'winapi')

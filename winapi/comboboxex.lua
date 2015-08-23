@@ -1,5 +1,5 @@
 
---proc/comboboxex: comctl32 combobox control.
+--proc/controls/comboboxex: comctl32 combobox control.
 --Written by Cosmin Apreutesei. Public Domain.
 
 setfenv(1, require'winapi')
