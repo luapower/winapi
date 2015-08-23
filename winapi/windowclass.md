@@ -16,6 +16,7 @@ local win = winapi.Window(t)
 Creates a top-level window. `t` is a table which can have the following
 extra fields over what `BaseWindow` accepts:
 
+<div class=small>
 ----------------------- ----------------------------------------- -------------- ---------------------
 __field__					__description__									__default__		__winapi flag__
 noclose						disable close button and ALT+F4				false				CS_NOCLOSE
@@ -59,6 +60,7 @@ icon							window's icon										nil
 small_icon					window's small icon								nil
 owner							window's owner										nil
 ----------------------- ----------------------------------------- -------------- ---------------------
+</div>
 
 __NOTE:__ All CS_*, WS_* and WS_EX_* flags become properties (virtual fields)
 of the window object and they can be queried and modified:
@@ -70,6 +72,7 @@ print(win.title)    --prints 'Hello'
 
 ## Runtime properties and methods
 
+<div class=small>
 -------------------------------------- ---------------------------------------------------------------
 __field__										__description__
 close()											destroy the window
@@ -91,10 +94,11 @@ send_to_back([rel_to_win])					move the window below other windows or a specific
 bring_to_front([rel_to_win])				move the window above other windows or a specific window
 accelerators									list of accelerators (a WAItemList)
 -------------------------------------- ---------------------------------------------------------------
-
+</div>
 
 ## Events:
 
+<div class=small>
 -------------------------------- ----------------------------------------------- ---------------------
 __handler__								__description__											__winapi flag__
 on_close()								was closed													WM_CLOSE
@@ -123,6 +127,7 @@ on_input_language_change()			input language changed									WM_INPUTLANGCHANGE
 on_user_change()						used has logged off										WM_USERCHANGED
 on_display_change()					display resolution changed								WM_DISPLAYCHANGE
 -------------------------------- ----------------------------------------------- ---------------------
+</div>
 
 Example:
 
