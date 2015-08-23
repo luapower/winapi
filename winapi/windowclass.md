@@ -112,7 +112,7 @@ on_minimizing(x, y)					minimizing: return false to prevent					SC_MINIMIZE
 on_unminimizing()						unminimizing: return false to prevent				WM_QUERYOPEN
 on_maximizing(x, y)					maximizing: return false to prevent					SC_MAXIMIZE
 on_restoring(x, y) 					unmaximizing: return false to prevent				SC_RESTORE
-on_menu_key(char_code)				get the 'f' in Alt+F if there's a `&File` menu	SC_KEYMENU
+on_menu_key(char_code)				get the 'f' in Alt+F on a '&File' menu				SC_KEYMENU
 on_get_minmax_info(MINMAXINFO*)	get min/max size constraints							WM_GETMINMAXINFO
 __system changes__					__description__											__winapi flag__
 on_query_end_session()				logging off (return false to prevent)				WM_QUERYENDSESSION
