@@ -2,7 +2,8 @@
 --oo/cairopanel2: cairo pixman surface control.
 --Written by Cosmin Apreutesei. Public Domain.
 
---NOTE: this implementation doesn't rely on cairo's win32 extensions.
+--NOTE: unlike cairopanel, this implementation doesn't rely on cairo's win32
+--extensions, so it works with a cairo binary that wasn't compiled with them.
 
 local ffi = require'ffi'
 local bit = require'bit'

@@ -1,5 +1,5 @@
 
---oo/cairopanel: cairo pixman surface control.
+--oo/controls/cairopanel: cairo pixman surface control.
 --Written by Cosmin Apreutesei. Public Domain.
 
 local ffi = require'ffi'
