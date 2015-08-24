@@ -41,10 +41,11 @@ specific to the `Window` class. Everything listed for `BaseWindow` in
 
 ### Initial fields and properties
 
+<div class=small>
+
 __NOTE:__ the table below `i` means initial field, `r` means read-only property,
 `rw` means read-write property.
 
-<div class=small>
 ----------------------- -------- ----------------------------------------- -------------- ---------------------
 __field/property__		__irw__	__description__									__default__		__reference__
 noclose						irw		remove the close button							false				CS_NOCLOSE
