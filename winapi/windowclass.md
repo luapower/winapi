@@ -63,7 +63,7 @@ child							irw		(for non-activable tool windows)	 			false				WS_CHILD
 topmost						irw		stay above all windows							false				WS_EX_TOPMOST
 window_edge					irw		(needs to be the same as frame)				true				WS_EX_WINDOWEDGE
 dialog_frame				irw		double border and no sysmenu icon			false				WS_EX_DLGMODALFRAME
-help_button					irw		help button											false				WS_EX_CONTEXTHELP
+help_button					irw		add a help button									false				WS_EX_CONTEXTHELP
 tool_window					irw		tool window frame									false				WS_EX_TOOLWINDOW
 transparent					irw		(use layered instead)		 					false				WS_EX_TRANSPARENT
 layered						irw		layered mode								 		false				WS_EX_LAYERED
@@ -83,7 +83,7 @@ maximized					ir			maximized state									false				WS_MAXIMIZE
 icon							irw		window's icon
 small_icon					irw		window's small icon
 owner							irw		window's owner
-foreground					 r			is this the foreground window?
+foreground					 r			foreground state
 normal_rect					 rw		RECT: frame rect in normal state
 restore_to_maximized		 rw		unminimize to maximized state
 accelerators				 rw		WAItemList: list of of accelerators
@@ -128,7 +128,7 @@ on_maximizing(x, y)					maximizing: return false to prevent				SC_MAXIMIZE
 on_restoring(x, y) 					unmaximizing: return false to prevent			SC_RESTORE
 on_menu_key(char_code)				get the 'f' in Alt+F on a '&File' menu			SC_KEYMENU
 on_get_minmax_info(MINMAXINFO*)	get min/max size constraints						WM_GETMINMAXINFO
-__system event__
+__system event__						__description__										__winapi message__
 on_query_end_session()				logging off (return false to prevent)			WM_QUERYENDSESSION
 on_end_session()						logging off	(after all apps agreed)				WM_ENDSESSION
 on_system_color_change()			system colors changed								WM_SYSCOLORCHANGE
