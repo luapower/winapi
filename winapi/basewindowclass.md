@@ -47,25 +47,25 @@ and controls which are documented here.
 
 <div class=small>
 ----------------------- -------- -------------------------- ----------------- ---------------------
-__field/property__		__irw__	__description__				__default__			__winapi flag__
+__field/property__		__irw__	__description__				__default__			__winapi ref__
 visible						irw		visibility						true					WS_VISIBLE
 enabled						irw		focusability					true					WS_DISABLED
-focused						 rw		focused state
-x, y							irw		position
-w, h							irw		size
-rect							 rw		outer rect (RECT)
-client_w, client_h		 r			inner size
-client_rect					 r			inner rect (RECT)
-screen_rect					 r			outer rect in screen space
-min_w, min_h				irw		minimum size
-max_w, max_h				irw		maximum size
-font							irw		default font					DEFAULT_GUI_FONT
-text							 rw
-cursor_pos					 r			mouse position (POINT)
-monitor						 r			monitor (HMONITOR)
-is_visible					 r			is actually visible?
+focused						 rw		focused state											GetFocus
+x, y							irw		position													SetWindowPos
+w, h							irw		size														SetWindowPos
+rect							 rw		outer rect (RECT)										SetWindowPos
+client_w, client_h		 r			inner size												GetClientRect
+client_rect					 r			inner rect (RECT)										GetClientRect
+screen_rect					 r			outer rect in screen space							GetWindowRect
+min_w, min_h				irw		minimum size											WM_WINDOWPOSCHANGING
+max_w, max_h				irw		maximum size											WM_WINDOWPOSCHANGING
+font							irw		default font					DEFAULT_GUI_FONT	Get/SetWindowFont
+text							 rw																	Get/SetWindowText
+cursor_pos					 r			mouse position (POINT)								GetCursorPos
+monitor						 r			monitor (HMONITOR)									MonitorFromWindow
+is_visible					 r			is actually visible?									IsWindowVisible
 updating						 w			control automatic radraw							SetRedraw
-dead							 r			was it destroyed?
+dead							 r			was it destroyed?										WM_NCDESTROY
 ----------------------- -------- -------------------------- ----------------- ---------------------
 </div>
 
@@ -73,34 +73,34 @@ dead							 r			was it destroyed?
 
 <div class=small>
 -------------------------------------- -------------------------------------------- ----------------------
-__state__										__description__										__winapi method__
+__state__										__description__										__winapi ref__
 enable()											enable													EnableWindow
 disable()										disable													EnableWindow
 focus()											focus														SetFocus
 show([async])									show														ShowWindow
 hide()											hide														ShowWindow
-__positioning__								__description__										__winapi method__
+__positioning__								__description__										__winapi ref__
 move(x, y)										move														SetWindowPos
 resize(w, h)									resize													SetWindowPos
 map_point(to_win, POINT) -> POINT		map a POINT to a window's space					MapWindowPoint
 map_rect(to_win, RECT) -> RECT			map a RECT to a window's space					MapWindowRect
 client_to_frame(nil, RECT) -> RECT		inner->outer frame space conversion				AdjustWindowRect
 frame_to_client(nil, RECT) -> RECT		outer->inner frame space conversion				AdjustWindowRect
-__children__									__description__										__winapi method__
+__children__									__description__										__winapi ref__
 children() -> iter() -> win				iterate children										EnumChildWindows
 child_at(POINT) -> win						child window at position							ChildWindowFromPoint
 real_child_at(POINT) -> win 				same but go through transparent children		RealChildWindowFromPoint
 child_at_recursive(POINT) -> win			same but recursive									ChildWindowFromPoint
 real_child_at_recursive(POINT) -> win	same but go through transparent children		RealChildWindowFromPoint
-__z-order__										__description__										__winapi method__
+__z-order__										__description__										__winapi ref__
 send_to_back([rel_to_win])					move below of other windows						SetWindowPos
 bring_to_front([rel_to_win])				bring in front of other windows					SetWindowPos
-__painting__									__description__										__winapi method__
+__painting__									__description__										__winapi ref__
 redraw()											redraw the window immediately						RedrawWindow
 invalidate([RECT], [erase_bg])			invalidate the window or a subregion			InvalidateRect
-__drag & drop__								__description__										__winapi method__
+__drag & drop__								__description__										__winapi ref__
 dragging(POINT) -> true|false				check if dragging										DragDetect
-__timers__										__description__										__winapi method__
+__timers__										__description__										__winapi ref__
 settimer(seconds, handler, id)			set/reset a timer										SetTimer
 stoptimer(id)									cancel a timer											KillTimer
 -------------------------------------- -------------------------------------------- ----------------------
@@ -110,12 +110,12 @@ stoptimer(id)									cancel a timer											KillTimer
 
 <div class=small>
 -------------------------------------------- -------------------------------------- -------------------------
-__lifetime__											__description__								__winapi message__
+__lifetime__											__description__								__winapi ref__
 on_destroy()											before destroying								WM_DESTROY
 on_destroyed()											after being destroyed						WM_NCDESTROY
-__movement__											__description__								__winapi message__
+__movement__											__description__								__winapi ref__
 on_pos_changing(WINDOWPOS)							resizing (or changing state)				WM_WINDOWPOSCHANGING
-on_parent_resizing(WINDOWPOS)						parent is resizing
+on_parent_resizing(WINDOWPOS)						parent is resizing							WM_WINDOWPOSCHANGING
 on_pos_changed()										resized or state changed					WM_WINDOWPOSCHANGED
 on_moving()												moving 											WM_MOVING
 on_moved()												was moved										WM_MOVE
@@ -127,10 +127,10 @@ on_focus()												was focused										WM_SETFOCUS
 on_blur()												was unfocused									WM_KILLFOCUS
 on_enable()												was enabled										WM_ENABLE
 on_show()												was shown										WM_SHOWWINDOW
-__queries__												__description__								__winapi message__
+__queries__												__description__								__winapi ref__
 on_help()												user pressed F1								WM_HELP
 on_set_cursor()										cursor changed									WM_SETCURSOR
-__mouse__												__description__								__winapi message__
+__mouse__												__description__								__winapi ref__
 on_mouse_move(x, y, btns)							mouse moved										WM_MOUSEMOVE
 on_mouse_over(x, y, btns)							mouse entered the client area (1) 		WM_MOUSEHOVER
 on_mouse_leave()										mouse left the client area (1)			WM_MOUSELEAVE
@@ -148,7 +148,7 @@ on_xbutton_down(x, y, btns, which)				other mouse button down						WM_XBUTTONDOW
 on_xbutton_up(x, y, btns, which)					other mouse button up						WM_XBUTTONUP
 on_mouse_wheel(x, y, btns, delta)				mouse wheel roll								WM_MOUSEWHEEL
 on_mouse_hwheel(x, y, btns, delta)				mouse horizontal wheel roll				WM_MOUSEHWHEEL
-__keyboard__											__description__								__winapi message__
+__keyboard__											__description__								__winapi ref__
 on_key_down(VK_code, flags)						key down											WM_KEYDOWN
 on_key_up(VK_code, flags)							key up											WM_KEYUP
 on_syskey_down(VK_code, flags)					syskey down										WM_SYSKEYDOWN
@@ -157,12 +157,12 @@ on_key_down_char(utf8_char, flags)				key down	char									WM_CHAR
 on_syskey_down_char(utf8_char, flags)			syskey down char								WM_SYSCHAR
 on_dead_key_up_char(VK_code, flags)				dead key up char								WM_DEADCHAR
 on_dead_syskey_down_char(VK_code, flags)		dead syskey down char						WM_SYSDEADCHAR
-__raw input__											__description__								__winapi message__
+__raw input__											__description__								__winapi ref__
 on_raw_input(RAWINPUT)								raw input event								WM_INPUT
 on_device_change(how, HRAWINPUT)					input device added/removed					WM_INPUT_DEVICE_CHANGE
-__system events__										__description__								__winapi message__
+__system events__										__description__								__winapi ref__
 on_dpi_changed()										monitor's DPI changed						WM_DPICHANGED
-__painting__
+__painting__											__description__								__winapi ref__
 on_paint(hdc)											window needs repainting						WM_PAINT
 -------------------------------------------- -------------------------------------- -------------------------
 </div>
