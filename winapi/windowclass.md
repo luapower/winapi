@@ -84,9 +84,9 @@ icon							irw		window's icon
 small_icon					irw		window's small icon
 owner							irw		window's owner
 foreground					 r			foreground state
-normal_rect					 rw		RECT: frame rect in normal state
+normal_rect					 rw		frame rect in normal state
 restore_to_maximized		 rw		unminimize to maximized state
-accelerators				 rw		WAItemList: list of of accelerators
+accelerators				 rw		list of of accelerators
 ----------------------- -------- ----------------------------------------- -------------- ---------------------
 </div>
 
