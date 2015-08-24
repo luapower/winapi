@@ -109,6 +109,7 @@ bring_to_front([rel_to_win])				bring in front of other windows					SetWindowPos
 __painting__									__description__										__reference__
 redraw()											redraw the window immediately						RedrawWindow
 invalidate([RECT], [erase_bg])			invalidate the window or a subregion			InvalidateRect
+batch_update(func, args...)				run func() with redrawing desabled				SetRedraw/RedrawWindow
 __drag & drop__								__description__										__reference__
 dragging(POINT) -> true|false				check if dragging										DragDetect
 __timers__										__description__										__reference__
