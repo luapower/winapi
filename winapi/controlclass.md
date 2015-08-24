@@ -34,6 +34,8 @@ parent						irw		control's parent														Get/SetParent
 ----------------------- -------- ----------------------------------------- -------------- ---------------------
 </div>
 
+### Anchors
+
 Anchors are a simple but very powerful way of doing layouting (if you grew
 up with Delphi like I did then you know what I mean).
 This is how they work: setting an anchor on a side of a control fixates
