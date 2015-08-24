@@ -2,10 +2,10 @@
 tagline: base class for windows and controls
 ---
 
-This module implements the `BaseWindow` class is the base class for
-both top-level windows and for controls. It also contains the
-`MessageRouter` which is responsible for routing messages to window
-instances, and the `Windows` singleton.
+This module implements the `BaseWindow` class which is the base class
+for both top-level windows and controls. The module also contains the
+`MessageRouter` singleton which is responsible for routing messages
+to window instances, and the `Windows` singleton.
 
 ## Windows
 
@@ -32,8 +32,10 @@ and controls which are documented here.
 __field__					__description__									__default__		__winapi flag__
 visible						visibility											true				WS_VISIBLE
 enabled						focusability										true				WS_DISABLED
-x								left coordinate									0
-y								top coordinate										0
+x, y							position												0
+w, here						size
+min_w, min_h				minimum size
+max_w, max_h				maximum size
 ----------------------- ----------------------------------------- -------------- ---------------------
 </div>
 

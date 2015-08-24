@@ -2,138 +2,124 @@
 tagline: top-level windows
 ---
 
-This module implements the `Window` class which inherits from `BaseWindow`
-from [winapi/basewindowclass], adding additional properties and methods
-specific to top-level windows.
+## `require'winapi.windowclass'`
+
+This module implements the `Window` class for creating top-level windows.
+`Window` inherits from `BaseWindow` from [winapi.basewindowclass] module.
+
+## Usage
 
 ~~~
 local winapi = require'winapi'
 require'winapi.windowclass'
 
-local win = winapi.Window(t)
-~~~
+local win = winapi.Window{ --these are initial fields
+	w = 500,
+	h = 300,
+	title = 'Lua rulez',
+	autoquit = true,
+	visible = false,
+}
 
-Creates a top-level window. `t` is a table which can have the following
-extra fields over what `BaseWindow` accepts:
-
-<div class=small>
------------------------ ----------------------------------------- -------------- ---------------------
-__field__					__description__									__default__		__winapi flag__
-noclose						disable close button and ALT+F4				false				CS_NOCLOSE
-dropshadow					only for non-movable windows					false				CS_DROPSHADOW
-own_dc						for opengl or other purposes					false				CS_OWNDC
-receive_double_clicks	receive double click messages					true				CS_DBLCLKS
-border						add a border										true				WS_BORDER
-frame 						add a titlebar	(needs border)					true				WS_DLGFRAME
-minimize_button			add a minimize button							true				WS_MINIMIZEBOX
-maximize_button			add a maximize button							true				WS_MAXIMIZEBOX
-sizeable						add a resizing border (needs frame)			true				WS_SIZEBOX
-sysmenu						not setting this hides all buttons			true				WS_SYSMENU
-vscroll						add a vertical scrollbar						false				WS_VSCROLL
-hscroll						add a horizontal scrollbar						false				WS_HSCROLL
-clip_children				clip children										true				WS_CLIPCHILDREN
-clip_siblings				clip siblings										true				WS_CLIPSIBLINGS
-child							for tool_window + activable:false 			false				WS_CHILD
-topmost						stay above all windows							false				WS_EX_TOPMOST
-window_edge					needs to be the same as frame					true				WS_EX_WINDOWEDGE
-dialog_frame				double border and no system menu icon		false				WS_EX_DLGMODALFRAME
-help_button					needs minimize:false and maximize:false	false				WS_EX_CONTEXTHELP
-tool_window					thin tool window frameless						false				WS_EX_TOOLWINDOW
-transparent					better use layered instead 					false				WS_EX_TRANSPARENT
-layered						layered mode (+disable all framing) 		false				WS_EX_LAYERED
-control_parent				recurse when tabbing	between controls		true				WS_EX_CONTROLPARENT
-activatable					activate and show on taskbar					true				WS_EX_NOACTIVATE
-taskbar_button				force showing the window on taskbar			false				WS_EX_APPWINDOW
-background					background color									COLOR_WINDOW
-cursor						default cursor										IDC_ARROW
-title							titlebar												''
-x								outer position	x									CW_USEDEFAULT
-y								outer position	y									CW_USEDEFAULT
-w								outer width											CW_USEDEFAULT
-h								outer height										CW_USEDEFAULT
-autoquit						stop the loop when the window is closed	false
-menu							menu bar												nil
-remember_maximized_pos	maximize to last known position				false
-minimized					minimized initial state							false				WS_MINIMIZE
-maximized					maximized initial state							false				WS_MAXIMIZE
-icon							window's icon										nil
-small_icon					window's small icon								nil
-owner							window's owner										nil
------------------------ ----------------------------------------- -------------- ---------------------
-</div>
-
-__NOTE:__ All CS_*, WS_* and WS_EX_* flags become properties (virtual fields)
-of the window object and they can be queried and modified:
-
-~~~{.lua}
-win.title = 'Hello' --changes the window's title
-print(win.title)    --prints 'Hello'
-~~~
-
-## Runtime properties and methods
-
-<div class=small>
--------------------------------------- ---------------------------------------------------------------
-__field__										__description__
-close()											destroy the window
-foreground -> true|false					is this the foreground window?
-activate()										activate the window
-setforeground()								activate the window even if the app is inactive
-minimized -> true|false						get the minimized state
-maximized -> true|false						get the maximized state
-minimize([deactivate], [async])			minimize (deactivate defaults to true)
-maximize([_], [async])						maximize and activate
-shownormal([activate], [async]])			show in normal state (activate defaults to true)
-restore([_], [async])						restore from minimized or maximized state and activate
-normal_rect -> x, y, w, h					get the window's frame rectangle in normal state
-set_normal_rect(x, y, w, h)				set the window's frame rectangle in normal state
-normal_rect = r								same as above but directly assign a RECT
-restore_to_maximized -> true|false		will the window unminimize to maximized state?
-restore_to_maximized = true|false		set if the window should unminimize to maximized state
-send_to_back([rel_to_win])					move the window below other windows or a specific window
-bring_to_front([rel_to_win])				move the window above other windows or a specific window
-accelerators									list of accelerators (a WAItemList)
--------------------------------------- ---------------------------------------------------------------
-</div>
-
-## Events
-
-<div class=small>
--------------------------------- ----------------------------------------------- ---------------------
-__handler__								__description__											__winapi message__
-on_close()								was closed													WM_CLOSE
-on_activate()							was activated												WM_ACTIVATE
-on_deactivate()						was deactivated											WM_ACTIVATE
-on_activate_app()						the app was activated									WM_ACTIVATEAPP
-on_deactivate_app()					the app was deactivated									WM_ACTIVATEAPP
-on_nc_activate()						the non-clienta area was activated					WM_NCACTIVATE
-on_nc_deactivate()					the non-clienta area was deactivated				WM_NCACTIVATE
-on_minimizing(x, y)					minimizing: return false to prevent					SC_MINIMIZE
-on_unminimizing()						unminimizing: return false to prevent				WM_QUERYOPEN
-on_maximizing(x, y)					maximizing: return false to prevent					SC_MAXIMIZE
-on_restoring(x, y) 					unmaximizing: return false to prevent				SC_RESTORE
-on_menu_key(char_code)				get the 'f' in Alt+F on a '&File' menu				SC_KEYMENU
-on_get_minmax_info(MINMAXINFO*)	get min/max size constraints							WM_GETMINMAXINFO
-__system changes__					__description__											__winapi flag__
-on_query_end_session()				logging off (return false to prevent)				WM_QUERYENDSESSION
-on_end_session()						logging off	(after all apps agreed)					WM_ENDSESSION
-on_system_color_change()			system colors changed									WM_SYSCOLORCHANGE
-on_settings_change()					system parameters info changed						WM_SETTINGCHANGE
-on_device_mode_change()				device-mode settings changed							WM_DEVMODECHANGE
-on_fonts_change()						installed fonts changed									WM_FONTCHANGE
-on_time_change()						system time changed										WM_TIMECHANGE
-on_spooler_change()					spooler's status changed								WM_SPOOLERSTATUS
-on_input_language_change()			input language changed									WM_INPUTLANGCHANGE
-on_user_change()						used has logged off										WM_USERCHANGED
-on_display_change()					display resolution changed								WM_DISPLAYCHANGE
--------------------------------- ----------------------------------------------- ---------------------
-</div>
-
-Example:
-
-~~~{.lua}
-function win:on_close()
-	print'closed'
+function win:on_close()    --this is an event handler
+	print'Bye'
 end
+
+print(win.title)           --this is reading the value of a property
+win.title = 'Lua rulez!'   --this is setting the value of a property
+win:show()                 --this is a method call
 ~~~
 
+## API
+
+The table below lists all initial fields, properties, methods and events
+specific to the `Window` class. Everything listed for `BaseWindow` in
+[winapi.basewindowclass] is available too.
+
+<div class=small>
+----------------------- -------- ----------------------------------------- -------------- ---------------------
+__fields__					__type__	__description__									__default__		__winapi value__
+noclose						i rw		disable close button and ALT+F4				false				CS_NOCLOSE
+dropshadow					i rw		only for non-movable windows					false				CS_DROPSHADOW
+own_dc						i rw		for opengl or other purposes					false				CS_OWNDC
+receive_double_clicks	i rw		receive double click messages					true				CS_DBLCLKS
+border						i rw		add a border										true				WS_BORDER
+frame 						i rw		add a titlebar	(needs border)					true				WS_DLGFRAME
+minimize_button			i rw		add a minimize button							true				WS_MINIMIZEBOX
+maximize_button			i rw		add a maximize button							true				WS_MAXIMIZEBOX
+sizeable						i rw		add a resizing border (needs frame)			true				WS_SIZEBOX
+sysmenu						i rw		not setting this hides all buttons			true				WS_SYSMENU
+vscroll						i rw		add a vertical scrollbar						false				WS_VSCROLL
+hscroll						i rw		add a horizontal scrollbar						false				WS_HSCROLL
+clip_children				i rw		clip children										true				WS_CLIPCHILDREN
+clip_siblings				i rw		clip siblings										true				WS_CLIPSIBLINGS
+child							i rw		for tool_window + activable:false 			false				WS_CHILD
+topmost						i rw		stay above all windows							false				WS_EX_TOPMOST
+window_edge					i rw		needs to be the same as frame					true				WS_EX_WINDOWEDGE
+dialog_frame				i rw		double border and no system menu icon		false				WS_EX_DLGMODALFRAME
+help_button					i rw		needs minimize:false and maximize:false	false				WS_EX_CONTEXTHELP
+tool_window					i rw		thin tool window frameless						false				WS_EX_TOOLWINDOW
+transparent					i rw		better use layered instead 					false				WS_EX_TRANSPARENT
+layered						i rw		layered mode (+disable all framing) 		false				WS_EX_LAYERED
+control_parent				i rw		recurse when tabbing	between controls		true				WS_EX_CONTROLPARENT
+activatable					i rw		activate and show on taskbar					true				WS_EX_NOACTIVATE
+taskbar_button				i rw		force showing the window on taskbar			false				WS_EX_APPWINDOW
+background					i rw		background color									COLOR_WINDOW
+cursor						i rw		default cursor										IDC_ARROW
+title							i rw		titlebar												''
+x, y							i			frame position (top-left corner)				CW_USEDEFAULT
+w, h							i			frame size											CW_USEDEFAULT
+autoquit						i rw		stop the loop when the window is closed	false
+menu							i rw		menu bar
+remember_maximized_pos	i rw		maximize to last known position				false
+minimized					i			minimized state									false				WS_MINIMIZE
+maximized					i			maximized state									false				WS_MAXIMIZE
+icon							i rw		window's icon
+small_icon					i rw		window's small icon
+owner							i rw		window's owner
+foreground					_ r		is this the foreground window?
+normal_rect					_ rw		RECT: frame rect in normal state
+restore_to_maximized		_ rw		unminimize to maximized state
+accelerators				_ rw		WAItemList: list of of accelerators
+__methods__
+close()									destroy the window
+activate()								activate the window if the app is active
+setforeground()						activate the window anyway
+set_normal_rect(x, y, w, h)		set the normal_rect discretely
+minimize([deactivate], [async])	minimize (deactivate: true)
+maximize(nil, [async])				maximize and activate
+shownormal([activate], [async])	show in normal state (activate: true)
+restore(nil, [async])				restore from minimized or maximized state
+send_to_back([rel_to_win])			move below other windows/specific window
+bring_to_front([rel_to_win])		move above other windows/specific window
+__events__
+on_close()								was closed																WM_CLOSE
+on_activate()							was activated															WM_ACTIVATE
+on_deactivate()						was deactivated														WM_ACTIVATE
+on_activate_app()						the app was activated												WM_ACTIVATEAPP
+on_deactivate_app()					the app was deactivated												WM_ACTIVATEAPP
+on_nc_activate()						the non-clienta area was activated								WM_NCACTIVATE
+on_nc_deactivate()					the non-clienta area was deactivated							WM_NCACTIVATE
+on_minimizing(x, y)					minimizing: return false to prevent								SC_MINIMIZE
+on_unminimizing()						unminimizing: return false to prevent							WM_QUERYOPEN
+on_maximizing(x, y)					maximizing: return false to prevent								SC_MAXIMIZE
+on_restoring(x, y) 					unmaximizing: return false to prevent							SC_RESTORE
+on_menu_key(char_code)				get the 'f' in Alt+F on a '&File' menu							SC_KEYMENU
+on_get_minmax_info(MINMAXINFO*)	get min/max size constraints										WM_GETMINMAXINFO
+__system events__
+on_query_end_session()				logging off (return false to prevent)							WM_QUERYENDSESSION
+on_end_session()						logging off	(after all apps agreed)								WM_ENDSESSION
+on_system_color_change()			system colors changed												WM_SYSCOLORCHANGE
+on_settings_change()					system parameters info changed									WM_SETTINGCHANGE
+on_device_mode_change()				device-mode settings changed										WM_DEVMODECHANGE
+on_fonts_change()						installed fonts changed												WM_FONTCHANGE
+on_time_change()						system time changed													WM_TIMECHANGE
+on_spooler_change()					spooler's status changed											WM_SPOOLERSTATUS
+on_input_language_change()			input language changed												WM_INPUTLANGCHANGE
+on_user_change()						used has logged off													WM_USERCHANGED
+on_display_change()					display resolution changed											WM_DISPLAYCHANGE
+----------------------- --------	----------------------------------------- -------------- ---------------------
+</div>
+
+__Legend:__ `i` means initial field, `r` means read-only property,
+`rw` means read-write property.
