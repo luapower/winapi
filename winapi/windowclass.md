@@ -28,6 +28,8 @@ end
 print(win.title)           --this is reading the value of a property
 win.title = 'Lua rulez!'   --this is setting the value of a property
 win:show()                 --this is a method call
+
+MessageLoop()					--start the message loop
 ~~~
 
 ## API
