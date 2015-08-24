@@ -49,6 +49,9 @@ and controls which are documented here.
 
 ### Initial fields and properties
 
+__NOTE:__ the table below `i` means initial field, `r` means read-only property,
+`rw` means read-write property.
+
 <div class=small>
 ----------------------- -------- -------------------------- ----------------- ---------------------
 __field/property__		__irw__	__description__				__default__			__winapi ref__

@@ -41,7 +41,7 @@ specific to the `Window` class. Everything listed for `BaseWindow` in
 
 ### Initial fields and properties
 
-In the table below `i` means initial field, `r` means read-only property,
+__NOTE:__ the table below `i` means initial field, `r` means read-only property,
 `rw` means read-write property.
 
 <div class=small>
