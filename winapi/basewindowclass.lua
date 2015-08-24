@@ -125,7 +125,7 @@ function MessageLoop(after_process)
 	return msg.signed_wParam --WM_QUIT sends an int exit code in wParam
 end
 
---process all pending message from the queue (if any) and return.
+--process all pending messages from the queue (if any) and return.
 function ProcessMessages(after_process)
 	while true do
 		local ok, msg = PeekMessage(nil, 0, 0, PM_REMOVE)
@@ -201,7 +201,6 @@ BaseWindow = {
 		on_raw_input = WM_INPUT,
 		on_device_change = WM_INPUT_DEVICE_CHANGE,
 		--system events
-		on_timer = WM_TIMER,
 		on_dpi_changed = WM_DPICHANGED,
 	},
 	__wm_syscommand_handler_names = {}, --WM_SYSCOMMAND code -> handler name map

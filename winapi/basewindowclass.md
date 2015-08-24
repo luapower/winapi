@@ -4,20 +4,38 @@ tagline: base class for windows and controls
 
 This module implements the `BaseWindow` class which is the base class
 for both top-level windows and controls. The module also contains the
-`MessageRouter` singleton which is responsible for routing messages
-to window instances, and the `Windows` singleton.
+`Windows` singleton which deals with windows (top-level or not)
+as a collection, and the message loop.
 
 ## Windows
 
+-------------------------------------------- -----------------------------------------------
+Windows.items -> {HWND -> win}					the HWND->window map
+Windows.active_window -> win						get the active window
+Windows.foreground_window -> win | nil			get the active window if the app is active
+Windows:window_at(POINT) -> win | nil			get the window at a point
+Windows:map_point(to_win, POINT) -> POINT		map a POINT to a window's space
+Windows:map_rect(to_win, RECT) -> RECT			map a RECT to a window's space
+Windows.cursor_pos -> POINT						current mouse position outside of events
+-------------------------------------------- -----------------------------------------------
 
+> __NOTE:__ The active window goes nil when the app is deactivated,
+but if activate() is called on a window while the app is inactive,
+the window's active state will be set immediately, even if the window
+will not be activated (because the app is inactive). OTOH, the foreground
+window is always nil while the app is inactive, even after calling
+activate() on a window.
 
-## MessageRouter
+## The message loop
 
+----------------------- ------------------------------------------------------
+`MessageLoop()`			start the message loop
+`ProcessMessages()`		process pending messages (if any) and return
+`PostQuitMessage()`		post a quit message to the message loop to stop it
+----------------------- ------------------------------------------------------
 
-
-## MessageLoop
-
-
+> __NOTE:__ The message loop returns an exit code, so you can call it
+like this: `os.exit(MessageLoop())`.
 
 ## BaseWindow
 
@@ -25,84 +43,129 @@ BaseWindow is for subclassing, not for instantiation. Nevertheless,
 it contains properties and methods that are common to both windows
 and controls which are documented here.
 
-## Initial properties
+## Initial fields and properties
 
 <div class=small>
------------------------ ----------------------------------------- -------------- ---------------------
-__field__					__description__									__default__		__winapi flag__
-visible						visibility											true				WS_VISIBLE
-enabled						focusability										true				WS_DISABLED
-x, y							position												0
-w, here						size
-min_w, min_h				minimum size
-max_w, max_h				maximum size
------------------------ ----------------------------------------- -------------- ---------------------
+----------------------- -------- -------------------------- ----------------- ---------------------
+__field/property__		__irw__	__description__				__default__			__winapi flag__
+visible						irw		visibility						true					WS_VISIBLE
+enabled						irw		focusability					true					WS_DISABLED
+focused						 rw		focused state
+x, y							irw		position
+w, h							irw		size
+rect							 rw		outer rect (RECT)
+client_w, client_h		 r			inner size
+client_rect					 r			inner rect (RECT)
+screen_rect					 r			outer rect in screen space
+min_w, min_h				irw		minimum size
+max_w, max_h				irw		maximum size
+font							irw		default font					DEFAULT_GUI_FONT
+text							 rw
+cursor_pos					 r			mouse position (POINT)
+monitor						 r			monitor (HMONITOR)
+is_visible					 r			is actually visible?
+updating						 w			control automatic radraw							SetRedraw
+dead							 r			was it destroyed?
+----------------------- -------- -------------------------- ----------------- ---------------------
 </div>
 
-## Runtime properties and methods
+## Methods
 
 <div class=small>
--------------------------------------- ---------------------------------------------------------------
-__field__										__description__
-
--------------------------------------- ---------------------------------------------------------------
+-------------------------------------- -------------------------------------------- ----------------------
+__state__										__description__										__winapi method__
+enable()											enable													EnableWindow
+disable()										disable													EnableWindow
+focus()											focus														SetFocus
+show([async])									show														ShowWindow
+hide()											hide														ShowWindow
+__positioning__								__description__										__winapi method__
+move(x, y)										move														SetWindowPos
+resize(w, h)									resize													SetWindowPos
+map_point(to_win, POINT) -> POINT		map a POINT to a window's space					MapWindowPoint
+map_rect(to_win, RECT) -> RECT			map a RECT to a window's space					MapWindowRect
+client_to_frame(nil, RECT) -> RECT		inner->outer frame space conversion				AdjustWindowRect
+frame_to_client(nil, RECT) -> RECT		outer->inner frame space conversion				AdjustWindowRect
+__children__									__description__										__winapi method__
+children() -> iter() -> win				iterate children										EnumChildWindows
+child_at(POINT) -> win						child window at position							ChildWindowFromPoint
+real_child_at(POINT) -> win 				same but go through transparent children		RealChildWindowFromPoint
+child_at_recursive(POINT) -> win			same but recursive									ChildWindowFromPoint
+real_child_at_recursive(POINT) -> win	same but go through transparent children		RealChildWindowFromPoint
+__z-order__										__description__										__winapi method__
+send_to_back([rel_to_win])					move below of other windows						SetWindowPos
+bring_to_front([rel_to_win])				bring in front of other windows					SetWindowPos
+__painting__									__description__										__winapi method__
+redraw()											redraw the window immediately						RedrawWindow
+invalidate([RECT], [erase_bg])			invalidate the window or a subregion			InvalidateRect
+__drag & drop__								__description__										__winapi method__
+dragging(POINT) -> true|false				check if dragging										DragDetect
+__timers__										__description__										__winapi method__
+settimer(seconds, handler, id)			set/reset a timer										SetTimer
+stoptimer(id)									cancel a timer											KillTimer
+-------------------------------------- -------------------------------------------- ----------------------
 </div>
 
 ## Events
 
 <div class=small>
--------------------------------- ----------------------------------------------- ---------------------
-__lifetime__							__description__											__winapi message__
-on_destroy()																							WM_DESTROY
-on_destroyed()																							WM_NCDESTROY
-__movement__							__description__											__winapi message__
-on_pos_changing																						WM_WINDOWPOSCHANGING
-on_pos_changed()																						WM_WINDOWPOSCHANGED
-on_moving()																								WM_MOVING
-on_moved()																								WM_MOVE
-on_resizing()																							WM_SIZING
-on_resized()																							WM_SIZE
-on_begin_sizemove()																					WM_ENTERSIZEMOVE
-on_end_sizemove()																						WM_EXITSIZEMOVE
-on_focus()																								WM_SETFOCUS
-on_blur()																								WM_KILLFOCUS
-on_enable()																								WM_ENABLE
-on_show()																								WM_SHOWWINDOW
-__queries__								__description__											__winapi message__
-on_help()																								WM_HELP
-on_set_cursor()																						WM_SETCURSOR
-__mouse__()								__description__											__winapi message__
-on_mouse_move()																						WM_MOUSEMOVE
-on_mouse_over()						call TrackMouseEvent() to receive this				WM_MOUSEHOVER
-on_mouse_leave()						call TrackMouseEvent() to receive this				WM_MOUSELEAVE
-on_lbutton_double_click()																			WM_LBUTTONDBLCLK
-on_lbutton_down()																						WM_LBUTTONDOWN
-on_lbutton_up()																						WM_LBUTTONUP
-on_mbutton_double_click()																			WM_MBUTTONDBLCLK
-on_mbutton_down()																						WM_MBUTTONDOWN
-on_mbutton_up()																						WM_MBUTTONUP
-on_rbutton_double_click()																			WM_RBUTTONDBLCLK
-on_rbutton_down()																						WM_RBUTTONDOWN
-on_rbutton_up()																						WM_RBUTTONUP
-on_xbutton_double_click()																			WM_XBUTTONDBLCLK
-on_xbutton_down()																						WM_XBUTTONDOWN
-on_xbutton_up()																						WM_XBUTTONUP
-on_mouse_wheel()																						WM_MOUSEWHEEL
-on_mouse_hwheel()																						WM_MOUSEHWHEEL
-__keyboard__							__description__											__winapi message__
-on_key_down()																							WM_KEYDOWN
-on_key_up()																								WM_KEYUP
-on_syskey_down()																						WM_SYSKEYDOWN
-on_syskey_up()																							WM_SYSKEYUP
-on_key_down_char()																					WM_CHAR
-on_syskey_down_char()																				WM_SYSCHAR
-on_dead_key_up_char()																				WM_DEADCHAR
-on_dead_syskey_down_char()																			WM_SYSDEADCHAR
-__raw() input__						__description__											__winapi message__
-on_raw_input()																							WM_INPUT
-on_device_change()																					WM_INPUT_DEVICE_CHANGE
-__system events__						__description__											__winapi message__
-on_timer()																								WM_TIMER
-on_dpi_changed()																						WM_DPICHANGED
--------------------------------- ----------------------------------------------- ---------------------
+-------------------------------------------- -------------------------------------- -------------------------
+__lifetime__											__description__								__winapi message__
+on_destroy()											before destroying								WM_DESTROY
+on_destroyed()											after being destroyed						WM_NCDESTROY
+__movement__											__description__								__winapi message__
+on_pos_changing(WINDOWPOS)							resizing (or changing state)				WM_WINDOWPOSCHANGING
+on_parent_resizing(WINDOWPOS)						parent is resizing
+on_pos_changed()										resized or state changed					WM_WINDOWPOSCHANGED
+on_moving()												moving 											WM_MOVING
+on_moved()												was moved										WM_MOVE
+on_resizing()											resizing											WM_SIZING
+on_resized()											was resized										WM_SIZE
+on_begin_sizemove()									moving or resizing started					WM_ENTERSIZEMOVE
+on_end_sizemove()										moving or resizing ended					WM_EXITSIZEMOVE
+on_focus()												was focused										WM_SETFOCUS
+on_blur()												was unfocused									WM_KILLFOCUS
+on_enable()												was enabled										WM_ENABLE
+on_show()												was shown										WM_SHOWWINDOW
+__queries__												__description__								__winapi message__
+on_help()												user pressed F1								WM_HELP
+on_set_cursor()										cursor changed									WM_SETCURSOR
+__mouse__												__description__								__winapi message__
+on_mouse_move(x, y, btns)							mouse moved										WM_MOUSEMOVE
+on_mouse_over(x, y, btns)							mouse entered the client area (1) 		WM_MOUSEHOVER
+on_mouse_leave()										mouse left the client area (1)			WM_MOUSELEAVE
+on_lbutton_double_click(x, y, btns) 			left mouse button double-click			WM_LBUTTONDBLCLK
+on_lbutton_down(x, y, btns)						left mouse button down						WM_LBUTTONDOWN
+on_lbutton_up(x, y, btns)							left mouse button up							WM_LBUTTONUP
+on_mbutton_double_click(x, y, btns)				middle mouse button double-click			WM_MBUTTONDBLCLK
+on_mbutton_down(x, y, btns)						middle mouse button down					WM_MBUTTONDOWN
+on_mbutton_up(x, y, btns)							middle mouse button up						WM_MBUTTONUP
+on_rbutton_double_click(x, y, btns)				right mouse button double-click			WM_RBUTTONDBLCLK
+on_rbutton_down(x, y, btns)						right mouse button down						WM_RBUTTONDOWN
+on_rbutton_up(x, y, btns)							right mouse button up						WM_RBUTTONUP
+on_xbutton_double_click(x, y, btns, which)	other mouse button double-click			WM_XBUTTONDBLCLK
+on_xbutton_down(x, y, btns, which)				other mouse button down						WM_XBUTTONDOWN
+on_xbutton_up(x, y, btns, which)					other mouse button up						WM_XBUTTONUP
+on_mouse_wheel(x, y, btns, delta)				mouse wheel roll								WM_MOUSEWHEEL
+on_mouse_hwheel(x, y, btns, delta)				mouse horizontal wheel roll				WM_MOUSEHWHEEL
+__keyboard__											__description__								__winapi message__
+on_key_down(VK_code, flags)						key down											WM_KEYDOWN
+on_key_up(VK_code, flags)							key up											WM_KEYUP
+on_syskey_down(VK_code, flags)					syskey down										WM_SYSKEYDOWN
+on_syskey_up(VK_code, flags)						syskey up										WM_SYSKEYUP
+on_key_down_char(utf8_char, flags)				key down	char									WM_CHAR
+on_syskey_down_char(utf8_char, flags)			syskey down char								WM_SYSCHAR
+on_dead_key_up_char(VK_code, flags)				dead key up char								WM_DEADCHAR
+on_dead_syskey_down_char(VK_code, flags)		dead syskey down char						WM_SYSDEADCHAR
+__raw input__											__description__								__winapi message__
+on_raw_input(RAWINPUT)								raw input event								WM_INPUT
+on_device_change(how, HRAWINPUT)					input device added/removed					WM_INPUT_DEVICE_CHANGE
+__system events__										__description__								__winapi message__
+on_dpi_changed()										monitor's DPI changed						WM_DPICHANGED
+__painting__
+on_paint(hdc)											window needs repainting						WM_PAINT
+-------------------------------------------- -------------------------------------- -------------------------
 </div>
+
+(1) call `TrackMouseEvent()` to receive these messages.
+

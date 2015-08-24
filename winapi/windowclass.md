@@ -13,12 +13,12 @@ This module implements the `Window` class for creating top-level windows.
 local winapi = require'winapi'
 require'winapi.windowclass'
 
-local win = winapi.Window{ --these are initial fields
-	w = 500,
+local win = winapi.Window{
+	w = 500,                --these are initial fields
 	h = 300,
 	title = 'Lua rulez',
 	autoquit = true,
-	visible = false,
+	visible = false,        --this field is from BaseWindow
 }
 
 function win:on_close()    --this is an event handler
@@ -73,8 +73,8 @@ taskbar_button				irw		force showing on taskbar						false				WS_EX_APPWINDOW
 background					irw		background color									COLOR_WINDOW
 cursor						irw		default cursor										IDC_ARROW
 title							irw		titlebar												''
-x, y							i			frame position										CW_USEDEFAULT
-w, h							i			frame size											CW_USEDEFAULT
+x, y							irw		frame position										CW_USEDEFAULT
+w, h							irw		frame size											CW_USEDEFAULT
 autoquit						irw		stop the loop when closed						false
 menu							irw		menu bar
 remember_maximized_pos	irw		maximize to last known position				false
@@ -120,14 +120,14 @@ on_activate()							was activated											WM_ACTIVATE
 on_deactivate()						was deactivated										WM_ACTIVATE
 on_activate_app()						the app was activated								WM_ACTIVATEAPP
 on_deactivate_app()					the app was deactivated								WM_ACTIVATEAPP
-on_nc_activate()						the non-clienta area was activated				WM_NCACTIVATE
-on_nc_deactivate()					the non-clienta area was deactivated			WM_NCACTIVATE
+on_nc_activate()						the non-client area was activated				WM_NCACTIVATE
+on_nc_deactivate()					the non-client area was deactivated				WM_NCACTIVATE
 on_minimizing(x, y)					minimizing: return false to prevent				SC_MINIMIZE
 on_unminimizing()						unminimizing: return false to prevent			WM_QUERYOPEN
 on_maximizing(x, y)					maximizing: return false to prevent				SC_MAXIMIZE
 on_restoring(x, y) 					unmaximizing: return false to prevent			SC_RESTORE
 on_menu_key(char_code)				get the 'f' in Alt+F on a '&File' menu			SC_KEYMENU
-on_get_minmax_info(MINMAXINFO*)	get min/max size constraints						WM_GETMINMAXINFO
+on_get_minmax_info(MINMAXINFO)	set the min/max size constraints					WM_GETMINMAXINFO
 __system event__						__description__										__winapi message__
 on_query_end_session()				logging off (return false to prevent)			WM_QUERYENDSESSION
 on_end_session()						logging off	(after all apps agreed)				WM_ENDSESSION
