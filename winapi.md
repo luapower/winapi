@@ -11,45 +11,56 @@ OpenGL and cairo integration.
 ## Features
 
   * UTF8 Lua strings everywhere (also works with wide char buffers)
-  * all calls are error-checked so you don't have to
-  * automatic memory management (ownership management and allocation of in/out buffers)
+  * all calls are error-checked
+  * memory management (managing ownership; allocation of in/out buffers)
   * flags can be passed as `'FLAG1 FLAG2'`
   * counting from 1 everywhere
-  * object system with virtual properties (eg. `window.w = 500` changes a window's width)
-  * Delphi-style anchor-based layout model for all controls
-  * [binding infrastructure][winapi_binding] tailored to winapi conventions,
-  facilitating the binding of more APIs
-  * cairo and OpenGL panel widgets.
+  * object system with virtual properties (`win.title = 'hello'` sets a window's title)
+  * anchor-based layout model for all controls
+  * binding helpers for easy binding of new and future APIs
+  * cairo and OpenGL widgets.
 
-## Modules
-
-{{module_list}}
-
-## Usage
+## Hello World
 
 ~~~{.lua}
 winapi = require'winapi'
 require'winapi.windowclass'
 
 local main = winapi.Window{
-   title = 'Demo',
+   title = 'Good News Everyone',
    w = 600, h = 400,
    autoquit = true,
 }
 
+function main:on_close()
+	print'Bye!'
+end
+
 os.exit(winapi.MessageLoop())
 ~~~
 
-> __Tip:__ The oo modules can be run as standalone scripts, which will
-showcase the module's functionality.
+## Modules
 
+{{module_list}}
+
+__Tip:__ Some modules can be run as standalone scripts, which will
+showcase the module's functionality.
 
 ## Documentation
 
-There's no method-by-method documentation, but there's a
-[tech doc][winapi_design], a [dev doc][winapi_binding], and a
-[narrative][winapi_history] which should give you more context.
-The code is also well documented IMHO, including API quirks and empirical
-knowledge. Also, oo modules have a small runnable demo at the bottom of the
-file which showcases the module's functionality. Run the module as a
-standalone script to check it out.
+### Architecture
+
+	* [winapi_design] - hi-level overview of the library
+	* [winapi_binding] - how the binding infrastructure works
+	* [winapi_history] - the reasoning behind various design decisions
+
+### Classes
+
+   * [winapi.basewindowclass] - base class for top-level windows and controls
+	* [winapi.controlclass] - base class for controls
+	* [winapi.windowclass] - final class for top level windows
+
+### Procedural layer
+
+The procedural layer is documented in the code, including API quirks
+and empirical knowledge, so do check that out.
