@@ -5,8 +5,8 @@ platforms: mingw32, mingw64
 
 ## Scope
 
-Windows, common controls and dialogs, message loop, support APIs,
-OpenGL and cairo integration.
+Windows, common controls and dialogs, message loop, system APIs,
+OpenGL and cairo.
 
 ## Features
 
