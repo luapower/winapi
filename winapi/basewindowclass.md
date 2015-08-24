@@ -10,7 +10,8 @@ as a collection, and the message loop.
 ## Windows
 
 <div class=small>
--------------------------------------------- -----------------------------------------------
+-------------------------------------------- -------------------------------------------- ----------------
+__field/method__										__description__										__reference__
 Windows.items -> {HWND -> win}					the HWND->window map
 Windows.active_window -> win						get the active window
 Windows.foreground_window -> win | nil			get the active window if the app is active
@@ -18,7 +19,7 @@ Windows:window_at(POINT) -> win | nil			get the window at a point
 Windows:map_point(to_win, POINT) -> POINT		map a POINT to a window's space
 Windows:map_rect(to_win, RECT) -> RECT			map a RECT to a window's space
 Windows.cursor_pos -> POINT						current mouse position outside of events
--------------------------------------------- -----------------------------------------------
+-------------------------------------------- --------------------------------------------- ----------------
 
 > __NOTE:__ The active window goes nil when the app is deactivated,
 but if activate() is called on a window while the app is inactive,
@@ -26,6 +27,7 @@ the window's active state will be set immediately, even if the window
 will not be activated (because the app is inactive). OTOH, the foreground
 window is always nil while the app is inactive, even after calling
 activate() on a window.
+
 </div>
 
 ## The message loop
@@ -39,6 +41,7 @@ activate() on a window.
 
 > __NOTE:__ The message loop returns an exit code, so you can call it
 like this: `os.exit(MessageLoop())`.
+
 </div>
 
 ## BaseWindow
@@ -49,12 +52,13 @@ and controls which are documented here.
 
 ### Initial fields and properties
 
+<div class=small>
+
 __NOTE:__ the table below `i` means initial field, `r` means read-only property,
 `rw` means read-write property.
 
-<div class=small>
 ----------------------- -------- -------------------------- ----------------- ---------------------
-__field/property__		__irw__	__description__				__default__			__winapi ref__
+__field/property__		__irw__	__description__				__default__			__reference__
 visible						irw		visibility						true					WS_VISIBLE
 enabled						irw		focusability					true					WS_DISABLED
 focused						 rw		focused state											GetFocus
@@ -80,34 +84,34 @@ dead							 r			was it destroyed?										WM_NCDESTROY
 
 <div class=small>
 -------------------------------------- -------------------------------------------- ----------------------
-__state__										__description__										__winapi ref__
+__state__										__description__										__reference__
 enable()											enable													EnableWindow
 disable()										disable													EnableWindow
 focus()											focus														SetFocus
 show([async])									show														ShowWindow
 hide()											hide														ShowWindow
-__positioning__								__description__										__winapi ref__
+__positioning__								__description__										__reference__
 move(x, y)										move														SetWindowPos
 resize(w, h)									resize													SetWindowPos
 map_point(to_win, POINT) -> POINT		map a POINT to a window's space					MapWindowPoint
 map_rect(to_win, RECT) -> RECT			map a RECT to a window's space					MapWindowRect
 client_to_frame(nil, RECT) -> RECT		inner->outer frame space conversion				AdjustWindowRect
 frame_to_client(nil, RECT) -> RECT		outer->inner frame space conversion				AdjustWindowRect
-__children__									__description__										__winapi ref__
+__children__									__description__										__reference__
 children() -> iter() -> win				iterate children										EnumChildWindows
 child_at(POINT) -> win						child window at position							ChildWindowFromPoint
 real_child_at(POINT) -> win 				same but go through transparent children		RealChildWindowFromPoint
 child_at_recursive(POINT) -> win			same but recursive									ChildWindowFromPoint
 real_child_at_recursive(POINT) -> win	same but go through transparent children		RealChildWindowFromPoint
-__z-order__										__description__										__winapi ref__
+__z-order__										__description__										__reference__
 send_to_back([rel_to_win])					move below of other windows						SetWindowPos
 bring_to_front([rel_to_win])				bring in front of other windows					SetWindowPos
-__painting__									__description__										__winapi ref__
+__painting__									__description__										__reference__
 redraw()											redraw the window immediately						RedrawWindow
 invalidate([RECT], [erase_bg])			invalidate the window or a subregion			InvalidateRect
-__drag & drop__								__description__										__winapi ref__
+__drag & drop__								__description__										__reference__
 dragging(POINT) -> true|false				check if dragging										DragDetect
-__timers__										__description__										__winapi ref__
+__timers__										__description__										__reference__
 settimer(seconds, handler, id)			set/reset a timer										SetTimer
 stoptimer(id)									cancel a timer											KillTimer
 -------------------------------------- -------------------------------------------- ----------------------
@@ -117,10 +121,10 @@ stoptimer(id)									cancel a timer											KillTimer
 
 <div class=small>
 -------------------------------------------- -------------------------------------- -------------------------
-__lifetime__											__description__								__winapi ref__
+__lifetime__											__description__								__reference__
 on_destroy()											before destroying								WM_DESTROY
 on_destroyed()											after being destroyed						WM_NCDESTROY
-__movement__											__description__								__winapi ref__
+__movement__											__description__								__reference__
 on_pos_changing(WINDOWPOS)							resizing (or changing state)				WM_WINDOWPOSCHANGING
 on_parent_resizing(WINDOWPOS)						parent is resizing							WM_WINDOWPOSCHANGING
 on_pos_changed()										resized or state changed					WM_WINDOWPOSCHANGED
@@ -134,10 +138,10 @@ on_focus()												was focused										WM_SETFOCUS
 on_blur()												was unfocused									WM_KILLFOCUS
 on_enable()												was enabled										WM_ENABLE
 on_show()												was shown										WM_SHOWWINDOW
-__queries__												__description__								__winapi ref__
+__queries__												__description__								__reference__
 on_help()												user pressed F1								WM_HELP
 on_set_cursor()										cursor changed									WM_SETCURSOR
-__mouse__												__description__								__winapi ref__
+__mouse__												__description__								__reference__
 on_mouse_move(x, y, btns)							mouse moved										WM_MOUSEMOVE
 on_mouse_over(x, y, btns)							mouse entered the client area (*) 		WM_MOUSEHOVER
 on_mouse_leave()										mouse left the client area (*)			WM_MOUSELEAVE
@@ -155,7 +159,7 @@ on_xbutton_down(x, y, btns, which)				other mouse button down						WM_XBUTTONDOW
 on_xbutton_up(x, y, btns, which)					other mouse button up						WM_XBUTTONUP
 on_mouse_wheel(x, y, btns, delta)				mouse wheel roll								WM_MOUSEWHEEL
 on_mouse_hwheel(x, y, btns, delta)				mouse horizontal wheel roll				WM_MOUSEHWHEEL
-__keyboard__											__description__								__winapi ref__
+__keyboard__											__description__								__reference__
 on_key_down(VK_code, flags)						key down											WM_KEYDOWN
 on_key_up(VK_code, flags)							key up											WM_KEYUP
 on_syskey_down(VK_code, flags)					syskey down										WM_SYSKEYDOWN
@@ -164,15 +168,16 @@ on_key_down_char(utf8_char, flags)				key down	char									WM_CHAR
 on_syskey_down_char(utf8_char, flags)			syskey down char								WM_SYSCHAR
 on_dead_key_up_char(VK_code, flags)				dead key up char								WM_DEADCHAR
 on_dead_syskey_down_char(VK_code, flags)		dead syskey down char						WM_SYSDEADCHAR
-__raw input__											__description__								__winapi ref__
+__raw input__											__description__								__reference__
 on_raw_input(RAWINPUT)								raw input event								WM_INPUT
 on_device_change(how, HRAWINPUT)					input device added/removed					WM_INPUT_DEVICE_CHANGE
-__system events__										__description__								__winapi ref__
+__system events__										__description__								__reference__
 on_dpi_changed()										monitor's DPI changed						WM_DPICHANGED
-__painting__											__description__								__winapi ref__
+__painting__											__description__								__reference__
 on_paint(hdc)											window needs repainting						WM_PAINT
 -------------------------------------------- -------------------------------------- -------------------------
-</div>
 
 (*) call `TrackMouseEvent()` to receive these messages.
+
+</div>
 

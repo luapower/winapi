@@ -46,7 +46,7 @@ __NOTE:__ the table below `i` means initial field, `r` means read-only property,
 
 <div class=small>
 ----------------------- -------- ----------------------------------------- -------------- ---------------------
-__field/property__		__irw__	__description__									__default__		__winapi flag__
+__field/property__		__irw__	__description__									__default__		__reference__
 noclose						irw		remove the close button							false				CS_NOCLOSE
 dropshadow					irw		(for non-movable windows)						false				CS_DROPSHADOW
 own_dc						irw		own the DC											false				CS_OWNDC
@@ -96,19 +96,20 @@ accelerators				 rw		list of of accelerators
 ### Methods
 
 <div class=small>
--------------------------------- ---------------------------------------------
-__method__								__description__
-close()									destroy the window
-activate()								activate the window if the app is active
-setforeground()						activate the window anyway
-set_normal_rect(x, y, w, h)		set the normal_rect discretely
-minimize([deactivate], [async])	minimize (deactivate: true)
-maximize(nil, [async])				maximize and activate
-shownormal([activate], [async])	show in normal state (activate: true)
-restore(nil, [async])				restore from minimized or maximized state
-send_to_back([rel_to_win])			move below other windows/specific window
-bring_to_front([rel_to_win])		move above other windows/specific window
--------------------------------- ---------------------------------------------
+-------------------------------- -------------------------------------------- ----------------------------
+__state__								__description__										__reference__
+close()									destroy the window									CloseWindow
+activate()								activate the window if the app is active		SetActiveWindow
+setforeground()						activate the window anyway							SetForegroundWindow
+minimize([deactivate], [async])	minimize (deactivate: true)						ShowWindow
+maximize(nil, [async])				maximize and activate								ShowWindow
+shownormal([activate], [async])	show in normal state (activate: true)			ShowWindow
+restore(nil, [async])				restore from minimized or maximized state		ShowWindow
+set_normal_rect(x, y, w, h)		set the normal_rect discretely					SetWindowPlacement
+__z-order__								__description__										__reference__
+send_to_back([rel_to_win])			move below other windows/specific window		SetWindowPos
+bring_to_front([rel_to_win])		move above other windows/specific window		SetWindowPos
+-------------------------------- -------------------------------------------- ----------------------------
 </div>
 
 
@@ -116,7 +117,7 @@ bring_to_front([rel_to_win])		move above other windows/specific window
 
 <div class=small>
 -------------------------------- -------------------------------------------- ----------------------
-__event__								__description__										__winapi message__
+__event__								__description__										__reference__
 on_close()								was closed												WM_CLOSE
 on_activate()							was activated											WM_ACTIVATE
 on_deactivate()						was deactivated										WM_ACTIVATE
