@@ -2,6 +2,8 @@
 tagline: base class for windows and controls
 ---
 
+## `require'winapi.basewindowclass'`
+
 This module implements the `BaseWindow` class which is the base class
 for both top-level windows and controls. The module also contains the
 `Windows` singleton which deals with windows (top-level or not)
