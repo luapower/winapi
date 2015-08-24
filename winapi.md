@@ -15,7 +15,7 @@ OpenGL and cairo.
   * memory management (managing ownership; allocation of in/out buffers)
   * flags can be passed as `'FLAG1 FLAG2'`
   * counting from 1 everywhere
-  * object system with virtual properties (`win.title = 'hello'` sets a window's title)
+  * object system with virtual properties (`win.title = 'hello'` sets the title)
   * anchor-based layout model for all controls
   * binding helpers for easy binding of new and future APIs
   * cairo and OpenGL widgets.
