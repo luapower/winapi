@@ -73,9 +73,9 @@ taskbar_button				irw		force showing on taskbar						false				WS_EX_APPWINDOW
 background					irw		background color									COLOR_WINDOW
 cursor						irw		default cursor										IDC_ARROW
 title							irw		titlebar												''
-x, y							i			frame position (top-left corner)				CW_USEDEFAULT
+x, y							i			frame position										CW_USEDEFAULT
 w, h							i			frame size											CW_USEDEFAULT
-autoquit						irw		stop the loop when the window is closed	false
+autoquit						irw		stop the loop when closed						false
 menu							irw		menu bar
 remember_maximized_pos	irw		maximize to last known position				false
 minimized					ir			minimized state									false				WS_MINIMIZE
