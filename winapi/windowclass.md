@@ -83,10 +83,10 @@ maximized					i r		maximized state									false				WS_MAXIMIZE
 icon							i rw		window's icon
 small_icon					i rw		window's small icon
 owner							i rw		window's owner
-foreground					_ r		is this the foreground window?
-normal_rect					_ rw		RECT: frame rect in normal state
-restore_to_maximized		_ rw		unminimize to maximized state
-accelerators				_ rw		WAItemList: list of of accelerators
+foreground					  r		is this the foreground window?
+normal_rect					  rw		RECT: frame rect in normal state
+restore_to_maximized		  rw		unminimize to maximized state
+accelerators				  rw		WAItemList: list of of accelerators
 ----------------------- -------- ----------------------------------------- -------------- ---------------------
 </div>
 
