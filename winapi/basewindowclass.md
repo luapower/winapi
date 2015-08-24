@@ -47,7 +47,7 @@ BaseWindow is for subclassing, not for instantiation. Nevertheless,
 it contains properties and methods that are common to both windows
 and controls which are documented here.
 
-## Initial fields and properties
+### Initial fields and properties
 
 <div class=small>
 ----------------------- -------- -------------------------- ----------------- ---------------------
@@ -73,7 +73,7 @@ dead							 r			was it destroyed?										WM_NCDESTROY
 ----------------------- -------- -------------------------- ----------------- ---------------------
 </div>
 
-## Methods
+### Methods
 
 <div class=small>
 -------------------------------------- -------------------------------------------- ----------------------
@@ -110,7 +110,7 @@ stoptimer(id)									cancel a timer											KillTimer
 -------------------------------------- -------------------------------------------- ----------------------
 </div>
 
-## Events
+### Events
 
 <div class=small>
 -------------------------------------------- -------------------------------------- -------------------------
