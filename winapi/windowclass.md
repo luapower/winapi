@@ -44,49 +44,49 @@ In the table below `i` means initial field, `r` means read-only property,
 
 <div class=small>
 ----------------------- -------- ----------------------------------------- -------------- ---------------------
-__field/property__		__type__	__description__									__default__		__winapi flag__
-noclose						i rw		remove the close button							false				CS_NOCLOSE
-dropshadow					i rw		(for non-movable windows)						false				CS_DROPSHADOW
-own_dc						i rw		own the DC											false				CS_OWNDC
-receive_double_clicks	i rw		enable double click events						true				CS_DBLCLKS
-border						i rw		add a border										true				WS_BORDER
-frame 						i rw		add a titlebar	(needs border)					true				WS_DLGFRAME
-minimize_button			i rw		add a minimize button							true				WS_MINIMIZEBOX
-maximize_button			i rw		add a maximize button							true				WS_MAXIMIZEBOX
-sizeable						i rw		enable resizing 									true				WS_SIZEBOX
-sysmenu						i rw		add a system menu									true				WS_SYSMENU
-vscroll						i rw		add a vertical scrollbar						false				WS_VSCROLL
-hscroll						i rw		add a horizontal scrollbar						false				WS_HSCROLL
-clip_children				i rw		clip children										true				WS_CLIPCHILDREN
-clip_siblings				i rw		clip siblings										true				WS_CLIPSIBLINGS
-child							i rw		(for non-activable tool windows)	 			false				WS_CHILD
-topmost						i rw		stay above all windows							false				WS_EX_TOPMOST
-window_edge					i rw		(needs to be the same as frame)				true				WS_EX_WINDOWEDGE
-dialog_frame				i rw		double border and no sysmenu icon			false				WS_EX_DLGMODALFRAME
-help_button					i rw		help button											false				WS_EX_CONTEXTHELP
-tool_window					i rw		tool window frame									false				WS_EX_TOOLWINDOW
-transparent					i rw		(use layered instead)		 					false				WS_EX_TRANSPARENT
-layered						i rw		layered mode								 		false				WS_EX_LAYERED
-control_parent				i rw		recursive tabbing	between controls			true				WS_EX_CONTROLPARENT
-activatable					i rw		activate and show on taskbar					true				WS_EX_NOACTIVATE
-taskbar_button				i rw		force showing on taskbar						false				WS_EX_APPWINDOW
-background					i rw		background color									COLOR_WINDOW
-cursor						i rw		default cursor										IDC_ARROW
-title							i rw		titlebar												''
+__field/property__		__irw__	__description__									__default__		__winapi flag__
+noclose						irw		remove the close button							false				CS_NOCLOSE
+dropshadow					irw		(for non-movable windows)						false				CS_DROPSHADOW
+own_dc						irw		own the DC											false				CS_OWNDC
+receive_double_clicks	irw		enable double click events						true				CS_DBLCLKS
+border						irw		add a border										true				WS_BORDER
+frame 						irw		add a titlebar	(needs border)					true				WS_DLGFRAME
+minimize_button			irw		add a minimize button							true				WS_MINIMIZEBOX
+maximize_button			irw		add a maximize button							true				WS_MAXIMIZEBOX
+sizeable						irw		enable resizing 									true				WS_SIZEBOX
+sysmenu						irw		add a system menu									true				WS_SYSMENU
+vscroll						irw		add a vertical scrollbar						false				WS_VSCROLL
+hscroll						irw		add a horizontal scrollbar						false				WS_HSCROLL
+clip_children				irw		clip children										true				WS_CLIPCHILDREN
+clip_siblings				irw		clip siblings										true				WS_CLIPSIBLINGS
+child							irw		(for non-activable tool windows)	 			false				WS_CHILD
+topmost						irw		stay above all windows							false				WS_EX_TOPMOST
+window_edge					irw		(needs to be the same as frame)				true				WS_EX_WINDOWEDGE
+dialog_frame				irw		double border and no sysmenu icon			false				WS_EX_DLGMODALFRAME
+help_button					irw		help button											false				WS_EX_CONTEXTHELP
+tool_window					irw		tool window frame									false				WS_EX_TOOLWINDOW
+transparent					irw		(use layered instead)		 					false				WS_EX_TRANSPARENT
+layered						irw		layered mode								 		false				WS_EX_LAYERED
+control_parent				irw		recursive tabbing	between controls			true				WS_EX_CONTROLPARENT
+activatable					irw		activate and show on taskbar					true				WS_EX_NOACTIVATE
+taskbar_button				irw		force showing on taskbar						false				WS_EX_APPWINDOW
+background					irw		background color									COLOR_WINDOW
+cursor						irw		default cursor										IDC_ARROW
+title							irw		titlebar												''
 x, y							i			frame position (top-left corner)				CW_USEDEFAULT
 w, h							i			frame size											CW_USEDEFAULT
-autoquit						i rw		stop the loop when the window is closed	false
-menu							i rw		menu bar
-remember_maximized_pos	i rw		maximize to last known position				false
-minimized					i r		minimized state									false				WS_MINIMIZE
-maximized					i r		maximized state									false				WS_MAXIMIZE
-icon							i rw		window's icon
-small_icon					i rw		window's small icon
-owner							i rw		window's owner
-foreground					  r		is this the foreground window?
-normal_rect					  rw		RECT: frame rect in normal state
-restore_to_maximized		  rw		unminimize to maximized state
-accelerators				  rw		WAItemList: list of of accelerators
+autoquit						irw		stop the loop when the window is closed	false
+menu							irw		menu bar
+remember_maximized_pos	irw		maximize to last known position				false
+minimized					ir			minimized state									false				WS_MINIMIZE
+maximized					ir			maximized state									false				WS_MAXIMIZE
+icon							irw		window's icon
+small_icon					irw		window's small icon
+owner							irw		window's owner
+foreground					 r			is this the foreground window?
+normal_rect					 rw		RECT: frame rect in normal state
+restore_to_maximized		 rw		unminimize to maximized state
+accelerators				 rw		WAItemList: list of of accelerators
 ----------------------- -------- ----------------------------------------- -------------- ---------------------
 </div>
 
