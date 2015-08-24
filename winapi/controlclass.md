@@ -1,5 +1,5 @@
 ---
-tagline: controls
+tagline: base class for controls
 ---
 
 ## `require'winapi.controlclass'`
