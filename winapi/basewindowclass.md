@@ -139,8 +139,8 @@ on_help()												user pressed F1								WM_HELP
 on_set_cursor()										cursor changed									WM_SETCURSOR
 __mouse__												__description__								__winapi ref__
 on_mouse_move(x, y, btns)							mouse moved										WM_MOUSEMOVE
-on_mouse_over(x, y, btns)							mouse entered the client area (1) 		WM_MOUSEHOVER
-on_mouse_leave()										mouse left the client area (1)			WM_MOUSELEAVE
+on_mouse_over(x, y, btns)							mouse entered the client area (*) 		WM_MOUSEHOVER
+on_mouse_leave()										mouse left the client area (*)			WM_MOUSELEAVE
 on_lbutton_double_click(x, y, btns) 			left mouse button double-click			WM_LBUTTONDBLCLK
 on_lbutton_down(x, y, btns)						left mouse button down						WM_LBUTTONDOWN
 on_lbutton_up(x, y, btns)							left mouse button up							WM_LBUTTONUP
@@ -174,5 +174,5 @@ on_paint(hdc)											window needs repainting						WM_PAINT
 -------------------------------------------- -------------------------------------- -------------------------
 </div>
 
-(1) call `TrackMouseEvent()` to receive these messages.
+(*) call `TrackMouseEvent()` to receive these messages.
 
