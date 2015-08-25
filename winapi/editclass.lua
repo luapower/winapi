@@ -25,6 +25,7 @@ Edit = subclass({
 			center = ES_CENTER,
 		},
 		case = {
+			normal = 0,
 			upper = ES_UPPERCASE,
 			lower = ES_LOWERCASE,
 		},

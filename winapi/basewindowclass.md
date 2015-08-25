@@ -42,7 +42,7 @@ screen_rect					 r			outer rect in screen space							GetWindowRect
 min_w, min_h				irw		minimum size											WM_WINDOWPOSCHANGING
 max_w, max_h				irw		maximum size											WM_WINDOWPOSCHANGING
 font							irw		default font					DEFAULT_GUI_FONT	Get/SetWindowFont
-text							 rw																	Get/SetWindowText
+text							 rw		depends on control									Get/SetWindowText
 cursor_pos					 r			mouse position (POINT)								GetCursorPos
 monitor						 r			monitor (HMONITOR)									MonitorFromWindow
 is_visible					 r			is actually visible?									IsWindowVisible
