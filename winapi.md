@@ -50,8 +50,10 @@ os.exit(winapi.MessageLoop())
 ### Classes
 
   * [winapi.basewindowclass] - base class for top-level windows and controls
-  * [winapi.controlclass] - base class for controls
-  * [winapi.windowclass] - final class for top level windows
+    * [winapi.windowclass] - final class for top level windows
+    * [winapi.controlclass] - base class for controls
+      * [winapi.basebuttonclass] - base class for buttons
+		  * [winapi.buttonclass] - push-buttons
 
 ### Procedural layer
 
