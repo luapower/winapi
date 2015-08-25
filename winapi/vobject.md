@@ -34,6 +34,8 @@ __introspection__
 `__vproperties() -> iter() -> prop, info`		iterate all virtual properties
 -------------------------------------------- --------------------------------------------
 
+### Generating properties in bulk
+
 Calling `Foo:__gen_vproperties({foo = true, bar = true}, getter, setter)`
 generates getters and setters for `foo` and `bar` properties
 based on `getter` and `setter` such that:
