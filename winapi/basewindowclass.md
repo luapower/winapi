@@ -9,6 +9,10 @@ for both top-level windows and controls. The module also contains the
 `Windows` singleton which deals with windows (top-level or not)
 as a collection, and the message loop.
 
+`BaseWindow` is for subclassing, not for instantiation. Nevertheless,
+it contains properties and methods that are common to both windows
+and controls which are documented here.
+
 ## BaseWindow
 
 ### Hierarchy
@@ -16,10 +20,6 @@ as a collection, and the message loop.
 * [Object][winapi.object]
 	* [VObject][winapi.vobject]
 		* BaseWindow
-
-`BaseWindow` is for subclassing, not for instantiation. Nevertheless,
-it contains properties and methods that are common to both windows
-and controls which are documented here.
 
 ### Initial fields and properties
 
