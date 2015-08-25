@@ -26,7 +26,7 @@ function Button:__before_create(info, args)
 	args.style = bit.bor(args.style, BS_PUSHBUTTON)
 end
 
-function Button:get_ideal_size(w,h) --fixing w or h work on vista+
+function Button:get_ideal_size(w, h) --fixing w or h work on Vista+
 	local size = SIZE()
 	size.w = w or 0
 	size.h = h or 0

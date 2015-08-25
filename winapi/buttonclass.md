@@ -26,20 +26,12 @@ which can be read, `w` means property which can be set.
 
 ----------------------- -------- ----------------------------------------- -------------- ---------------------
 __field/property__		__irw__	__description__									__default__		__reference__
-text																								'&OK'
-w											width													100
-h											height												24
-text_margin								applied when autosize == true					{20,5}
-autosize																							false
-text_margin
-pushed
+text							irw		button's label										'&OK'				Get/SetWindowText
+w								irw		width													100
+h								irw		height												24
+text_margin					irw		margins that go with `autosize`				{20,5}			BCM_GET/SETTEXTMARGIN
+autosize						irw		set size based on text							false
+pushed						irw		pushed state															BM_GET/SETSTATE
+ideal_size					r			get ideal size for text (`{w=, h=}`)							BCM_GETIDEALSIZE
 ----------------------- -------- ----------------------------------------- -------------- ---------------------
-</div>
-
-### Events
-
-<div class=small>
--------------------------------- -------------------------------------------- ----------------------
-__event__								__description__										__reference__
------------------------ --------	-------------------------------------------- ---------------------
 </div>

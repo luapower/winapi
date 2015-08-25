@@ -29,16 +29,23 @@ which can be read, `w` means property which can be set.
 
 ----------------------- -------- ----------------------------------------- -------------- ---------------------
 __field/property__		__irw__	__description__									__default__		__reference__
-tabstop						irw																true				WS_TABSTOP
-halign						irw		horiz. align 'left', 'right', 'center'							BS_LEFT,...
+tabstop						irw		focus on tab										true				WS_TABSTOP
+halign						irw		horiz. align: 'left', 'right', 'center'						BS_LEFT,...
 valign 						irw		vert. align: 'top', 'bottom', 'center'							BS_TOP,...
 word_wrap					irw		word wrapping															BS_MULTILINE
 flat							irw		flat appearance														BS_FLAT
 double_clicks				irw		enable double-click events											BS_NOTIFY
-image_list					irw		image list																BCM_SETIMAGELIST
+image_list					irw		see (*)																	BCM_SETIMAGELIST
 icon							irw		icon																		BM_SETIMAGE
 bitmap						irw		bitmap																	BM_SETIMAGE
 ----------------------- -------- ----------------------------------------- -------------- ---------------------
+
+(*) the `image_list` property is a table with the fields:
+
+	* `image_list`: a `HIMAGELIST`
+	* `align`: 'left', 'right', 'top', 'bottom', 'center'
+	* `margin`: the margin around the image
+
 </div>
 
 ### Events
@@ -52,4 +59,3 @@ on_focus()								focused													BN_SETFOCUS
 on_blur()								unfocused												BN_KILLFOCUS
 ----------------------- --------	-------------------------------------------- ---------------------
 </div>
-
