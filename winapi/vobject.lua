@@ -69,7 +69,7 @@ function VObject:get___class()
 	return getmetatable(self).__class
 end
 
-function VObject:__vproperties() --returns {property = {get = source, set = source}}
+function VObject:__vproperties() --returns iter() -> property, {get = class, set = class}
 	local t = {}
 	for k,v,source in VObject.__index.__allpairs(self) do
 		if type(k) == 'string' and k:find'^get_' or k:find'^set_' then
