@@ -37,13 +37,13 @@ box_align					irw		'left', 'right'									'left'						BS_LEFTTEXT
 
 pushlike						irw		push-like appearance								false							BS_PUSHLIKE
 
+checked						irw		true, false, 'indeterminate'					false							BST_UNCHECKED,
+																																	BST_CHECKED,
+																																	BST_INDETERMINATE
+
 type							irw		'twostate', 'threestate',						'twostate_autocheck'		BS_CHECKBOX,
 											'twostate_autocheck', 															BS_3STATE,
 											'threestate_autocheck'															BS_AUTOCHECKBOX,
 																																	BS_AUTO3STATE
-
-checked						irw		true, false, 'indeterminate'													BST_UNCHECKED,
-																																	BST_CHECKED,
-																																	BST_INDETERMINATE
 ----------------------- -------- ----------------------------------------- ----------------------- ---------------------
 </div>

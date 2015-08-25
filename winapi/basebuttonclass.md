@@ -35,7 +35,7 @@ valign 						irw		vert. align: 'top', 'bottom', 'center'							BS_TOP,...
 word_wrap					irw		word wrapping															BS_MULTILINE
 flat							irw		flat appearance														BS_FLAT
 double_clicks				irw		enable double-click events											BS_NOTIFY
-image_list					irw		see (*)																	BCM_SETIMAGELIST
+image_list					irw		see below (*)															BCM_SETIMAGELIST
 icon							irw		icon																		BM_SETIMAGE
 bitmap						irw		bitmap																	BM_SETIMAGE
 ----------------------- -------- ----------------------------------------- -------------- ---------------------
