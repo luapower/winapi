@@ -1,5 +1,4 @@
 ---
-project: winapi
 tagline: technical documentation
 ---
 
