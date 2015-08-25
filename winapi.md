@@ -53,9 +53,9 @@ os.exit(winapi.MessageLoop())
 	* [VObject][winapi.vobject] - objects with virtual properties
 		* [BaseWindow][winapi.basewindowclass] - base class for top-level windows and controls
 			* [Window][winapi.windowclass] - final class for top level windows
-				* [Control][winapi.controlclass] - base class for controls
-					* [BaseButton][winapi.basebuttonclass] - base class for buttons
-						* [Button][winapi.buttonclass] - push-buttons
+			* [Control][winapi.controlclass] - base class for controls
+				* [BaseButton][winapi.basebuttonclass] - base class for buttons
+					* [Button][winapi.buttonclass] - push-buttons
 
 ### Functions
 
