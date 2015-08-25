@@ -39,13 +39,6 @@ end
 os.exit(winapi.MessageLoop())
 ~~~
 
-## Modules
-
-{{module_list}}
-
-__Tip:__ Some modules can be run as standalone scripts, which will
-showcase the module's functionality.
-
 ## Documentation
 
 ### Architecture
@@ -64,3 +57,11 @@ showcase the module's functionality.
 
 The procedural layer is documented in the code, including API quirks
 and empirical knowledge, so do check that out.
+
+## Modules
+
+{{module_list}}
+
+__Tip:__ Some modules can be run as standalone scripts, which will
+showcase the module's functionality.
+
