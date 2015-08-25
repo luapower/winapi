@@ -4,18 +4,19 @@ tagline: base class for controls
 
 ## `require'winapi.controlclass'`
 
-This module implements the `Control` class which is the base class for controls.
-`Control` inherits from `BaseWindow` from [winapi.basewindowclass] module.
+This module implements the `Control` class which is the base class for
+controls. `Control` is for subclassing, not for instantiation.
+Nevertheless, it contains properties that are common to all controls
+which are documented here.
 
-The `Control` class is for subclassing, not for instantiation. Nevertheless,
-it contains properties that are common to all controls which are documented here.
+## Control
 
+### Hierarchy
 
-## API
-
-The tables below list all initial fields and properties specific to the `Control` class.
-Everything listed for `BaseWindow` in [winapi.basewindowclass] is available too.
-
+* [Object][winapi.object]
+* [VObject][winapi.vobject]
+	* [BaseWindow][winapi.basewindowclass]
+		* Control
 
 ### Initial fields and properties
 

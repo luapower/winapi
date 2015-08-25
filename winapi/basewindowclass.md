@@ -11,6 +11,13 @@ as a collection, and the message loop.
 
 ## Windows
 
+### Hierarchy
+
+* [Object][winapi.object]
+	* [VObject][winapi.vobject]
+		* [HandleList][winapi.handlelist]
+			* Windows
+
 <div class=small>
 -------------------------------------------- -------------------------------------------- ----------------
 __field/method__										__description__										__reference__
@@ -48,7 +55,13 @@ like this: `os.exit(MessageLoop())`.
 
 ## BaseWindow
 
-BaseWindow is for subclassing, not for instantiation. Nevertheless,
+### Hierarchy
+
+* [Object][winapi.object]
+	* [VObject][winapi.vobject]
+		* BaseWindow
+
+`BaseWindow` is for subclassing, not for instantiation. Nevertheless,
 it contains properties and methods that are common to both windows
 and controls which are documented here.
 

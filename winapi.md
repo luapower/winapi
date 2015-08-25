@@ -55,10 +55,10 @@ os.exit(winapi.MessageLoop())
         * [BaseButton][winapi.basebuttonclass] - base class for buttons
            * [Button][winapi.buttonclass] - push-buttons
 
-### Procedural layer
+### Functions
 
-The procedural layer is documented in the code, including API quirks
-and empirical knowledge, so do check that out.
+The "proc layer" is documented in the code, including API quirks
+and empirical knowledge, so do check out the source code.
 
 ## Modules
 

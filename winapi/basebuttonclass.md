@@ -5,17 +5,20 @@ tagline: base class for button-like controls
 ## `require'winapi.basebuttonclass'`
 
 This module implements the `BaseButton` class which is the base class
-for buttons and button-like controls.
+for buttons and button-like controls. `BaseButton` is for subclassing,
+not for instantiation. Nevertheless, it contains properties and methods
+that are common to all buttons and button-like controls which are
+documented here.
 
-BaseWindow is for subclassing, not for instantiation. Nevertheless,
-it contains properties and methods that are common to all buttons
-and button-like controls.
+## BaseButton
 
-## API
+### Hierarchy
 
-The tables below list all initial fields and properties specific to the `BaseButton` class.
-Everything listed for `Control` in [winapi.controlclass] is available too.
-
+* [Object][winapi.object]
+	* [VObject][winapi.vobject]
+		* [BaseWindow][winapi.basewindowclass]
+			* [Control][winapi.controlclass]
+				* BaseButton
 
 ### Initial fields and properties
 

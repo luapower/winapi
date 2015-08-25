@@ -6,12 +6,16 @@ tagline: push-buttons
 
 This module implements the `Button` class for creating buttons.
 
+## Button
 
-## API
+### Hierarchy
 
-The tables below list all initial fields and properties specific to the `Button` class.
-Everything listed for `BaseButton` in [winapi.basebuttonclass] is available too.
-
+* [Object][winapi.object]
+	* [VObject][winapi.vobject]
+		* [BaseWindow][winapi.basewindowclass]
+			* [Control][winapi.controlclass]
+				* [BaseButton][winapi.basebuttonclass]
+					* Button
 
 ### Initial fields and properties
 
