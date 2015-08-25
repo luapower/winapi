@@ -162,6 +162,8 @@ on_paint(hdc)											window needs repainting						WM_PAINT
 		* [HandleList][winapi.handlelist]
 			* Windows
 
+### Properties and methods
+
 <div class=small>
 -------------------------------------------- -------------------------------------------- ----------------
 __field/method__										__description__										__reference__
