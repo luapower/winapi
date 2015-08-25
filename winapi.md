@@ -77,6 +77,8 @@ For a more compehensive demo, see [winapi_demo].
 				* [TabControl][winapi.tabcontrolclass] - tab bars
 				* [Toolbar][winapi.toolbarclass] - toolbars
 				* [Panel][winapi.menuclass] - custom frameless windows
+				* [WGLPanel][winapi.wglpanel] - [OpenGL][gl] panel
+				* [CairoPanel][winapi.cairopanel] - [cairo] panel
 		* [Menu][winapi.menuclass] - menus and menu bars
 		* [NotifyIcon][winapi.notifyiconclass] - system tray icons
 
