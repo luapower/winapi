@@ -49,8 +49,8 @@ os.exit(winapi.MessageLoop())
 
 ### Classes
 
-* [Object][winapi.object]
-	* [VObject][winapi.vobject]
+* [Object][winapi.object] - the root class
+	* [VObject][winapi.vobject] - objects with virtual properties
 		* [BaseWindow][winapi.basewindowclass] - base class for top-level windows and controls
 			* [Window][winapi.windowclass] - final class for top level windows
 				* [Control][winapi.controlclass] - base class for controls
@@ -59,7 +59,7 @@ os.exit(winapi.MessageLoop())
 
 ### Functions
 
-The "proc layer" is documented in the code, including API quirks
+The "proc" layer is documented in the code, including API quirks
 and empirical knowledge, so do check out the source code.
 
 ## Modules
