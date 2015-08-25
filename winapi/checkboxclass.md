@@ -29,9 +29,7 @@ __field/property__		__irw__	__description__									__default__					__reference_
 
 text							irw		checkbox's label									'Option'						Get/SetWindowText
 
-w								irw		width													100
-
-h								irw		height												24
+w, h							irw		size													100, 24
 
 box_align					irw		'left', 'right'									'left'						BS_LEFTTEXT
 

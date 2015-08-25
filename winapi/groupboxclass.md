@@ -1,12 +1,12 @@
 ---
-tagline: radio buttons
+tagline: group boxes
 ---
 
-## `require'winapi.radiobuttonclass`
+## `require'winapi.groupboxclass`
 
-This module implements the `RadioButton` class for creating radio buttons.
+This module implements the `GroupBox` class for creating group boxes.
 
-## RadioButton
+## GroupBox
 
 ### Hierarchy
 
@@ -15,7 +15,7 @@ This module implements the `RadioButton` class for creating radio buttons.
 		* [BaseWindow][winapi.basewindowclass]
 			* [Control][winapi.controlclass]
 				* [BaseButton][winapi.basebuttonclass]
-					* RadioButton
+					* GroupBox
 
 ### Initial fields and properties
 
@@ -26,12 +26,10 @@ which can be read, `w` means property which can be set.
 
 ----------------------- -------- ----------------------------------------- ----------------------- ---------------------
 __field/property__		__irw__	__description__									__default__					__reference__
-text							irw		checkbox's label									'Option'						Get/SetWindowText
-w, h							irw		size													100, 24
-box_align					irw		'left', 'right'									'left'						BS_LEFTTEXT
-pushlike						irw		push-like appearance								false							BS_PUSHLIKE
-checked						irw		true, false											false							BST_(UN)CHECKED
-autocheck					irw		automatic checking based on group			true							BS_(AUTO)RADIOBUTTON
-dontclick					w			make not clickable (Vista+)													BM_SETDONTCLICK
+text							irw		group box's title									'Group'						Get/SetWindowText
+w, h							irw		size													200, 100
+tabstop						irw		focus on tab										false							WS_TABSTOP
+align							irw		'left', 'right', 'center'						'left'						BS_LEFT/RIGHT/CENTER
+flat							irw		flat appearance									false							BS_FLAT
 ----------------------- -------- ----------------------------------------- ----------------------- ---------------------
 </div>

@@ -58,6 +58,7 @@ os.exit(winapi.MessageLoop())
 					* [Button][winapi.buttonclass] - push-buttons
 					* [CheckBox][winapi.checkboxclass] - checkboxes
 					* [RadioButton][winapi.radiobuttonclass] - radio buttons
+					* [GroupBox][winapi.groupboxclass] - group boxes
 
 ### Functions
 
