@@ -5,9 +5,10 @@ tagline: top-level windows
 ## `require'winapi.windowclass'`
 
 This module implements the `Window` class for creating top-level windows.
-`Window` inherits from `BaseWindow` from [winapi.basewindowclass] module.
 
-## Usage
+## Window
+
+### Usage
 
 ~~~{.lua}
 local winapi = require'winapi'
@@ -32,19 +33,19 @@ win:show()                 --this is a method call
 MessageLoop()					--start the message loop
 ~~~
 
-## API
+### Hierarchy
 
-The tables below list all initial fields, properties, methods and events
-specific to the `Window` class. Everything listed for `BaseWindow` in
-[winapi.basewindowclass] is available too.
-
+* [Object][winapi.object]
+	* [VObject][winapi.vobject]
+		* [BaseWindow][winapi.basewindowclass]
+			* Window
 
 ### Initial fields and properties
 
 <div class=small>
 
-__NOTE:__ the table below `i` means initial field, `r` means read-only property,
-`rw` means read-write property.
+__NOTE:__ in the table below `i` means initial field, `r` means property
+which can be read, `w` means property which can be set.
 
 ----------------------- -------- ----------------------------------------- -------------- ---------------------
 __field/property__		__irw__	__description__									__default__		__reference__

@@ -25,8 +25,8 @@ and controls which are documented here.
 
 <div class=small>
 
-__NOTE:__ the table below `i` means initial field, `r` means read-only property,
-`rw` means read-write property.
+__NOTE:__ in the table below `i` means initial field, `r` means property
+which can be read, `w` means property which can be set.
 
 ----------------------- -------- -------------------------- ----------------- ---------------------
 __field/property__		__irw__	__description__				__default__			__reference__
