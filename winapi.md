@@ -45,6 +45,11 @@ win:show()                 --this is a method call
 os.exit(winapi.MessageLoop()) --start the message loop
 ~~~
 
+For a more compehensive demo, see [winapi_demo].
+
+[winapi_demo]: https://github.com/luapower/winapi/blob/master/winapi_demo.lua
+
+
 ## Documentation
 
 ### Architecture
