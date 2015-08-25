@@ -9,50 +9,6 @@ for both top-level windows and controls. The module also contains the
 `Windows` singleton which deals with windows (top-level or not)
 as a collection, and the message loop.
 
-## Windows
-
-### Hierarchy
-
-* [Object][winapi.object]
-	* [VObject][winapi.vobject]
-		* [HandleList][winapi.handlelist]
-			* Windows
-
-<div class=small>
--------------------------------------------- -------------------------------------------- ----------------
-__field/method__										__description__										__reference__
-Windows.items -> {HWND -> win}					the HWND->window map
-Windows.active_window -> win						get the active window
-Windows.foreground_window -> win | nil			get the active window if the app is active
-Windows:window_at(POINT) -> win | nil			get the window at a point
-Windows:map_point(to_win, POINT) -> POINT		map a POINT to a window's space
-Windows:map_rect(to_win, RECT) -> RECT			map a RECT to a window's space
-Windows.cursor_pos -> POINT						current mouse position outside of events
--------------------------------------------- --------------------------------------------- ----------------
-
-> __NOTE:__ The active window goes nil when the app is deactivated,
-but if activate() is called on a window while the app is inactive,
-the window's active state will be set immediately, even if the window
-will not be activated (because the app is inactive). OTOH, the foreground
-window is always nil while the app is inactive, even after calling
-activate() on a window.
-
-</div>
-
-## The message loop
-
-<div class=small>
------------------------ ------------------------------------------------------
-`MessageLoop()`			start the message loop
-`ProcessMessages()`		process pending messages (if any) and return
-`PostQuitMessage()`		post a quit message to the message loop to stop it
------------------------ ------------------------------------------------------
-
-> __NOTE:__ The message loop returns an exit code, so you can call it
-like this: `os.exit(MessageLoop())`.
-
-</div>
-
 ## BaseWindow
 
 ### Hierarchy
@@ -197,3 +153,46 @@ on_paint(hdc)											window needs repainting						WM_PAINT
 
 </div>
 
+## Windows
+
+### Hierarchy
+
+* [Object][winapi.object]
+	* [VObject][winapi.vobject]
+		* [HandleList][winapi.handlelist]
+			* Windows
+
+<div class=small>
+-------------------------------------------- -------------------------------------------- ----------------
+__field/method__										__description__										__reference__
+Windows.items -> {HWND -> win}					the HWND->window map
+Windows.active_window -> win						get the active window
+Windows.foreground_window -> win | nil			get the active window if the app is active
+Windows:window_at(POINT) -> win | nil			get the window at a point
+Windows:map_point(to_win, POINT) -> POINT		map a POINT to a window's space
+Windows:map_rect(to_win, RECT) -> RECT			map a RECT to a window's space
+Windows.cursor_pos -> POINT						current mouse position outside of events
+-------------------------------------------- --------------------------------------------- ----------------
+
+> __NOTE:__ The active window goes nil when the app is deactivated,
+but if activate() is called on a window while the app is inactive,
+the window's active state will be set immediately, even if the window
+will not be activated (because the app is inactive). OTOH, the foreground
+window is always nil while the app is inactive, even after calling
+activate() on a window.
+
+</div>
+
+## The message loop
+
+<div class=small>
+----------------------- ------------------------------------------------------
+`MessageLoop()`			start the message loop
+`ProcessMessages()`		process pending messages (if any) and return
+`PostQuitMessage()`		post a quit message to the message loop to stop it
+----------------------- ------------------------------------------------------
+
+> __NOTE:__ The message loop returns an exit code, so you can call it
+like this: `os.exit(MessageLoop())`.
+
+</div>
