@@ -43,9 +43,9 @@ bitmap						irw
 <div class=small>
 -------------------------------- -------------------------------------------- ----------------------
 __event__								__description__										__reference__
-on_click																								BN_CLICKED
-on_double_click																					BN_DOUBLECLICKED
-on_focus																								BN_SETFOCUS
-on_blur																								BN_KILLFOCUS
+on_click()																							BN_CLICKED
+on_double_click()																					BN_DOUBLECLICKED
+on_focus()																							BN_SETFOCUS
+on_blur()																							BN_KILLFOCUS
 ----------------------- --------	-------------------------------------------- ---------------------
 </div>
