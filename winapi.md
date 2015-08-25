@@ -38,8 +38,8 @@ function win:on_close()    --this is an event handler
 	print'Bye'
 end
 
-print(win.title)           --this is reading the value of a property
-win.title = 'Lua rulez!'   --this is setting the value of a property
+print(win.title)           --this is how to read the value of a property
+win.title = 'Lua rulez!'   --this is how to set the value of a property
 win:show()                 --this is a method call
 
 os.exit(winapi.MessageLoop()) --start the message loop
