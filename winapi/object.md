@@ -13,8 +13,8 @@ Object implements the single-inheritance object model specified in
 [winapi.class]. This means that you can use `subclass()` to subclass
 from `Object` and `isinstance()` on every instance or subclass of `Object`.
 
-It also defines how instantiation works: user calls `Foo(args...)` which
-creates an instance of `Foo` and then calls `__init(self, args...)` on it.
+It also defines how instantiation works: calling `Foo(args...)` creates
+an instance of `Foo`, calls `__init(self, args...)` on it, and returns it.
 
 Instances:
 
