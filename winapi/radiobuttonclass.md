@@ -2,7 +2,7 @@
 tagline: radio buttons
 ---
 
-## `require'winapi.radiobuttonclass`
+## `require'winapi.radiobuttonclass'`
 
 This module implements the `RadioButton` class for creating radio buttons.
 

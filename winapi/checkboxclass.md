@@ -2,7 +2,7 @@
 tagline: checkboxes
 ---
 
-## `require'winapi.checkboxclass`
+## `require'winapi.checkboxclass'`
 
 This module implements the `CheckBox` class for creating checkboxes.
 

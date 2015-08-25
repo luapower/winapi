@@ -40,7 +40,7 @@ Calling `Foo:__gen_vproperties({foo = true, bar = true}, getter, setter)`
 generates getters and setters for `foo` and `bar` properties
 based on `getter` and `setter` such that:
 
-	get_foo(self)           calls getter(self, foo)
-	get_bar(self)           calls getter(self, bar)
-	set_foo(self, val)      calls setter(self, foo, val)
-	set_bar(self, val)      calls setter(self, bar, val)
+	get_foo(self)           calls getter(self, 'foo')
+	get_bar(self)           calls getter(self, 'bar')
+	set_foo(self, val)      calls setter(self, 'foo', val)
+	set_bar(self, val)      calls setter(self, 'bar', val)

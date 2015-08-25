@@ -57,5 +57,5 @@ on_click()								clicked													BN_CLICKED
 on_double_click()						double clicked											BN_DOUBLECLICKED
 on_focus()								focused													BN_SETFOCUS
 on_blur()								unfocused												BN_KILLFOCUS
------------------------ --------	-------------------------------------------- ---------------------
+--------------------------------	-------------------------------------------- ---------------------
 </div>

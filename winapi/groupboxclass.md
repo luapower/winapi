@@ -2,7 +2,7 @@
 tagline: group boxes
 ---
 
-## `require'winapi.groupboxclass`
+## `require'winapi.groupboxclass'`
 
 This module implements the `GroupBox` class for creating group boxes.
 
