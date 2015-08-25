@@ -49,11 +49,13 @@ os.exit(winapi.MessageLoop())
 
 ### Classes
 
-  * [BaseWindow][winapi.basewindowclass] - base class for top-level windows and controls
-     * [Window][winapi.windowclass] - final class for top level windows
-     * [Control][winapi.controlclass] - base class for controls
-        * [BaseButton][winapi.basebuttonclass] - base class for buttons
-           * [Button][winapi.buttonclass] - push-buttons
+* [Object][winapi.object]
+	* [VObject][winapi.vobject]
+		* [BaseWindow][winapi.basewindowclass] - base class for top-level windows and controls
+			* [Window][winapi.windowclass] - final class for top level windows
+				* [Control][winapi.controlclass] - base class for controls
+					* [BaseButton][winapi.basebuttonclass] - base class for buttons
+						* [Button][winapi.buttonclass] - push-buttons
 
 ### Functions
 
