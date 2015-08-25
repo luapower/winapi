@@ -27,15 +27,16 @@ These are called "read-only properties".
 
 ### Methods
 
------------------------------------------------------------------ --------------------------------------------
+-------------------------------------------- --------------------------------------------
 __subclassing__
-`__gen_vproperties(names, getter, setter)`								generate virtual properties in bulk
+`__gen_vproperties(names, getter, setter)`	generate virtual properties in bulk
 __introspection__
-`__vproperties() -> iter() -> prop, {get = class, set = class}`	iterate all virtual properties
------------------------------------------------------------------ --------------------------------------------
+`__vproperties() -> iter() -> prop, info`		iterate all virtual properties
+-------------------------------------------- --------------------------------------------
 
-`__gen_vproperties({foo = true, bar = true}, getter, setter)` generates
-getters and setters for `foo` and `bar` properties as follows:
+Calling `Foo:__gen_vproperties({foo = true, bar = true}, getter, setter)`
+generates getters and setters for `foo` and `bar` properties
+based on `getter` and `setter` such that:
 
 	get_foo(self)           calls getter(self, foo)
 	get_bar(self)           calls getter(self, bar)
