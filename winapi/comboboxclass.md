@@ -34,7 +34,7 @@ vscroll						irw		always show vertical scroll 					false				CBS_DISABLENOSCROLL
 fixedheight					irw		fixed height										false				CBS_NOINTEGRALHEIGHT
 sort							irw		sort items											false				CBS_SORT
 case_sensitive				irw		'normal', 'upper', 'lower'						'normal'			CBS_UPPER/LOWERCASE
-__for dropdowns__
+__dropdowns__
 no_edit_image				irw		TODO																		CBES_EX_NOEDITIMAGE
 no_edit_image2				irw		TODO																		CBES_EX_NOEDITIMAGEINDENT
 path_word_break			irw		TODO																		CBES_EX_PATHWORDBREAKPROC

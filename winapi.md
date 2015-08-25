@@ -49,7 +49,7 @@ os.exit(winapi.MessageLoop())
 
 ### Classes
 
-* [Object][winapi.object] - the root class
+* [Object][winapi.object] - objects
 	* [VObject][winapi.vobject] - objects with virtual properties
 		* [BaseWindow][winapi.basewindowclass] - base class for top-level windows and controls
 			* [Window][winapi.windowclass] - final class for top level windows
@@ -61,6 +61,13 @@ os.exit(winapi.MessageLoop())
 					* [GroupBox][winapi.groupboxclass] - group boxes
 				* [Edit][winapi.editclass] - edit boxes
 				* [ComboBox][winapi.comboboxclass] - combo boxes and drop-down lists
+				* [ListBox][winapi.listboxclass] - list boxes
+				* [ListView][winapi.listviewclass] - list views
+				* [TabControl][winapi.tabcontrolclass] - tab bars
+				* [Toolbar][winapi.toolbarclass] - toolbars
+				* [Panel][winapi.menuclass] - custom frameless windows
+		* [Menu][winapi.menuclass] - menus and menu bars
+		* [NotifyIcon][winapi.notifyiconclass] - system tray icons
 
 ### Functions
 

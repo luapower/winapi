@@ -2,11 +2,11 @@
 tagline: edit boxes
 ---
 
-## `require'winapi.comboboxclass'`
+## `require'winapi.editclass'`
 
 This module implements the `Edit` class for creating edit boxes.
 
-## ComboBox
+## Edit
 
 ### Hierarchy
 
