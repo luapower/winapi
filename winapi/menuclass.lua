@@ -191,7 +191,7 @@ end
 
 function Menu:WM_MENUCOMMAND(i) --pseudo-message from the owner window further routed to individual item handlers
 	local handler = self.items.handlers[i]
-	if handler then handler() end
+	if handler then handler(self) end
 end
 
 
@@ -212,3 +212,23 @@ function MenuBar:__set_window(window) --used by Window:set_menu()
 	self:__redraw()
 end
 
+--showcase
+
+if not ... then
+	require'winapi.showcase'
+	local win = ShowcaseWindow()
+
+	local menubar = MenuBar()
+	win.menu = menubar
+
+	local filemenu = Menu()
+	filemenu.items:add{text = '&Close', on_click = function() win:close() end}
+
+	local helpmenu = Menu()
+	helpmenu.items:add{text = '&About', on_click = function() end}
+
+	menubar.items:add{text = '&File', submenu = filemenu}
+	menubar.items:add{text = '&Help', submenu = helpmenu}
+
+	MessageLoop()
+end

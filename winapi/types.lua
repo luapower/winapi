@@ -301,4 +301,7 @@ typedef struct tagPOINTS {
 	SHORT x;
 	SHORT y;
 } POINTS, *PPOINTS, *LPPOINTS;
+
+struct HKEY__ { int unused; }; typedef struct HKEY__ *HKEY;
+typedef HKEY *PHKEY;
 ]]

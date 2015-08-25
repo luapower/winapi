@@ -40,6 +40,10 @@ function MAKEINTRESOURCE(i)
 	return i
 end
 
+function IS_INTRESOURCE(i)
+	error'NYI' --((((ULONG_PTR)(_r)) >> 16) == 0)
+end
+
 --types
 
 SIZE = types.SIZE

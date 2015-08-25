@@ -9,8 +9,9 @@ require'winapi.tabcontrol'
 
 TabItemList = class(ItemList)
 
-function TabItemList:__init(tab)
+function TabItemList:__init(tab, items)
 	self.hwnd = tab.hwnd
+	self:add_items(items)
 end
 
 function TabItemList:add(i, item)
@@ -71,7 +72,7 @@ end
 
 function TabControl:__init(info)
 	TabControl.__index.__init(self, info)
-	self.items = TabItemList(self)
+	self.items = TabItemList(self, info.items)
 end
 
 function TabControl:set_image_list(iml)

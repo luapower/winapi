@@ -137,6 +137,8 @@ TBBUTTON = struct{
 		'command', 'idCommand', pass, pass,
 		'state', 'fsState', flags, pass, --TBSTATE_*
 		'style', 'fsStyle', flags, pass, --TBSTYLE_*
+		'text_ptr', 'iString', pass, pass, --index or pointer
+		'text_index', 'iString', pass, pass, --index or pointer
 	},
 	defaults = {
 		state = TBSTATE_ENABLED,
@@ -241,6 +243,7 @@ typedef struct _COLORMAP {
 WINCOMMCTRLAPI HBITMAP WINAPI CreateMappedBitmap(HINSTANCE hInstance, INT_PTR idBitmap,
                                   UINT wFlags, __in_opt LPCOLORMAP lpColorMap,
                                   int iNumMaps);
+]]
 
 CMB_MASKED               = 0x02
 
@@ -312,22 +315,24 @@ TB_GETUNICODEFORMAT      = CCM_GETUNICODEFORMAT
 TB_MAPACCELERATORW       = (WM_USER + 90)  -- wParam == ch, lParam int * pidBtn
 
 -- Custom Draw Structure
+ffi.cdef[[
 typedef struct _NMTBCUSTOMDRAW {
     NMCUSTOMDRAW nmcd;
     HBRUSH hbrMonoDither;
-    HBRUSH hbrLines;                -- For drawing lines on buttons
-    HPEN hpenLines;                 -- For drawing lines on buttons
-    COLORREF clrText;               -- Color of text
-    COLORREF clrMark;               -- Color of text bk when marked. (only if TBSTATE_MARKED)
-    COLORREF clrTextHighlight;      -- Color of text when highlighted
-    COLORREF clrBtnFace;            -- Background of the button
-    COLORREF clrBtnHighlight;       -- 3D highlight
-    COLORREF clrHighlightHotTrack;  -- In conjunction with fHighlightHotTrack will cause button to highlight like a menu
-    RECT rcText;                    -- Rect for text
+    HBRUSH hbrLines;                // For drawing lines on buttons
+    HPEN hpenLines;                 // For drawing lines on buttons
+    COLORREF clrText;               // Color of text
+    COLORREF clrMark;               // Color of text bk when marked. (only if TBSTATE_MARKED)
+    COLORREF clrTextHighlight;      // Color of text when highlighted
+    COLORREF clrBtnFace;            // Background of the button
+    COLORREF clrBtnHighlight;       // 3D highlight
+    COLORREF clrHighlightHotTrack;  // In conjunction with fHighlightHotTrack will cause button to highlight like a menu
+    RECT rcText;                    // Rect for text
     int nStringBkMode;
     int nHLStringBkMode;
     int iListGap;
 } NMTBCUSTOMDRAW, * LPNMTBCUSTOMDRAW;
+]]
 
 -- Toolbar custom draw return flags
 TBCDRF_NOEDGES               = 0x00010000  -- Don't draw button edges
@@ -339,6 +344,7 @@ TBCDRF_BLENDICON             = 0x00200000  -- Use ILD_BLEND50 on the icon image
 TBCDRF_NOBACKGROUND          = 0x00400000  -- Use ILD_BLEND50 on the icon image
 TBCDRF_USECDCOLORS           = 0x00800000  -- Use CustomDrawColors to RenderText regardless of VisualStyle
 
+ffi.cdef[[
 typedef struct tagTBADDBITMAP {
         HINSTANCE       hInst;
         UINT_PTR        nID;
@@ -354,9 +360,12 @@ typedef struct {
     int   iButton;
     DWORD dwFlags;
 } TBINSERTMARK, * LPTBINSERTMARK;
+]]
+
 TBIMHT_AFTER       = 0x00000001 -- TRUE = insert After iButton, otherwise before
 TBIMHT_BACKGROUND  = 0x00000002 -- TRUE iff missed buttons completely
 
+ffi.cdef[[
 typedef struct {
     HINSTANCE       hInstOld;
     UINT_PTR        nIDOld;
@@ -364,11 +373,11 @@ typedef struct {
     UINT_PTR        nIDNew;
     int             nButtons;
 } TBREPLACEBITMAP, *LPTBREPLACEBITMAP;
+]]
 
 TBBF_LARGE               = 0x0001
 
 TB_GETBITMAPFLAGS        = (WM_USER + 41)
-
 TB_HITTEST               = (WM_USER + 69)
 
 -- New post Win95/NT4 for InsertButton and AddButton.  if iString member
@@ -382,23 +391,25 @@ TB_SETLISTGAP            = (WM_USER + 96)
 TB_GETIMAGELISTCOUNT     = (WM_USER + 98)
 TB_GETIDEALSIZE          = (WM_USER + 99)  -- wParam == fHeight, lParam = psize
 -- before using WM_USER + 103, recycle old space above (WM_USER + 97)
-TB_TRANSLATEACCELERATOR      = CCM_TRANSLATEACCELERATOR
+--TODO: TB_TRANSLATEACCELERATOR      = CCM_TRANSLATEACCELERATOR
 
 TBMF_PAD                 = 0x00000001
 TBMF_BARPAD              = 0x00000002
 TBMF_BUTTONSPACING       = 0x00000004
 
+ffi.cdef[[
 typedef struct {
     UINT cbSize;
     DWORD dwMask;
 
-    int cxPad;        -- PAD
+    int cxPad;        // PAD
     int cyPad;
-    int cxBarPad;     -- BARPAD
+    int cxBarPad;     // BARPAD
     int cyBarPad;
-    int cxButtonSpacing;   -- BUTTONSPACING
+    int cxButtonSpacing;   // BUTTONSPACING
     int cyButtonSpacing;
 } TBMETRICS, * LPTBMETRICS;
+]]
 
 TB_GETMETRICS            = (WM_USER + 101)
 TB_SETMETRICS            = (WM_USER + 102)
@@ -407,7 +418,7 @@ TB_SETPRESSEDIMAGELIST   = (WM_USER + 104)
 TB_GETPRESSEDIMAGELIST   = (WM_USER + 105)
 TB_SETWINDOWTHEME        = CCM_SETWINDOWTHEME
 
-TBN_FIRST               = ffi.cast('UINT', -700)
+TBN_FIRST                = ffi.cast('UINT', -700)
 TBN_GETBUTTONINFOA       = (TBN_FIRST-0)
 TBN_BEGINDRAG            = (TBN_FIRST-1)
 TBN_ENDDRAG              = (TBN_FIRST-2)
@@ -422,13 +433,15 @@ TBN_DROPDOWN             = (TBN_FIRST - 10)
 TBN_GETOBJECT            = (TBN_FIRST - 12)
 
 -- Structure for TBN_HOTITEMCHANGE notification
+ffi.cdef[[
 typedef struct tagNMTBHOTITEM
 {
     NMHDR   hdr;
     int     idOld;
     int     idNew;
-    DWORD   dwFlags;           -- HICF_*
+    DWORD   dwFlags;           // HICF_*
 } NMTBHOTITEM, * LPNMTBHOTITEM;
+]]
 
 -- Hot item change flags
 HICF_OTHER           = 0x00000000
@@ -461,6 +474,7 @@ TBN_WRAPACCELERATOR      = (TBN_FIRST - 26)
 TBN_DRAGOVER             = (TBN_FIRST - 27)
 TBN_MAPACCELERATOR       = (TBN_FIRST - 28)
 
+ffi.cdef[[
 typedef struct tagNMTBSAVE
 {
     NMHDR hdr;
@@ -492,38 +506,39 @@ typedef struct tagNMTBGETINFOTIPW
     int iItem;
     LPARAM lParam;
 } NMTBGETINFOTIPW, *LPNMTBGETINFOTIPW;
+]]
 
 TBNF_IMAGE               = 0x00000001
 TBNF_TEXT                = 0x00000002
 TBNF_DI_SETITEM          = 0x10000000
 
+ffi.cdef[[
 typedef struct {
     NMHDR hdr;
-    DWORD dwMask;      --[in] Specifies the values requested .[out] Client ask the data to be set for future use
-    int idCommand;    -- [in] id of button we're requesting info for
-    DWORD_PTR lParam;  -- [in] lParam of button
-    int iImage;       -- [out] image index
-    LPWSTR pszText;   -- [out] new text for item
-    int cchText;      -- [in] size of buffer pointed to by pszText
+    DWORD dwMask;      // [in] Specifies the values requested .[out] Client ask the data to be set for future use
+    int idCommand;     // [in] id of button we're requesting info for
+    DWORD_PTR lParam;  // [in] lParam of button
+    int iImage;        // [out] image index
+    LPWSTR pszText;    // [out] new text for item
+    int cchText;       // [in] size of buffer pointed to by pszText
 } NMTBDISPINFOW, *LPNMTBDISPINFOW;
+]]
 
 -- Return codes for TBN_DROPDOWN
 TBDDRET_DEFAULT          = 0
 TBDDRET_NODEFAULT        = 1
 TBDDRET_TREATPRESSED     = 2       -- Treat as a standard press button
 
-TBNOTIFY        = NMTOOLBAR
-LPTBNOTIFY      = LPNMTOOLBAR
+--TODO: TBNOTIFY        = NMTOOLBAR
+--TODO: LPTBNOTIFY      = LPNMTOOLBAR
 
+ffi.cdef[[
 typedef struct tagNMTOOLBARW {
     NMHDR   hdr;
     int     iItem;
     TBBUTTON tbButton;
     int     cchText;
     LPWSTR   pszText;
-
     RECT    rcButton;
-
 } NMTOOLBARW, *LPNMTOOLBARW;
-
 ]]

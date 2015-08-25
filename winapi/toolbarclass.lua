@@ -72,7 +72,7 @@ end
 function Toolbar:__init(info)
 	Comctl_SetVersion(self.hwnd, 6)
 	Toolbar.__index.__init(self, info)
-	self.items = TBItemList(self)
+	self.items = TBItemList(self, info.items)
 end
 
 function Toolbar:set_image_list(iml)
@@ -83,3 +83,27 @@ function Toolbar:get_image_list(iml)
 	ImageLists:find(Toolbar_GetImageList(self.hwnd))
 end
 
+--showcase
+
+if not ... then
+	require'winapi.showcase'
+	local win = ShowcaseWindow()
+	local tb = Toolbar{
+		x = 0,
+		y = 0,
+		w = 300,
+		h = 100,
+		no_align = true,
+		list = true,
+		parent = win,
+		image_list = ShowcaseImageList(),
+		items = {
+			{i = 1, text_index = 1},
+			{i = 2, text_index = 2},
+			{i = 3, text_index = 3},
+			{i = 4, text_index = 4},
+		},
+	}
+	tb.on_mouse_move = function(self, x, y) print(x, y) end
+	MessageLoop()
+end
