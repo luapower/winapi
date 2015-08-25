@@ -50,15 +50,15 @@ showcase the module's functionality.
 
 ### Architecture
 
-	* [winapi_design] - hi-level overview of the library
-	* [winapi_binding] - how the binding infrastructure works
-	* [winapi_history] - the reasoning behind various design decisions
+  * [winapi_design] - hi-level overview of the library
+  * [winapi_binding] - how the binding infrastructure works
+  * [winapi_history] - the reasoning behind various design decisions
 
 ### Classes
 
-   * [winapi.basewindowclass] - base class for top-level windows and controls
-	* [winapi.controlclass] - base class for controls
-	* [winapi.windowclass] - final class for top level windows
+  * [winapi.basewindowclass] - base class for top-level windows and controls
+  * [winapi.controlclass] - base class for controls
+  * [winapi.windowclass] - final class for top level windows
 
 ### Procedural layer
 
