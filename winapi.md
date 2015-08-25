@@ -23,20 +23,26 @@ OpenGL and cairo.
 ## Hello World
 
 ~~~{.lua}
-winapi = require'winapi'
+local winapi = require'winapi'
 require'winapi.windowclass'
 
-local main = winapi.Window{
-   title = 'Good News Everyone',
-   w = 600, h = 400,
-   autoquit = true,
+local win = winapi.Window{
+	w = 500,                --these are initial fields
+	h = 300,
+	title = 'Lua rulez',
+	autoquit = true,
+	visible = false,        --this field is from BaseWindow
 }
 
-function main:on_close()
-	print'Bye!'
+function win:on_close()    --this is an event handler
+	print'Bye'
 end
 
-os.exit(winapi.MessageLoop())
+print(win.title)           --this is reading the value of a property
+win.title = 'Lua rulez!'   --this is setting the value of a property
+win:show()                 --this is a method call
+
+os.exit(MessageLoop())     --start the message loop
 ~~~
 
 ## Documentation

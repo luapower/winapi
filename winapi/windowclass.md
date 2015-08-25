@@ -8,31 +8,6 @@ This module implements the `Window` class for creating top-level windows.
 
 ## Window
 
-### Usage
-
-~~~{.lua}
-local winapi = require'winapi'
-require'winapi.windowclass'
-
-local win = winapi.Window{
-	w = 500,                --these are initial fields
-	h = 300,
-	title = 'Lua rulez',
-	autoquit = true,
-	visible = false,        --this field is from BaseWindow
-}
-
-function win:on_close()    --this is an event handler
-	print'Bye'
-end
-
-print(win.title)           --this is reading the value of a property
-win.title = 'Lua rulez!'   --this is setting the value of a property
-win:show()                 --this is a method call
-
-MessageLoop()					--start the message loop
-~~~
-
 ### Hierarchy
 
 * [Object][winapi.object]
