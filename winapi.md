@@ -66,4 +66,3 @@ and empirical knowledge, so do check that out.
 
 __Tip:__ Some modules can be run as standalone scripts, which will
 showcase the module's functionality.
-
