@@ -27,14 +27,14 @@ __NOTE:__ the table below `i` means initial field, `r` means read-only property,
 ----------------------- -------- ----------------------------------------- -------------- ---------------------
 __field/property__		__irw__	__description__									__default__		__reference__
 tabstop						irw																true				WS_TABSTOP
-halign						irw																					BS_...
-valign 						irw																					BS_...
-word_wrap					irw																					BS_MULTILINE
-flat																													BS_FLAT
-double_clicks							enable double-click events											BS_NOTIFY
-image_list					irw
-icon							irw
-bitmap						irw
+halign						irw		horiz. align 'left', 'right', 'center'							BS_LEFT,...
+valign 						irw		vert. align: 'top', 'bottom', 'center'							BS_TOP,...
+word_wrap					irw		word wrapping															BS_MULTILINE
+flat							irw		flat appearance														BS_FLAT
+double_clicks				irw		enable double-click events											BS_NOTIFY
+image_list					irw		image list																BCM_SETIMAGELIST
+icon							irw		icon																		BM_SETIMAGE
+bitmap						irw		bitmap																	BM_SETIMAGE
 ----------------------- -------- ----------------------------------------- -------------- ---------------------
 </div>
 
@@ -43,9 +43,10 @@ bitmap						irw
 <div class=small>
 -------------------------------- -------------------------------------------- ----------------------
 __event__								__description__										__reference__
-on_click()																							BN_CLICKED
-on_double_click()																					BN_DOUBLECLICKED
-on_focus()																							BN_SETFOCUS
-on_blur()																							BN_KILLFOCUS
+on_click()								clicked													BN_CLICKED
+on_double_click()						double clicked											BN_DOUBLECLICKED
+on_focus()								focused													BN_SETFOCUS
+on_blur()								unfocused												BN_KILLFOCUS
 ----------------------- --------	-------------------------------------------- ---------------------
 </div>
+
