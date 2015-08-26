@@ -42,14 +42,18 @@ end
 function Control:set_parent(parent)
 	local old_parent = self.parent
 	if parent and not old_parent then --popup windows can become child windows
-		SetWindowStyle(self.hwnd, setbits(GetWindowStyle(self.hwnd),
-														bit.bor(WS_POPUP, WS_CHILD), WS_CHILD))
+		SetWindowStyle(self.hwnd,
+			setbits(GetWindowStyle(self.hwnd),
+			bit.bor(WS_POPUP, WS_CHILD),
+			WS_CHILD))
 	end
 	SetParent(self.hwnd, parent and parent.hwnd)
 	pin(self, parent)
 	if not parent and old_parent then --child windows can become popup windows (diff. from overlapped)
-		SetWindowStyle(self.hwnd, setbits(GetWindowStyle(self.hwnd),
-														bit.bor(WS_POPUP, WS_CHILD), WS_POPUP))
+		SetWindowStyle(self.hwnd,
+			setbits(GetWindowStyle(self.hwnd),
+			bit.bor(WS_POPUP, WS_CHILD),
+			WS_POPUP))
 	end
 	if (parent and not old_parent) or (not parent and old_parent) then
 		SetWindowPos(self.hwnd, nil, 0, 0, 0, 0, SWP_FRAMECHANGED_ONLY)
@@ -105,9 +109,9 @@ function Control:__parent_resizing(wp)
 	local pr, r = self.parent.screen_rect, self.rect
 
 	local x, w = anchor_dim(self, self.anchors.left, self.anchors.right,
-									pr.x1 + wp.w - pr.x2, r.x1, r.w, self.__anchor_w)
+		pr.x1 + wp.w - pr.x2, r.x1, r.w, self.__anchor_w)
 	local y, h = anchor_dim(self, self.anchors.top,  self.anchors.bottom,
-									pr.y1 + wp.h - pr.y2, r.y1, r.h, self.__anchor_h)
+		pr.y1 + wp.h - pr.y2, r.y1, r.h, self.__anchor_h)
 
 	--override rect with the changed sides.
 	if x then r.x = x end

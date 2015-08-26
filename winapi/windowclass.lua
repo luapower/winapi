@@ -166,6 +166,8 @@ function Window:__after_create(info, args)
 		self.restore_to_maximized = true
 	end
 
+	pin(self, self.owner)
+
 	self.accelerators = WAItemList(self)
 end
 
@@ -203,6 +205,7 @@ end
 
 function Window:set_owner(owner)
 	SetWindowOwner(self.hwnd, owner and owner.hwnd)
+	pin(self, self.owner)
 end
 
 --activation -----------------------------------------------------------------

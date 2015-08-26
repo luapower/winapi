@@ -244,7 +244,7 @@ end
 
 function BaseWindow:__set_style_ex_bit(k,v)
 	SetWindowExStyle(self.hwnd,
-		self.__style_ex_bitmask:set(GetWindowExStyle(self.hwnd), k, v))
+		self.__style_ex_bitmask:setbit(GetWindowExStyle(self.hwnd), k, v))
 	SetWindowPos(self.hwnd, nil, 0, 0, 0, 0, SWP_FRAMECHANGED_ONLY)
 end
 
@@ -303,24 +303,24 @@ function BaseWindow:__check_bitmask(name, mask, wanted, actual)
 	local ok, pp = pcall(require, 'pp')
 	local wanted_fmt = ok and pp.format(mask:get(wanted), '   ') or ''
 	local actual_fmt = ok and pp.format(mask:get(actual), '   ') or ''
-	error(string.format(
-		'inconsistent %s bits\nwanted: 0x%08x %s\nactual: 0x%08x %s', name,
+	print(string.format(
+		'WARNING: inconsistent %s bits\nwanted: 0x%08x %s\nactual: 0x%08x %s', name,
 			tonumber(wanted), wanted_fmt,
 			tonumber(actual), actual_fmt))
 end
 
 function BaseWindow:__check_class_style(wanted)
-	self:__check_bitmask('class style', self.__class_style_bitmask, wanted,
+	self:__check_bitmask('ClassStyle', self.__class_style_bitmask, wanted,
 		GetClassStyle(self.hwnd))
 end
 
 function BaseWindow:__check_style(wanted)
-	self:__check_bitmask('style', self.__style_bitmask, wanted,
+	self:__check_bitmask('WS_* style', self.__style_bitmask, wanted,
 		GetWindowStyle(self.hwnd))
 end
 
 function BaseWindow:__check_style_ex(wanted)
-	self:__check_bitmask('ex style', self.__style_ex_bitmask, wanted,
+	self:__check_bitmask('WS_EX_* style', self.__style_ex_bitmask, wanted,
 		GetWindowExStyle(self.hwnd))
 end
 

@@ -130,19 +130,47 @@ typedef struct _TBBUTTON {
 typedef const TBBUTTON *LPCTBBUTTON;
 ]], ffi.abi('64bit') and 6 or 2))
 
+local function intptr_wcs(s, cdata)
+	local buf = wcs(s)
+	pin(buf, cdata)
+	return ffi.cast('INT_PTR', buf)
+end
+
+local style_bitmask = bitmask{
+	auto_width = BTNS_AUTOSIZE,
+	toggle = BTNS_CHECK,
+	group = BTNS_GROUP, --use with `pushed`
+	type = {
+		button = 0,
+		dropdown = BTNS_WHOLEDROPDOWN,
+		button_with_dropdown = BTNS_DROPDOWN,
+		separator = BTNS_SEP,
+	},
+	accelerator_prefix = negate(BTNS_NOPREFIX),
+	show_text = BTNS_SHOWTEXT, --use with `list` and `mixed_buttons`
+}
+
+local function set_style(t, cdata)
+	return style_bitmask:set(cdata.fsStyle, t)
+end
+
+local function get_style(cdata)
+	return style_bitmask:get(cdata.fsStyle)
+end
+
 TBBUTTON = struct{
 	ctype = 'TBBUTTON',
 	fields = sfields{
 		'i', 'iBitmap', countfrom0, countfrom1,
 		'command', 'idCommand', pass, pass,
 		'state', 'fsState', flags, pass, --TBSTATE_*
-		'style', 'fsStyle', flags, pass, --TBSTYLE_*
-		'text_ptr', 'iString', pass, pass, --index or pointer
-		'text_index', 'iString', pass, pass, --index or pointer
+		'style', 'fsStyle', set_style, get_style, --TBSTYLE_*
+		'text', 'iString', intptr_wcs, pass, --used as pointer
+		'text_index', 'iString', pass, pass, --used as index
 	},
 	defaults = {
 		state = TBSTATE_ENABLED,
-	}
+	},
 }
 
 function Toolbar_AddButton(tb, button) --TODO: support an array of buttons
@@ -418,19 +446,22 @@ TB_SETPRESSEDIMAGELIST   = (WM_USER + 104)
 TB_GETPRESSEDIMAGELIST   = (WM_USER + 105)
 TB_SETWINDOWTHEME        = CCM_SETWINDOWTHEME
 
-TBN_FIRST                = ffi.cast('UINT', -700)
-TBN_GETBUTTONINFOA       = (TBN_FIRST-0)
-TBN_BEGINDRAG            = (TBN_FIRST-1)
-TBN_ENDDRAG              = (TBN_FIRST-2)
-TBN_BEGINADJUST          = (TBN_FIRST-3)
-TBN_ENDADJUST            = (TBN_FIRST-4)
-TBN_RESET                = (TBN_FIRST-5)
-TBN_QUERYINSERT          = (TBN_FIRST-6)
-TBN_QUERYDELETE          = (TBN_FIRST-7)
-TBN_TOOLBARCHANGE        = (TBN_FIRST-8)
-TBN_CUSTHELP             = (TBN_FIRST-9)
-TBN_DROPDOWN             = (TBN_FIRST - 10)
-TBN_GETOBJECT            = (TBN_FIRST - 12)
+TBN_FIRST                = tonumber(ffi.cast('UINT', -700))
+
+update(WM_NOTIFY_NAMES, constants{
+	TBN_GETBUTTONINFOA       = TBN_FIRST-0,
+	TBN_BEGINDRAG            = TBN_FIRST-1,
+	TBN_ENDDRAG              = TBN_FIRST-2,
+	TBN_BEGINADJUST          = TBN_FIRST-3,
+	TBN_ENDADJUST            = TBN_FIRST-4,
+	TBN_RESET                = TBN_FIRST-5,
+	TBN_QUERYINSERT          = TBN_FIRST-6,
+	TBN_QUERYDELETE          = TBN_FIRST-7,
+	TBN_TOOLBARCHANGE        = TBN_FIRST-8,
+	TBN_CUSTHELP             = TBN_FIRST-9,
+	TBN_DROPDOWN             = TBN_FIRST-10,
+	TBN_GETOBJECT            = TBN_FIRST-12,
+})
 
 -- Structure for TBN_HOTITEMCHANGE notification
 ffi.cdef[[
@@ -529,16 +560,20 @@ TBDDRET_DEFAULT          = 0
 TBDDRET_NODEFAULT        = 1
 TBDDRET_TREATPRESSED     = 2       -- Treat as a standard press button
 
---TODO: TBNOTIFY        = NMTOOLBAR
---TODO: LPTBNOTIFY      = LPNMTOOLBAR
-
 ffi.cdef[[
 typedef struct tagNMTOOLBARW {
-    NMHDR   hdr;
-    int     iItem;
-    TBBUTTON tbButton;
-    int     cchText;
-    LPWSTR   pszText;
-    RECT    rcButton;
+    NMHDR     hdr;
+    int       i;
+    TBBUTTON  button;
+    int       cchText;
+    LPWSTR    pszText;
+    RECT      rect;
 } NMTOOLBARW, *LPNMTOOLBARW;
+
+typedef NMTOOLBARW   TBNOTIFY;
+typedef LPNMTOOLBARW LPTBNOTIFY;
 ]]
+
+function NM.TBN_DROPDOWN(hdr)
+	return ffi.cast('NMTOOLBARW*', hdr)
+end

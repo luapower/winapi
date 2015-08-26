@@ -42,6 +42,8 @@ local function about_box()
 		maximize_button = false,
 		minimize_button = false,
 		owner = win, --don't show it in taskbar
+		tool_window = true,
+		sizeable = false,
 	}
 
 	local w, h = 100, 24
@@ -94,20 +96,21 @@ win.menu = menubar
 --create a toolbar -----------------------------------------------------------
 
 require'winapi.showcase'
+
 local toolbar = Toolbar{
 	parent = win,
 	x = 0,
 	y = 0,
-	no_align = true,
 	parent = win,
-	image_list = ShowcaseImageList(),
+	image_list = ImageList{w = 16, h = 16, masked = true, colors = '32bit'},
 	items = {
-		{i = 1, text_index = 1},
-		{i = 2, text_index = 2},
-		{i = 3, text_index = 3},
-		{i = 4, text_index = 4},
+		--NOTE: using `iBitmap` instead of `i` because `i` counts from 1
+		{iBitmap = STD_FILENEW,  text = 'New'},
+		{iBitmap = STD_FILEOPEN, text = 'Open'},
+		{iBitmap = STD_FILESAVE, text = 'Save'},
 	},
 }
+toolbar:load_images(IDB_STD_SMALL_COLOR)
 
 --create a group box ---------------------------------------------------------
 

@@ -59,17 +59,3 @@ function findbits(prefix, value)
 	return table.concat(t, ' ')
 end
 
---print that can be used in expressions and recurses into tables
-local function __print(indent,...)
-	if indent ~= '' then _print(indent,...) else _print(...) end
-	for i=1,select('#',...) do
-		local t = select(i,...)
-		if type(t) == 'table' and (not getmetatable(t) or not getmetatable(t).__tostring) then
-			for k,v in pairs(t) do __print(indent..'       ',k,v) end
-		end
-	end
-	return ...
-end
-
-function print(...) return __print('',...) end
-

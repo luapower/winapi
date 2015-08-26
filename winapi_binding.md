@@ -2,19 +2,33 @@
 tagline: developer documentation
 ---
 
-## How to use the binding infrastructure
+## Overview
+
+To bind new "chapters" of the Windows API first identify which chapter
+it is and check to see if there isn't already a module for that.
+Module names should match msdn documentation as much as possible.
+After you decided on a module name, start adding in all the necessary
+ffi cdefs, defines and functions. The function names and args should
+match WinAPI as much as possible. This is the "procedural layer"
+of the binding. The OOP layer (if any) will be based on it.
+
+## Binding WinAPI functions
+
+### Error checking
 
 Pass the result of winapi calls to `checknz`, `checkh` and friends according
 to what constitutes an error in the result: you get automatic error handling
 and clear code.
 
+### Memory management
+
 Use `own(object, finalizer)` on all newly created objects but call
 `disown(object)` right after any successful api call that assigns that object
 an owner responsible for freeing it, and use `own()` again every time a call
 leaves an object without an owner. Doing this consistently will complicate
-the implementation sometimes but it prevents leaks and you get automatic object
-lifetime management (for what is worth, given the non-deterministic nature
-of the gc).
+the implementation sometimes but it prevents leaks and you get automatic
+object lifetime management (for what is worth given the non-deterministic
+nature of the gc).
 
 Avoid surfacing ABI boilerplate like buffers, buffer sizes and internal data
 structures. Sometimes you may want to reuse a buffer to avoid heap trashing
@@ -24,49 +38,57 @@ will be used, if not, an internal buffer will be created. If there's a need
 to pass state around beyond this, make a class (that is, do it in the
 object layer).
 
-Use `wcs(arg)` on all string args: if arg is a Lua string, it's assumed to be
-an utf8 encoded string and it's converted to wcs, otherwise it's assumed a
-wcs and passed through as is. This makes the API accept both Lua strings and
-wcs strings transparently.
+### Strings
+
+Use `wcs(arg)` on all string args: if arg is a Lua string, it will be
+interpreted as an utf8 encoded string and converted to wcs, otherwise
+it will be passed through untouched. This allows passing both Lua
+strings and wcs buffers transparently.
+
+### Flags
 
 Use `flags(arg)` on all flag args so that you can pass a string of the form
 `'FLAG1 FLAG2 ...'` as an alternative to `bit.bor(FLAG1, FLAG2, ...)`. It
 also changes nil into 0 to allow for optional flag args to be passed where
 winapi expects an int.
 
+### Indices
+
 Count from 1! Use `countfrom0` on all positional args: this will decrement
 the arg but only if it's strictly > 0 so that negative numbers are passed
 through as they are since we want to preserve values with special meaning
 like -1.
 
-### Simple type constructors
+### Simple structs
 
 Use `arg = types.FOO(arg)` instead of `arg = ffi.new('FOO', arg)`.
-This allows passing a pre-allocated FOO as argument. Publish
-common types in the winapi namespace: `FOO = types.FOO` and then use `FOO`
-instead of `types.FOO`.
+This allows passing a pre-allocated FOO as argument.
 
-### Array constructors
+Publish common types in the winapi namespace: `FOO = types.FOO`
+and then use `FOO` instead of `types.FOO`.
+
+### Arrays
 
 Use `arg = arrays.FOO(arg)` instead of `arg = ffi.new('FOO[?]', #arg, arg)`.
 This allows passing in a pre-allocated array as argument, and when passing
 in a table, the array size will be #arg.
 
-### Struct constructors
+### Complex structs
 
-Don't allocate structs with ffi.new('FOO', arg). Instead, make a struct
-constructor FOO = struct{...}, and pass all FOO args through it: arg = FOO(arg).
+Don't allocate structs with `ffi.new('FOO', arg)`. Instead, make a struct
+constructor `FOO = struct{...}`, and pass all `FOO`'s args through it:
+`arg = FOO(arg)`.
 
 This can enable some magic, depending on how much you add to your definition:
 
-  * the user can pass in a pre-allocated FOO which will be passed through.
+  * the user can pass in a pre-allocated `FOO` which will be passed through.
   * if passing in a table, as it's usually the case,
-    * the size (usually cbSize) field (if any) can be set automatically.
+    * the size (usually `cbSize`) field (if any) can be set automatically.
     * the struct's mask field (if any) can be set automatically to reflect
 	 that only certain fields (those present in the table) need to be set.
 	 * default values (eg. a version field) can be set automatically.
   * virtual fields with a getter and setter can be added which will be
-  available alongside the cdata fields for all cdata of that type.
+  available alongside the cdata fields.
 
 #### Virtual fields
 
@@ -81,12 +103,17 @@ C fields has some advantages:
   field. Getting the value of a field with its mask cleared returns nil,
   regardless of its data type.
 
-  * bits of masked bitfields can be read and set individually, provided you
-    define the data field, the mask field, and the prefix for the mask
-    constants in the struct definition.
+  * bits of masked bitfields can be read and set individually, provided
+  you define the data field, the mask field, and the prefix for the mask
+  constants in the struct definition.
 
-  * output (an in/out) buffers can be allocated and anchored to the struct
-  automatically: you can add those in an `init` function.
+  * an `init` function can be provided in which any output buffers that
+  the struct references can be allocated and anchored to the struct
+  (i.e. they become part of the struct).
+
+  * getters/setters can be conversion functions such as `mbs`/`wcs`.
+  if the setter function returns a cdata, that cdata is anchored
+  automatically to the struct's field.
 
 #### Example:
 
@@ -122,12 +149,59 @@ FOO = struct{
 Use the "lowercase with underscores" naming convention for virtual field names.
 Use names like caption, x, y, w, h, pos, parent, etc. consistently throughout.
 
-## How to use the OO system
+### Messages
 
-The easiest way to bind a new control is to use the code of an existing
-control as a template. Basically, you subclass from `Control` (or a specific
-control, if your control is a refinement of a standard control) after you
-define the style bitmasks, default values, and event name mappings, if any.
-You override the constructor and/or any methods and define any new properties
-by way of getters and setters.
+Write message decoders for all WM_* and messages specific to your module.
+(eg. mouse.lua contains message decoders for WM_MOUSE* messages).
 
+Only write decoders for messages for which wParam and lParam mean something.
+
+WM_* decoders go into the `WM` global table.
+
+WM_NOTIFY decoders go into the `NM` global table.
+
+All message names must be added into the global `WM_NAMES`
+and `WM_NOTIFY_NAMES` tables respectively, regardless whether
+there are decoders for them or not. Examples:
+
+~~~{.lua}
+update(WM_NAMES, constants{
+	LB_ADDSTRING             = 0x0180,
+	LB_INSERTSTRING          = 0x0181,
+	...
+})
+
+update(WM_NOTIFY_NAMES, constants{
+	TBN_GETBUTTONINFOA       = TBN_FIRST-0,
+	TBN_BEGINDRAG            = TBN_FIRST-1,
+	...
+})
+~~~
+
+## Making new classes
+
+The easiest way to create a new class is to use the code of an existing
+class as a template. Generally you subclass from `Control` if you are
+creating a new kind of control, from `WindowClass` if you are creating
+a new kind of top-level window, or from `VObject` if it's a non-visual class.
+
+`BaseWindowClass` contains extensive automation to help with binding,
+so that binding a new control is mainly an issue of filling up the following
+tables:
+
+	__class_style_bitmask = bitmask{}, --for windows that own their WNDCLASS
+	__style_bitmask = bitmask{},       --style bits
+	__style_ex_bitmask = bitmask{},    --extended style bits
+	__defaults = {},
+	__init_properties = {}, --properties to be set after window creation
+	__wm_handler_names = index{} --message name -> handler name mapping
+	__wm_syscommand_handler_names = {}, --WM_SYSCOMMAND code -> handler name map
+	__wm_command_handler_names = {},    --WM_COMMAND code -> handler name map
+	__wm_notify_handler_names = {},     --WM_NOTIFY code -> handler name map
+
+Initialization also contains pre- and post-creation hooks:
+
+	__before_create(self, info, args)
+	__after_create(self, info, args)
+
+Look at an existing control for how these are used.

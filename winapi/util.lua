@@ -171,11 +171,6 @@ function pin(resource, target)
 	return resource
 end
 
-function unpin(resource)
-	pins[resource] = nil
-	return resource
-end
-
 --index adjustment -----------------------------------------------------------
 
 --adjust a number from counting from 1 to counting from 0.

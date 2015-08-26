@@ -34,8 +34,6 @@ function ImageList_Destroy(himl)
 	disown(himl)
 end
 
---
-
 ffi.cdef[[
 int         ImageList_Add(HIMAGELIST himl, HBITMAP hbmImage, HBITMAP hbmMask);
 BOOL        ImageList_Replace(HIMAGELIST himl, int i, HBITMAP hbmImage, HBITMAP hbmMask);

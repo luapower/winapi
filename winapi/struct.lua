@@ -13,6 +13,8 @@ local Struct_meta = {__index = Struct}
 
 local setbit = setbit --cache
 
+local pins = setmetatable({}, {__mode = 'k'}) --{cdata = {field = pinned_val}}
+
 function Struct:set(cdata, field, value) --hot code
 	if type(field) ~= 'string' then
 		error(string.format('struct "%s" has no field of type "%s"', self.ctype, type(field)), 5)
@@ -24,11 +26,17 @@ function Struct:set(cdata, field, value) --hot code
 			cdata[self.mask] = setbit(cdata[self.mask] or 0, mask, value ~= nil)
 		end
 		if name then
-			if setter then
-				value = setter(value, cdata)
-			end
+			value = setter(value, cdata)
+			--cdata values are pinned to the struct automatically.
+			--only the current value is pinned for each struct field.
+			--the old value is released when the new value is set.
 			if type(value) == 'cdata' then
-				pin(value, cdata)
+				local t = pins[value]
+				if not t then
+					t = {}
+					pins[value] = t
+				end
+				t[field] = value
 			end
 			cdata[name] = value
 		else
