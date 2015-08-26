@@ -163,13 +163,16 @@ TBBUTTON = struct{
 	fields = sfields{
 		'i', 'iBitmap', countfrom0, countfrom1,
 		'command', 'idCommand', pass, pass,
-		'state', 'fsState', flags, pass, --TBSTATE_*
+		'__state', 'fsState', flags, pass, --TBSTATE_*
 		'style', 'fsStyle', set_style, get_style, --TBSTYLE_*
 		'text', 'iString', intptr_wcs, pass, --used as pointer
 		'text_index', 'iString', pass, pass, --used as index
 	},
+	bitfields = {
+		state = {'__state', '__state', 'TBSTATE'},
+	},
 	defaults = {
-		state = TBSTATE_ENABLED,
+		state = {enabled = true},
 	},
 }
 
@@ -186,7 +189,7 @@ function Toolbar_InsertButton(tb, i, button)
 	checktrue(SNDMSG(tb, TB_INSERTBUTTON, countfrom0(i), ffi.cast('BBUTTON*', button)))
 end
 
-function Tooldbar_DeleteButton(tb, i)
+function Toolbar_DeleteButton(tb, i)
 	return checktrue(SNDMSG(tb, countfrom0(i)))
 end
 
@@ -194,14 +197,14 @@ function Toolbar_GetButtonCount(tb)
 	return checkpoz(SNDMSG(tb, TB_BUTTONCOUNT))
 end
 
-TBIF_IMAGE               = 0x00000001
-TBIF_TEXT                = 0x00000002
-TBIF_STATE               = 0x00000004
-TBIF_STYLE               = 0x00000008
-TBIF_LPARAM              = 0x00000010
-TBIF_COMMAND             = 0x00000020
-TBIF_SIZE                = 0x00000040
-TBIF_BYINDEX             = 0x80000000 -- wParam in Get/SetButtonInfo is an index, not id
+TBIF_IMAGE    = 0x00000001
+TBIF_TEXT     = 0x00000002
+TBIF_STATE    = 0x00000004
+TBIF_STYLE    = 0x00000008
+TBIF_LPARAM   = 0x00000010
+TBIF_COMMAND  = 0x00000020
+TBIF_SIZE     = 0x00000040
+TBIF_BYINDEX  = 0x80000000 -- wParam in Get/SetButtonInfo is an index, not id
 
 ffi.cdef[[
 typedef struct {
@@ -233,45 +236,24 @@ TBBUTTONINFO = struct{
 }
 
 -- BUTTONINFO APIs do NOT support the string pool.
-TB_GETBUTTONINFO         = (WM_USER + 63)
-TB_SETBUTTONINFO         = (WM_USER + 64)
+TB_GETBUTTONINFO = (WM_USER + 63)
+TB_SETBUTTONINFO = (WM_USER + 64)
 
 function Toolbar_GetButtonInfo(tb, i, info)
 	info = TBBUTTONINFO:setmask(info)
-	if not ptr(item.pszText) then --user didn't supply a buffer
-		local ws, sz = WCS()
-		item.text = ws --ws gets pinned and the field mask gets set
-		item.cchTextMax = sz
+	if bit.band(info.fsState, TBIF_BYINDEX) ~= 0 then
+		i = countfrom0(i)
 	end
-	if bit.band(info.fsState, TBIF_BYINDEX) ~= 0 then i = countfrom0(i) end --default
-	checkpoz(SNDMSG(tb, TB_GETBUTTONINFO, i, info))
+	checkpoz(SNDMSG(tb, TB_GETBUTTONINFO, i, ffi.cast('TBBUTTONINFOW*', info)))
 	return info
 end
 
 function Toolbar_SetButtonInfo(tb, i, info)
 	info = TBBUTTONINFO(info)
 	if bit.band(info.fsState, TBIF_BYINDEX) ~= 0 then i = countfrom0(i) end
-	checkpoz(SNDMSG(tb, TB_SETBUTTONINFO, i, info))
+	checkpoz(SNDMSG(tb, TB_SETBUTTONINFO, i, ffi.cast('TBBUTTONINFOW*', info)))
 end
 
-
---[[
-
-typedef struct tagCOLORSCHEME {
-   DWORD            dwSize;
-   COLORREF         clrBtnHighlight;
-   COLORREF         clrBtnShadow;
-} COLORSCHEME, *LPCOLORSCHEME;
-
-typedef struct _COLORMAP {
-    COLORREF from;
-    COLORREF to;
-} COLORMAP, *LPCOLORMAP;
-
-WINCOMMCTRLAPI HBITMAP WINAPI CreateMappedBitmap(HINSTANCE hInstance, INT_PTR idBitmap,
-                                  UINT wFlags, __in_opt LPCOLORMAP lpColorMap,
-                                  int iNumMaps);
-]]
 
 CMB_MASKED               = 0x02
 
@@ -341,6 +323,16 @@ TB_GETCOLORSCHEME        = CCM_GETCOLORSCHEME      -- fills in COLORSCHEME point
 TB_SETUNICODEFORMAT      = CCM_SETUNICODEFORMAT
 TB_GETUNICODEFORMAT      = CCM_GETUNICODEFORMAT
 TB_MAPACCELERATORW       = (WM_USER + 90)  -- wParam == ch, lParam int * pidBtn
+
+
+function Toolbar_GetButtonText(tb, i, buf)
+	if not buf then
+		local sz = checkpoz(SNDMSG(tb, TB_GETBUTTONTEXTW, countfrom0(i)))
+		buf = WCS(sz)
+	end
+	checkpoz(SNDMSG(tb, TB_GETBUTTONTEXTW, i, buf))
+	return buf or mbs(buf)
+end
 
 -- Custom Draw Structure
 ffi.cdef[[

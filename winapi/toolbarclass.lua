@@ -34,6 +34,10 @@ function TBItemList:get_count()
 	return Toolbar_GetButtonCount(self.hwnd)
 end
 
+function TBItemList:get_text(i)
+	return Toolbar_GetButtonText(self.hwnd, i)
+end
+
 Toolbar = subclass({
 	__style_bitmask = bitmask{
 		align = {
@@ -91,7 +95,6 @@ function Toolbar:__before_create(info, args)
 end
 
 function Toolbar:__init(info)
-	Comctl_SetVersion(self.hwnd, 6)
 	Toolbar.__index.__init(self, info)
 	self.items = TBItemList(self, info.items)
 end
@@ -113,30 +116,26 @@ end
 if not ... then
 	require'winapi.showcase'
 	local win = ShowcaseWindow()
+
 	local tb = Toolbar{
-		x = 0,
-		y = 0,
-		w = win.client_w,
 		parent = win,
+		image_list = ImageList{w = 16, h = 16, masked = true, colors = '32bit'},
 		items = {
 			--NOTE: using `iBitmap` instead of `i` because `i` counts from 1
-			{iBitmap = STD_FILENEW,  text = 'New'},
-			{iBitmap = STD_FILEOPEN, text = 'Open', style = {toggle = true}},
-			{iBitmap = STD_FILESAVE, text = 'Save', style = {type = 'dropdown'}},
+			--{iBitmap = STD_FILENEW,  text = 'New'},
+			--{iBitmap = STD_FILEOPEN, text = 'Open', style = {toggle = true}},
+			--{iBitmap = STD_FILESAVE, text = 'Save', style = {type = 'dropdown'}},
 		},
 		anchors = {left = true, right = true},
 	}
-
-	tb.draw_drop_down_arrows = true
-
-	--the height of the toolbar is automatically set to fit the images.
-	tb.image_list = ImageList{w = 16, h = 16, masked = true, colors = '32bit'}
-
 	tb:load_images(IDB_STD_SMALL_COLOR)
 
 	function tb:on_dropdown(info)
-		print('dropdown', info.button.i, info.rect.x, info.rect.y)
+		print('dropdown', info.button.iBitmap, info.rect.x, info.rect.y)
 	end
+
+	--local item = tb.items:get(3)
+	--print(require'pp'.format(item.state))
 
 	MessageLoop()
 end

@@ -161,7 +161,7 @@ WM_* decoders go into the `WM` global table.
 WM_NOTIFY decoders go into the `NM` global table.
 
 All message names must be added into the global `WM_NAMES`
-and `WM_NOTIFY_NAMES` tables respectively, regardless whether
+and `WM_NOTIFY_NAMES` tables respectively too, regardless whether
 there are decoders for them or not. Examples:
 
 ~~~{.lua}

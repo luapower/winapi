@@ -55,7 +55,7 @@ For a more compehensive demo, see [winapi_demo].
 ### Architecture
 
   * [winapi_design] - hi-level overview of the library
-  * [winapi_binding] - how the binding infrastructure works
+  * [winapi_binding] - how the binding works, aka developer documentation
   * [winapi_history] - the reasoning behind various design decisions
 
 ### Classes
@@ -77,7 +77,7 @@ For a more compehensive demo, see [winapi_demo].
 				* [TabControl][winapi.tabcontrolclass] - tab bars
 				* [Toolbar][winapi.toolbarclass] - toolbars
 				* [Panel][winapi.menuclass] - custom frameless windows
-				* [WGLPanel][winapi.wglpanel] - [OpenGL][gl] panel
+				* [WGLPanel][winapi.wglpanel] - [OpenGL][opengl] panel
 				* [CairoPanel][winapi.cairopanel] - [cairo] panel
 		* [Menu][winapi.menuclass] - menus and menu bars
 		* [NotifyIcon][winapi.notifyiconclass] - system tray icons

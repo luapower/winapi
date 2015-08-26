@@ -111,6 +111,5 @@ local window = ShowcaseWindow{w=300,h=200}
 local lb1 = ListBox{parent = window, x = 10, y = 10}
 lb1.items:add'test1'
 lb1.items:add'test2'
-
 MessageLoop()
 end

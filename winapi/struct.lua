@@ -59,7 +59,7 @@ function Struct:set(cdata, field, value) --hot code
 			def = self.bitfields[fieldname]
 			if def then
 				local datafield, maskfield, prefix = unpack(def, 1, 3)
-				local mask = _M[prefix..'_'..bitname]
+				local mask = _M[prefix..'_'..bitname:upper()]
 				if mask then
 					cdata[maskfield] = setbit(cdata[maskfield] or 0, mask, value ~= nil)
 					cdata[datafield] = setbit(cdata[datafield] or 0, mask, value)

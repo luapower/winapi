@@ -218,17 +218,21 @@ if not ... then
 	require'winapi.showcase'
 	local win = ShowcaseWindow()
 
-	local menubar = MenuBar()
-	win.menu = menubar
+	win.menu = MenuBar()
 
-	local filemenu = Menu()
-	filemenu.items:add{text = '&Close', on_click = function() win:close() end}
+	win.menu.items:add{
+		text = '&File',
+		submenu = Menu{
+			items = {
+				{text = '&Close', on_click = function() win:close() end},
+			},
+		},
+	}
 
 	local helpmenu = Menu()
 	helpmenu.items:add{text = '&About', on_click = function() end}
 
-	menubar.items:add{text = '&File', submenu = filemenu}
-	menubar.items:add{text = '&Help', submenu = helpmenu}
+	win.menu.items:add{text = '&Help', submenu = helpmenu}
 
 	MessageLoop()
 end

@@ -46,7 +46,7 @@ function Panel:__before_create(info, args)
 		style = self.__class_style_bitmask:set(0, info),
 		proc = MessageRouter.proc,
 		cursor = info.cursor,
-		background = info.background,
+		background = info.background, --TODO: can't be changed afterwards!
 	}
 	args.class = self.__winclass
 end
@@ -58,3 +58,18 @@ function Panel:WM_NCDESTROY()
 	PostMessage(nil, WM_UNREGISTER_CLASS, self.__winclass)
 end
 
+--showcase
+
+if not ... then
+require'winapi.showcase'
+local win = ShowcaseWindow()
+local panel = Panel{
+	parent = win,
+	x = 20, y = 20,
+	w = win.client_w - 40,
+	h = win.client_h - 40,
+	background = CreateSolidBrush(RGB(10, 20, 30)),
+	anchors = {top = true, left = true, bottom = true, right = true},
+}
+MessageLoop()
+end

@@ -51,7 +51,7 @@ function InitCommonControlsEx(ICC)
 	checknz(comctl.InitCommonControlsEx(icex))
 end
 
-InitCommonControlsEx()
+--InitCommonControlsEx()
 
 --common styles for rebar controls, toolbar controls, and status windows
 
@@ -81,10 +81,6 @@ CCM_GETVERSION           = (CCM_FIRST + 0x8)
 CCM_SETNOTIFYWINDOW      = (CCM_FIRST + 0x9) -- wParam == hwndParent.
 CCM_SETWINDOWTHEME       = (CCM_FIRST + 0xb)
 CCM_DPISCALE             = (CCM_FIRST + 0xc) -- wParam == Awareness
-
-function Comctl_SetVersion(hctl, version)
-	return checkpoz(SNDMSG(hctl, version))
-end
 
 --assorted consants
 

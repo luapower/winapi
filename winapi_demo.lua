@@ -99,9 +99,6 @@ require'winapi.showcase'
 
 local toolbar = Toolbar{
 	parent = win,
-	x = 0,
-	y = 0,
-	parent = win,
 	image_list = ImageList{w = 16, h = 16, masked = true, colors = '32bit'},
 	items = {
 		--NOTE: using `iBitmap` instead of `i` because `i` counts from 1
