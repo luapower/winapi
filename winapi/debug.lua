@@ -13,7 +13,7 @@ local _G = _G
 local declared = {}
 
 local getinfo = debug.getinfo
-local rawget, rawset, _print = rawget, rawset, print
+local rawget, rawset = rawget, rawset
 
 function _M:__index(k)
 	if declared[k] then return nil end

@@ -123,13 +123,13 @@ package.loaded['winapi.windowclasses'] = true --prevent double-loading by winapi
 require'winapi.color'
 require'winapi.cursor'
 require'winapi.window' --for DefWindowProc
-local class = assert(print(RegisterClass{
+local class = print(RegisterClass{
 	name='MyClass',
 	style = bit.bor(CS_HREDRAW, CS_VREDRAW),
 	background = COLOR_WINDOW,
 	cursor = LoadCursor(IDC_ARROW),
 	proc = DefWindowProc,
-}))
+})
 UnregisterClass(class)
 end
 
