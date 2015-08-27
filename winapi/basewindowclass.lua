@@ -122,7 +122,7 @@ function MessageLoop(after_process)
 			after_process(msg)
 		end
 	end
-	return msg.signed_wParam --WM_QUIT sends an int exit code in wParam
+	return tonumber(msg.signed_wParam) --WM_QUIT sends an int exit code in wParam
 end
 
 --process all pending messages from the queue (if any) and return.
