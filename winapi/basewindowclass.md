@@ -111,7 +111,7 @@ on_begin_sizemove()									moving or resizing started					WM_ENTERSIZEMOVE
 on_end_sizemove()										moving or resizing ended					WM_EXITSIZEMOVE
 on_focus()												was focused										WM_SETFOCUS
 on_blur()												was unfocused									WM_KILLFOCUS
-on_enable()												was enabled or disabled						WM_ENABLE
+on_enable(enabled)									was enabled or disabled						WM_ENABLE
 on_show()												was shown										WM_SHOWWINDOW
 __mouse__												__description__								__reference__
 on_mouse_move(x, y, btns)							mouse moved										WM_MOUSEMOVE
