@@ -374,6 +374,13 @@ local lb1 = Static{parent = win, x = 20, y = 50, text = 'BitmapPanel'}
 local lb2 = Static{parent = win, x = 140, y = 50, text = 'CairoPanel'}
 local lb3 = Static{parent = win, x = 260, y = 50, text = 'WGLPanel'}
 
+--create an accelerator ------------------------------------------------------
+
+win.accelerators:add{
+	hotkey = 'escape', --VK_ESCAPE
+	handler = function() win:close() end,
+}
+
 --start the message loop -----------------------------------------------------
 
 os.exit(MessageLoop())
