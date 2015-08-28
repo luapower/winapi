@@ -20,6 +20,7 @@ Label = subclass({
 		owner_draw = SS_OWNERDRAW,
 		simulate_edit = SS_EDITCONTROL,
 		ellipsis = {
+			[false] = 0,
 			char = SS_ENDELLIPSIS,
 			path = SS_PATHELLIPSIS,
 			word = SS_WORDELLIPSIS,
