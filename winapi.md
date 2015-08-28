@@ -20,6 +20,11 @@ OpenGL and cairo.
   * binding helpers for easy binding of new and future APIs
   * cairo and OpenGL widgets.
 
+## Status
+
+[Current status](https://github.com/luapower/winapi/issues/26)
+and [issues](https://github.com/luapower/winapi/issues).
+
 ## Hello World
 
 ~~~{.lua}
