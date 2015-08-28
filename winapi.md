@@ -11,14 +11,14 @@ OpenGL and cairo.
 ## Features
 
   * UTF8 Lua strings everywhere (also works with wide char buffers)
-  * all calls are error-checked
-  * memory management (managing ownership; allocation of in/out buffers)
-  * flags can be passed as `'FLAG1 FLAG2'`
-  * counting from 1 everywhere
-  * object system with virtual properties (`win.title = 'hello'` sets the title)
+  * OpenGL, cairo and bitmap widgets
   * anchor-based layout model for all controls
+  * object system with virtual properties (`win.title = 'hello'` sets the title)
   * binding helpers for easy binding of new and future APIs
-  * cairo and OpenGL widgets.
+  * all calls are error-checked
+  * automatic memory management (ownership; buffers)
+  * flags can be passed as `'FLAG1 FLAG2'`
+  * counting from 1 everywhere.
 
 ## Status
 
