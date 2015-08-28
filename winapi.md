@@ -52,7 +52,9 @@ os.exit(winapi.MessageLoop()) --start the message loop
 
 ## Demos
 
-Check out [winapi_demo] to see all the controls in action.
+Check out [winapi_demo] to see all the controls in action:
+
+![screnshot](/files/luapower/media/www/winapi_demo.png)
 
 Also, many modules can be run as standalone scripts, which will
 showcase their functionality, so there's lots of little demos there too.
