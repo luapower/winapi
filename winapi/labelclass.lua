@@ -33,7 +33,7 @@ Label = subclass({
 		accelerator_prefix = true,
 	},
 	__init_properties = {},
-	__wm_notify_handler_names = index{
+	__wm_command_handler_names = index{
 		on_click = STN_CLICKED,
 		on_double_click = STN_DBLCLK,
 		on_enable = STN_ENABLE,
@@ -58,6 +58,9 @@ if not ... then
 		text = 'Hi there my sweet lemon drops!',
 		align = 'right',
 	}
+	function s1:on_click()
+		print'clicked'
+	end
 	MessageLoop()
 end
 
