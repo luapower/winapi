@@ -1,5 +1,5 @@
 
---RGBA device independent bitmaps
+--proc/gdi/dibitmap: RGBA device independent bitmaps
 --Written by Cosmin Apreutesei. Public Domain.
 
 setfenv(1, require'winapi')
