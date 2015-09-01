@@ -68,10 +68,23 @@ function MessageRouter:__init()
 	local function dispatch(hwnd, WM, wParam, lParam)
 		local window = Windows:find(hwnd)
 		if window then
-			return window:__handle_message(WM, wParam, lParam)
+			window:__handle_message(WM, wParam, lParam)
 		end
 		return DefWindowProc(hwnd, WM, wParam, lParam) --catch WM_CREATE etc.
 	end
+
+	--exceptions in WNDPROC are caught by Windows on x64, see:
+	--http://stackoverflow.com/questions/1487950/access-violation-in-wm-paint-not-caught
+	if ffi.abi'64bit' then
+		local dispatch0 = dispatch
+		function dispatch(...)
+			local ok, ret = xpcall(dispatch0, debug.traceback, ...)
+			if ok then return ret end
+			io.stderr:write(ret..'\n')
+			PostMessage(nil, WM_EXCEPTION)
+		end
+	end
+
 	self.proc = ffi.cast('WNDPROC', dispatch)
 end
 
@@ -820,14 +833,7 @@ end
 function BaseWindow:__WM_PAINT_pass(ok, ...)
 	EndPaint(self.hwnd, self.__paintstruct)
 	if ok then return ... end
-	if ffi.abi'32bit' then
-		error(..., 4)
-	else
-		--exceptions in WM_PAINT are caught by Windows on x64, see:
-		--http://stackoverflow.com/questions/1487950/access-violation-in-wm-paint-not-caught
-		io.stderr:write((...)..'\n')
-		PostMessage(nil, WM_EXCEPTION)
-	end
+	error(..., 4)
 end
 
 function BaseWindow:WM_PAINT()
