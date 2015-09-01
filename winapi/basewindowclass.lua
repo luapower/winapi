@@ -68,7 +68,7 @@ function MessageRouter:__init()
 	local function dispatch(hwnd, WM, wParam, lParam)
 		local window = Windows:find(hwnd)
 		if window then
-			window:__handle_message(WM, wParam, lParam)
+			return window:__handle_message(WM, wParam, lParam)
 		end
 		return DefWindowProc(hwnd, WM, wParam, lParam) --catch WM_CREATE etc.
 	end
@@ -830,10 +830,9 @@ function BaseWindow:invalidate(r, erase_background)
 	InvalidateRect(self.hwnd, r, erase_background ~= false)
 end
 
-function BaseWindow:__WM_PAINT_pass(ok, ...)
+function BaseWindow:__WM_PAINT_pass(ok, err)
 	EndPaint(self.hwnd, self.__paintstruct)
-	if ok then return ... end
-	error(..., 4)
+	if not ok then error(err, 4) end
 end
 
 function BaseWindow:WM_PAINT()
