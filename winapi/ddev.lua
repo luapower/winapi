@@ -50,6 +50,7 @@ DISPLAY_DEVICE = struct{ctype = 'DISPLAY_DEVICEW', size = 'cb',
 
 --if devname_or_index is nil, returns an iterator instead!
 function EnumDisplayDevices(devname_or_index, dd, EDD)
+	dd = DISPLAY_DEVICE(dd)
 	if not devname_or_index then
 		local i = 0
 		return function()
@@ -59,7 +60,6 @@ function EnumDisplayDevices(devname_or_index, dd, EDD)
 			return ret
 		end
 	end
-	dd = DISPLAY_DEVICE(dd)
 	local devname = type(devname_or_index) == 'string' and wcs(devname_or_index) or nil
 	local devindex = tonumber(devname_or_index) or 0
 	local ret = C.EnumDisplayDevicesW(devname, devindex, dd, flags(EDD))
