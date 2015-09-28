@@ -1,5 +1,5 @@
 
---proc/dsound: DirectSound API
+--proc/multimedia/dsound: DirectSound API
 --Written by Cosmin Apreutesei. Public Domain.
 
 local ffi = require'ffi'
@@ -1324,7 +1324,7 @@ if not ... then
 		--find out how much was consumed
 		local len0 = playcursor[0] - rb.start
 		local len = len0
-		if len <= 0 then --TODO: how to interpret zero? full or empty?
+		if len <= 0 then --a zero len is empty (the buffer can never be completely full)
 			len = rb.size + len
 		end
 		print(string.format('pull %6d bytes.   start: %6d, filled: %3d%%',
@@ -1388,7 +1388,9 @@ if not ... then
 	wave_offset = 0
 	function rb:fill()
 		rb:update()
-		local len = rb.size - rb.length
+		--find out how much space is available, but keep 1 block free
+		--so that we can distinguish full from empty.
+		local len = rb.size - rb.length - BLOCK_SIZE
 		if len <= 0 then return end
 		print(string.format('push %6d bytes.   start: %6d, filled: %3d%%',
 			len, rb.start, rb.length / rb.size * 100))
@@ -1396,13 +1398,12 @@ if not ... then
 		wave_offset = wave_offset + len
 	end
 
-	--fill up the sound buffer.
-	rb:push(rb.size, wave_offset)
+	--fill up the sound buffer (minus 1 block).
+	rb:push(rb.size - BLOCK_SIZE, wave_offset)
 	wave_offset = wave_offset + rb.size
 
 	--re-fill the sound buffer on a timer when it's approx. half empty.
 	win:settimer(BUFFER_SECONDS/2, function()
-		--local tone_diff = math.random(80, 4000)
 		set_tone(music_tone())
 		rb:fill()
 	end)
