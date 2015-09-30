@@ -1332,6 +1332,8 @@ if not ... then
 		rb:pull(len)
 	end
 
+	math.randomseed(os.time())
+
 	local tone = 440
 	local function music_tone()
 		local octave = math.random(tone > 120 and -12 or 0, tone < 2000 and 12 or 0) / 12
