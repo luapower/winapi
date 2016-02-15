@@ -185,10 +185,10 @@ update(WM_NOTIFY_NAMES, constants{
 The easiest way to create a new class is to use the code of an existing
 class as a template. There are base classes for almost everything, so:
 
-   * subclass from `Control` if you are creating a new kind of control.
-	* subclass from `WindowClass` if you are creating a new kind of top-level window.
-	* subclass from `VObject` if it's a non-visual class.
-	* subclass from `ItemList` if your class represents a list of objects.
+* subclass from `Control` if you are creating a new kind of control.
+* subclass from `Window` if you are creating a new kind of top-level window.
+* subclass from `VObject` if it's a non-visual class.
+* subclass from `ItemList` if your class represents a list of objects.
 
 ### Initialization
 
