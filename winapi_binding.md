@@ -193,7 +193,7 @@ class as a template. There are base classes for almost everything, so:
 ### Initialization
 
 Initialization is done by overriding the `__init` constructor.
-`BaseWindowClass` also provides pre- and post-window-creation hooks
+`BaseWindow` also provides pre- and post-window-creation hooks
 which you can override:
 
 	__before_create(self, info, args)
@@ -201,7 +201,7 @@ which you can override:
 
 ### Auto-generation of properties and events
 
-`BaseWindowClass` contains extensive automation to help with binding
+`BaseWindow` contains extensive automation to help with binding
 of HWND-based classes, so that binding a new window or control is mainly
 an issue of filling up the following tables:
 
