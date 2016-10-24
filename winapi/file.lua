@@ -59,6 +59,22 @@ BOOL ReadFile(
 	LPOVERLAPPED lpOverlapped
 );
 
+BOOL LockFile(
+	HANDLE hFile,
+	DWORD  dwFileOffsetLow,
+	DWORD  dwFileOffsetHigh,
+	DWORD  nNumberOfBytesToLockLow,
+	DWORD  nNumberOfBytesToLockHigh
+);
+
+BOOL UnlockFile(
+	HANDLE hFile,
+	DWORD  dwFileOffsetLow,
+	DWORD  dwFileOffsetHigh,
+	DWORD  nNumberOfBytesToUnlockLow,
+	DWORD  nNumberOfBytesToUnlockHigh
+);
+
 BOOL FlushFileBuffers(HANDLE hFile);
 ]]
 
@@ -95,6 +111,14 @@ end
 
 function FlushFileBuffers(hfile)
 	return retnz(C.FlushFileBuffers(hfile))
+end
+
+function LockFile(hfile, offsetLow, offsetHigh, bytesLow, bytesHigh)
+	return retnz(C.LockFile(hfile, offsetLow, offsetHigh, bytesLow, bytesHigh))
+end
+
+function UnlockFile(hfile, offsetLow, offsetHigh, bytesLow, bytesHigh)
+	return retnz(C.UnlockFile(hfile, offsetLow, offsetHigh, bytesLow, bytesHigh))
 end
 
 if not ... then
