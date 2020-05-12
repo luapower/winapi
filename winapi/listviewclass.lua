@@ -12,7 +12,7 @@ LVColumnList = class(ItemList)
 
 function LVColumnList:add(i, col)
 	if not col then i,col = self.count+1,i end
-	if type(col) ~= 'table' then col = {text = tostring(col)} end
+	if type(col) == 'string' then col = {text = col} end
 	return ListView_InsertColumn(self.hwnd, i, col)
 end
 
@@ -63,7 +63,7 @@ LVItemList = class(ItemList)
 
 function LVItemList:add(i, item)
 	if not item then i,item = self.count+1,i end
-	if type(item) ~= 'table' then item = {text = tostring(item)} end
+	if type(item) == 'string' then item = {text = item} end
 	local subitems = item.subitems
 	item = LVITEM(item)
 	item.i = i
@@ -82,7 +82,7 @@ function LVItemList:remove(i)
 end
 
 function LVItemList:set_subitem(i, subitem, item)
-	if type(item) ~= 'table' then item = {text = tostring(item)} end
+	if type(item) == 'string' then item = {text = item} end
 	item = LVITEM(item)
 	item.i = i
 	item.subitem = subitem
