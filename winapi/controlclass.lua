@@ -8,7 +8,7 @@ require'winapi.comctl'
 
 local anchors_mt = {__tostring = format_anchors}
 local function anchors(t)
-	return setmetatable(t, amchors_mt)
+	return setmetatable(t, anchors_mt)
 end
 
 Control = subclass({
