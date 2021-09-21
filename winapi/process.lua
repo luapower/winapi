@@ -145,7 +145,7 @@ end
 
 function CreateProcess(
 	cmd, env, cur_dir,
-	start_info, inherit_handles,
+	start_info, inherit_all_handles,
 	flags, proc_sec_attr, thread_sec_attr
 )
 	local proc_info = PROCESS_INFORMATION()
@@ -155,7 +155,7 @@ function CreateProcess(
 		wcs(cmd),
 		proc_sec_attr,
 		thread_sec_attr,
-		inherit_handles or false,
+		inherit_all_handles or false,
 		flags or 0,
 		encode_env(env),
 		wcs(cur_dir),
