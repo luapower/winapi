@@ -18,5 +18,14 @@ HANDLE CreateThread(
 	DWORD                   dwCreationFlags,
 	LPDWORD                 lpThreadId
 );
+
+DWORD ResumeThread(
+	HANDLE hThread
+);
 ]]
 
+function ResumeThread(h)
+	local sc = C.ResumeThread(h)
+	if sc == 4294967295 then sc = -1 end
+	return retpoz(sc)
+end
