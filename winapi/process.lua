@@ -108,6 +108,10 @@ BOOL TerminateProcess(
 );
 
 HANDLE GetCurrentProcess();
+
+HANDLE GetStdHandle(
+	DWORD nStdHandle
+);
 ]]
 
 PROCESS_INFORMATION = types.PROCESS_INFORMATION
@@ -216,6 +220,15 @@ end
 
 function SetEnvironmentVariable(k, v)
 	checknz(C.SetEnvironmentVariableW(wcs(k), wcs(v)))
+end
+
+STD_INPUT_HANDLE  = tonumber(ffi.cast('DWORD', -10))
+STD_OUTPUT_HANDLE = tonumber(ffi.cast('DWORD', -11))
+STD_ERROR_HANDLE  = tonumber(ffi.cast('DWORD', -12))
+
+local checkvh = checkwith(function(h) return h ~= INVALID_HANDLE_VALUE, h end)
+function GetStdHandle(handle)
+	return checkvh(C.GetStdHandle(flags(handle)))
 end
 
 --job objects ----------------------------------------------------------------
