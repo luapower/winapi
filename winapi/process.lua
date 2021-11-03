@@ -146,7 +146,7 @@ local function encode_env(env)
 		dt[i] = k:gsub('[%z=]', '_') .. '=' .. tostring(env[k])
 	end
 	table.insert(dt, '')
-	return table.concat(dt, '\0')
+	return table.concat(dt, '\0')..'\0' --Lua adds the last \0
 end
 
 function CreateProcess(
